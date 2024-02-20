@@ -138,13 +138,8 @@
     <!-- /.content -->
 @endsection
 
-@section('styles')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-@endsection
-
 @section('scripts')
     @if ($message = Session::get('success'))
-        <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
         <script>
             toastr.options = {
                 "closeButton": true,

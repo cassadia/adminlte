@@ -32,7 +32,8 @@
                                 
                                 <div class="form-group">
                                     <label for="KodeMotor">Kode Motor</label>
-                                    <input type="text" class="form-control  @error('KodeMotor') is-invalid @enderror" placeholder="Kode Motor" name="KodeMotor" value="{{ old('KodeMotor') }}">
+                                    <input type="text" class="form-control  @error('KodeMotor') is-invalid @enderror"
+                                        placeholder="Kode Motor" name="KodeMotor" value="{{ old('KodeMotor') }}">
 
                                     <!-- error message untuk title -->
                                     @error('KodeMotor')
@@ -44,7 +45,8 @@
                                 
                                 <div class="form-group">
                                     <label for="NamaMotor">Nama Motor</label>
-                                    <input type="text" class="form-control @error('NamaMotor') is-invalid @enderror" placeholder="Nama Motor" name="NamaMotor" value="{{ old('NamaMotor') }}">
+                                    <input type="text" class="form-control @error('NamaMotor') is-invalid @enderror"
+                                        placeholder="Nama Motor" name="NamaMotor" value="{{ old('NamaMotor') }}">
 
                                     <!-- error message untuk title -->
                                     @error('NamaMotor')
@@ -54,30 +56,28 @@
                                     @enderror
                                 </div>
 
-                                {{-- <div class="form-group">
-                                    <label>Tahun:</label>
-                                    <input type="number" class="form-control @error('TahunMotor') is-invalid @enderror" id="TahunMotor" placeholder="Tahun Motor" name="TahunMotor" value="{{ old('TahunMotor') }}" min="0" max="9999">
-
-                                    <!-- error message untuk title -->
-                                    @error('TahunMotor')
+                                <div class="form-group">
+                                    <label>Tahun Dari:</label>
+                                    <input type="number" class="form-control @error('TahunMotorDari') is-invalid @enderror"
+                                        placeholder="Tahun Motor" name="TahunMotorDari" id="TahunMotorDari"
+                                            value="{{ old('TahunMotorDari') }}" min="0" max="9999">
+                                
+                                    <!-- Pesan kesalahan untuk input tahun -->
+                                    @error('TahunMotorDari')
                                         <div class="alert alert-danger mt-2 small">
                                             {{ $message }}
                                         </div>
                                     @enderror
-                                    <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                                        <input type="text" class="form-control datetimepicker-input" data-target="#reservationdate" data-date-format="YYYY"/>
-                                        <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
-                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                        </div>
-                                    </div>
-                                </div> --}}
+                                </div>
 
                                 <div class="form-group">
-                                    <label>Tahun:</label>
-                                    <input type="number" class="form-control @error('TahunMotor') is-invalid @enderror" placeholder="Tahun Motor" name="TahunMotor" id="TahunMotor" value="{{ old('TahunMotor') }}" min="0" max="9999">
+                                    <label>Tahun Sampai:</label>
+                                    <input type="number" class="form-control @error('TahunMotorSampai') is-invalid @enderror"
+                                        placeholder="Tahun Motor" name="TahunMotorSampai" id="TahunMotorSampai"
+                                            value="{{ old('TahunMotorSampai') }}" min="0" max="9999">
                                 
                                     <!-- Pesan kesalahan untuk input tahun -->
-                                    @error('TahunMotor')
+                                    @error('TahunMotorSampai')
                                         <div class="alert alert-danger mt-2 small">
                                             {{ $message }}
                                         </div>
@@ -86,7 +86,8 @@
 
                                 <div class="form-group">
                                     <label for="NoSeriMesin">No Seri Mesin</label>
-                                    <input type="text" class="form-control @error('NoSeriMesin') is-invalid @enderror" placeholder="No Seri Mesin" name="NoSeriMesin" value="{{ old('NoSeriMesin') }}">
+                                    <input type="text" class="form-control @error('NoSeriMesin') is-invalid @enderror"
+                                        placeholder="No Seri Mesin" name="NoSeriMesin" value="{{ old('NoSeriMesin') }}">
 
                                     <!-- error message untuk title -->
                                     @error('NoSeriMesin')
@@ -98,7 +99,8 @@
 
                                 <div class="form-group">
                                     <label for="NoSeriRangka">No Seri Rangka</label>
-                                    <input type="text" class="form-control @error('NoSeriRangka') is-invalid @enderror" placeholder="Nama Motor" name="NoSeriRangka" value="{{ old('NoSeriRangka') }}">
+                                    <input type="text" class="form-control @error('NoSeriRangka') is-invalid @enderror"
+                                        placeholder="Nama Motor" name="NoSeriRangka" value="{{ old('NoSeriRangka') }}">
 
                                     <!-- error message untuk title -->
                                     @error('NoSeriRangka')
@@ -109,17 +111,16 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="exampleInputFile">Gambar</label>
+                                    <label for="gambar">Gambar</label>
                                     <div class="input-group">
                                         <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="exampleInputFile">
-                                            <label class="custom-file-label" for="exampleInputFile">Choose file</label>
-                                        </div>
-                                        <div class="input-group-append">
-                                            <span class="input-group-text">Upload</span>
+                                            <input type="file" class="custom-file-input" id="gambar" name="gambar">
+                                            <label class="custom-file-label" for="gambar"
+                                                id="gambar-label">Choose file</label>
                                         </div>
                                     </div>
                                 </div>
+                                
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="exampleCheck1" name="status">
                                     <label class="form-check-label" for="exampleCheck1">Status</label>
@@ -133,7 +134,7 @@
                             <a href="{{ route('vehicle.index') }}" class="btn btn-info float-right">Back</a>
                           </div>
                         </form>
-                      </div>
+                    </div>
 
                 </div>
             </div>
@@ -143,42 +144,40 @@
     <!-- /.content -->
 @endsection
 
-{{-- @section('scripts')
-    $(function () {
-        //Date picker
-        $('#reservationdate').datetimepicker({
-            format: 'L'
-        });
-        // Mendapatkan elemen input tahun
-        var tahunInput = document.getElementById('TahunMotor');
-        
-        // Menambahkan event listener untuk membatasi panjang input tahun
-        tahunInput.addEventListener('input', function(event) {
-            // Ambil nilai input
-            var tahunValue = event.target.value;
-    
-            // Batasi nilai input menjadi maksimal 4 digit
-            if (tahunValue.length > 4) {
-                event.target.value = tahunValue.slice(0, 4);
-            }
-        });        
-    })
-@endsection --}}
-
 @section('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // Mendapatkan elemen input tahun
-        var tahunInput = document.getElementById('TahunMotor');
-        
-        // Menambahkan event listener untuk membatasi panjang input tahun
-        tahunInput.addEventListener('input', function(event) {
-            // Ambil nilai input
-            var tahunValue = event.target.value;
+        $(document).ready(function() {
+            // Mengubah teks label saat memilih file
+            $('#gambar').change(function() {
+                var fileName = $(this).val().split('\\').pop(); // Mendapatkan nama file yang dipilih
+                $('#gambar-label').text(fileName); // Memperbarui teks label dengan nama file
+            });
 
-            // Batasi nilai input menjadi maksimal 4 digit
-            if (tahunValue.length > 4) {
-                event.target.value = tahunValue.slice(0, 4);
-            }
+            // Mendapatkan elemen input tahun
+            var tahunInputDari = document.getElementById('TahunMotorDari');
+            var tahunInputSampai = document.getElementById('TahunMotorSampai');
+            
+            // Menambahkan event listener untuk membatasi panjang input tahun
+            tahunInputDari.addEventListener('input', function(event) {
+                // Ambil nilai input
+                var tahunValue = event.target.value;
+
+                // Batasi nilai input menjadi maksimal 4 digit
+                if (tahunValue.length > 4) {
+                    event.target.value = tahunValue.slice(0, 4);
+                }
+            });
+
+            tahunInputSampai.addEventListener('input', function(event) {
+                // Ambil nilai input
+                var tahunValue = event.target.value;
+
+                // Batasi nilai input menjadi maksimal 4 digit
+                if (tahunValue.length > 4) {
+                    event.target.value = tahunValue.slice(0, 4);
+                }
+            });
         });
     </script>
 @endsection

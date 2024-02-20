@@ -246,4 +246,41 @@ class ProductController extends Controller
             return $output;
         }
     }
+
+    public function productExport(Request $request)
+    {
+        $keyword = $request->input('keyword');
+        
+        if ($keyword) {
+            $products = Product::where('nm_produk', 'like', '%' . $keyword . '%')->get();
+        } else {
+            $products = Product::all();
+        }
+
+        // Buat header untuk file CSV
+        $headers = array(
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=products.csv",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+
+        // Buat file CSV dengan menggunakan library PHP League CSV
+        $callback = function () use ($products) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, array('Kode Produk', 'Nama Produk', 'Qty'
+                , 'Harga', 'Status', 'Tanggal Buat', 'Tanggal Ubah'));
+
+            foreach ($products as $product) {
+                fputcsv($file, array($product->kd_produk, $product->nm_produk, $product->qty_available
+                    , $product->harga_jual, $product->status, $product->created_at, $product->updated_at));
+            }
+
+            fclose($file);
+        };
+
+        // Kembalikan response dengan header yang telah dibuat dan file yang telah dibuat
+        return response()->stream($callback, 200, $headers);
+    }
 }

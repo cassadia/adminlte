@@ -104,12 +104,7 @@
 <!-- AdminLTE App -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-{{-- <script src="{{ asset('js\moment.min.js') }}"></script>
-<script src="{{ asset('js\jquery.inputmask.min.js') }}"></script>
-<script src="{{ asset('js\tempusdominus-bootstrap-4.js') }}"></script>
-<script src="{{ asset('js\tempusdominus-bootstrap-4.min.js') }}"></script> --}}
-{{-- <script src="{{ asset('js\daterangepicker.js') }}"></script>
-<script src="{{ asset('js/adminlte.min.js') }}" defer></script> --}}
+
 <!-- Impor Moment.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <!-- Impor Tempus Dominus Bootstrap 4 JavaScript -->
