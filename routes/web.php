@@ -50,7 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/mapping', [App\Http\Controllers\ProductController::class, 'indexMapping'])->name('product.mapping');
     Route::get('/searchAuto', [\App\Http\Controllers\ProductController::class, 'searchAuto']);
     Route::get('/searchMotor', [\App\Http\Controllers\ProductController::class, 'searchMotor']);
+    Route::get('/productExport', [\App\Http\Controllers\ProductController::class, 'productExport'])->name('product.export');
     Route::get('/search-vehicles', [\App\Http\Controllers\VehicleController::class, 'search'])->name('vehicles.search');
+    Route::get('/vehicleExport', [\App\Http\Controllers\VehicleController::class, 'vehicleExport'])->name('vehicle.export');
     Route::post('/mappingStore', [\App\Http\Controllers\MappingController::class, 'store']);
     Route::post('/updateMapping', [\App\Http\Controllers\MappingController::class, 'updateMapping']);
     Route::post('/updateMappingAll', [\App\Http\Controllers\MappingController::class, 'updateMappingAll']);

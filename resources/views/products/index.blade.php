@@ -23,6 +23,10 @@
                         <div class="card-header d-flex align-items-center">
                             <h3 class="card-title">Product</h3>
                             <div class="card-tools ml-auto">
+                                <a href="{{ route('product.export', ['keyword' => Request::get('keyword')]) }}"
+                                    class="btn btn-sm btn-success">
+                                    <i class="fas fa-download"></i> Ekspor Data
+                                </a>
                                 <a href="{{ route('product.create') }}" class="btn btn-sm btn-success">
                                     <i class="fas fa-plus"></i> Product
                                 </a>
@@ -30,8 +34,13 @@
                         </div>
                         <div class="card-body">
                             <form action="{{ route('product.index') }}" method="GET" class="form-inline mb-3">
-                                <input type="text" name="keyword" class="form-control form-control-sm mr-2" placeholder="Cari Produk" value="{{ Request::get('keyword') }}">
-                                <button type="submit" class="btn btn-sm btn-info"><i class="fas fa-search"></i> Cari</button>
+                                <input type="text" name="keyword" class="form-control form-control-sm mr-2"
+                                    placeholder="Cari Produk" value="{{ Request::get('keyword') }}">
+                                {{-- <input type="hidden" name="export_keyword"
+                                    value="{{ Request::get('keyword') }}"> <!-- Tambahkan input tersembunyi --> --}}
+                                <button type="submit" class="btn btn-sm btn-info">
+                                    <i class="fas fa-search"></i> Cari
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -44,6 +53,7 @@
                                     <tr>
                                         <th>Kode Produk</th>
                                         <th>Nama Produk</th>
+                                        <th>Qty</th>
                                         <th>Harga</th>
                                         <th>Status</th>
                                         <th>Tgl Buat</th>
@@ -55,6 +65,7 @@
                                     <tr>
                                         <td>{{ $product->kd_produk }}</td>
                                         <td>{{ $product->nm_produk }}</td>
+                                        <td>{{ $product->qty_available }}</td>
                                         <td>{{ $product->harga_jual }}</td>
                                         <td>{{ $product->status }}</td>
                                         <td>{{ $product->created_at }}</td>
@@ -62,8 +73,10 @@
                                         <td>
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-default">Aksi</button>
-                                                <button type="button" class="btn btn-default dropdown-toggle dropdown-icon" data-toggle="dropdown">
-                                                  <span class="sr-only">Toggle Dropdown</span>
+                                                <button type="button"
+                                                    class="btn btn-default dropdown-toggle dropdown-icon"
+                                                        data-toggle="dropdown">
+                                                    <span class="sr-only">Toggle Dropdown</span>
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-right" role="menu">
                                                     <a class="dropdown-item" href="{{ route('product.show', 1) }}">Lihat</a>
@@ -101,7 +114,6 @@
                                 <form class="form-inline" method="GET" action="{{ route('product.index') }}">
                                     <label for="perPage" class="mr-2">Items per page:</label>
                                     <select class="form-control form-control-sm" name="perPage" onchange="this.form.submit()">
-                                        {{-- <option value="5" {{ Request::get('perPage') == '5' ? 'selected' : '' }}>5</option> --}}
                                         <option value="10" {{ Request::get('perPage') == '10' ? 'selected' : '' }}>10</option>
                                         <option value="25" {{ Request::get('perPage') == '25' ? 'selected' : '' }}>25</option>
                                         <option value="50" {{ Request::get('perPage') == '50' ? 'selected' : '' }}>50</option>

@@ -23,6 +23,10 @@
                         <div class="card-header d-flex align-items-center">
                             <h3 class="card-title">Vehicle</h3>
                             <div class="card-tools ml-auto">
+                                <a href="{{ route('vehicle.export', ['keyword' => Request::get('keyword')]) }}"
+                                    class="btn btn-sm btn-success">
+                                    <i class="fas fa-download"></i> Ekspor Data
+                                </a>
                                 <a href="{{ route('vehicle.create') }}" class="btn btn-sm btn-success">
                                     <i class="fas fa-plus"></i> Vehicle
                                 </a>
@@ -46,6 +50,7 @@
                                         <th>Tahun</th>
                                         <th>No Seri Mesin</th>
                                         <th>No Seri Rangka</th>
+                                        <th>Gambar</th>
                                         <th>Status</th>
                                         <th>Tgl Buat</th>
                                         <th>Tgl Ubah</th>
@@ -56,23 +61,41 @@
                                     <tr>
                                         <td>{{ $vehicle->kd_motor }}</td>
                                         <td>{{ $vehicle->nm_motor }}</td>
-                                        <td>{{ $vehicle->tahun }}</td>
+                                        <td>
+                                            @if ($vehicle->tahun_dari)
+                                                {{ $vehicle->tahun_dari }} - {{ $vehicle->tahun_sampai ?: 'Sekarang' }}
+                                            @endif
+                                        </td>
                                         <td>{{ $vehicle->no_seri_mesin }}</td>
                                         <td>{{ $vehicle->no_seri_rangka }}</td>
+                                        <td>
+                                            <a href="{{ asset('images/' . $vehicle->gambar) }}"
+                                                data-lightbox="gambar" data-title="{{ $vehicle->NamaMotor }}">
+                                                <img src="{{ asset('images/' . $vehicle->gambar) }}"
+                                                     alt="{{ $vehicle->NamaMotor }}" class="img-fluid"
+                                                        style="max-width: 100px; max-height: 50px;">
+                                            </a>
+                                        </td>
                                         <td>{{ $vehicle->status }}</td>
                                         <td>{{ $vehicle->created_at }}</td>
                                         <td>{{ $vehicle->updated_at }}</td>
                                         <td>
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-default">Aksi</button>
-                                                <button type="button" class="btn btn-default dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                                <button type="button"
+                                                    class="btn btn-default dropdown-toggle dropdown-icon"
+                                                        data-toggle="dropdown">
                                                   <span class="sr-only">Toggle Dropdown</span>
                                                 </button>
                                                 <div class="dropdown-menu" role="menu">
-                                                    <a class="dropdown-item" href="{{ route('vehicle.show', $vehicle->id) }}">Lihat</a>
-                                                    <a class="dropdown-item" href="{{ route('vehicle.edit', $vehicle->id) }}">Edit</a>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('vehicle.show', $vehicle->id) }}">Lihat</a>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('vehicle.edit', $vehicle->id) }}">Edit</a>
                                             
-                                                    <form onsubmit="return confirm('Apakah Anda Yakin ?');" action="{{ route('vehicle.destroy', $vehicle->id) }}" method="POST">
+                                                    <form onsubmit="return confirm('Apakah Anda Yakin ?');"
+                                                        action="{{ route('vehicle.destroy', $vehicle->id) }}"
+                                                            method="POST">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="dropdown-item">Hapus</button>
@@ -103,7 +126,6 @@
                                 <form class="form-inline" method="GET" action="{{ route('vehicle.index') }}">
                                     <label for="perPage" class="mr-2">Items per page:</label>
                                     <select class="form-control form-control-sm" name="perPage" onchange="this.form.submit()">
-                                        <option value="5" {{ Request::get('perPage') == '5' ? 'selected' : '' }}>5</option>
                                         <option value="10" {{ Request::get('perPage') == '10' ? 'selected' : '' }}>10</option>
                                         <option value="25" {{ Request::get('perPage') == '25' ? 'selected' : '' }}>25</option>
                                         <option value="50" {{ Request::get('perPage') == '50' ? 'selected' : '' }}>50</option>
@@ -123,13 +145,12 @@
     <!-- /.content -->
 @endsection
 
-@section('styles')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-@endsection
-
 @section('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="path/to/lightbox.css">
+    <script src="path/to/lightbox.js"></script>
+
     @if ($message = Session::get('success'))
-        <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
         <script>
             toastr.options = {
                 "closeButton": true,

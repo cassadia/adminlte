@@ -14,9 +14,11 @@ class Vehicle extends Model
     protected $fillable = [
         'kd_motor',
         'nm_motor',
-        'tahun',
+        'tahun_dari',
+        'tahun_sampai',
         'no_seri_mesin',
         'no_seri_rangka',
-        'status'
+        'status',
+        'gambar'
     ];
 }
