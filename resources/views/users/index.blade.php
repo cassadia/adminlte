@@ -161,42 +161,4 @@
             toastr.success('{{ $message }}')
         </script>
     @endif
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Event click pada hasil pencarian
-            $(document).on('click', '#search_list tr', function() {
-                // Ambil nilai dari kolom kode produk
-                var kodeProduk = $(this).find('td:eq(0)').text();
-                var namaMotor = $(this).find('td:eq(1)').text();
-                
-                // Tempatkan nilai kode produk ke dalam input kode produk
-                $('#KodeProduk').val(kodeProduk);
-                $('#NamaMotor').val(namaMotor);
-    
-                // Bersihkan daftar saran setelah nilai dimasukkan
-                $('#search_list').empty();
-            });
-    
-            // Event keyup pada input search
-            $('#search').on('keyup', function() {
-                var query = $(this).val();
-                if (query.length >= 3) {
-                    $.ajax({
-                        url: "search",
-                        type: "GET",
-                        data: { 'search': query },
-                        success: function(data) {
-                            $('#search_list').html(data);
-                        }
-                    });
-                } else {
-                    // Jika input kurang dari 3 karakter, bersihkan daftar saran
-                    $('#search_list').empty();
-                }
-            });
-        });
-    </script>
-    
-    
 @endsection

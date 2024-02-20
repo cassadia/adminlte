@@ -55,6 +55,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/updateMapping', [\App\Http\Controllers\MappingController::class, 'updateMapping']);
     Route::post('/updateMappingAll', [\App\Http\Controllers\MappingController::class, 'updateMappingAll']);
 
+    Route::post('/userStore', [\App\Http\Controllers\UserController::class, 'store'])->name('user.store');
+    Route::put('/userUpdate', [\App\Http\Controllers\UserController::class, 'update'])->name('user.update');
+
 
     // Route::get('/my-new-function', [App\Http\Controllers\ProductController::class, 'myNewFunction'])->name('product.my-new-function');
 

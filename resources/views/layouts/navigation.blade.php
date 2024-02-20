@@ -21,26 +21,8 @@
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('users.index') }}" class="nav-link">
-                    <i class="nav-icon fas fa-users"></i>
-                    <p>
-                        {{ __('Setting Users') }}
-                    </p>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('about') }}" class="nav-link">
-                    <i class="nav-icon far fa-address-card"></i>
-                    <p>
-                        {{ __('About us') }}
-                    </p>
-                </a>
-            </li>
-
-            <li class="nav-item">
                 <a href="{{ route('product.index') }}" class="nav-link">
-                    <i class="nav-icon far fa-address-card"></i>
+                    <i class="nav-icon fas fa-database"></i>
                     <p>
                         {{ __('Product') }}
                     </p>
@@ -49,7 +31,7 @@
 
             <li class="nav-item">
                 <a href="{{ route('vehicle.index') }}" class="nav-link">
-                    <i class="nav-icon far fa-address-card"></i>
+                    <i class="nav-icon fas fa-car"></i>
                     <p>
                         {{ __('Vehicle') }}
                     </p>
@@ -58,7 +40,7 @@
 
             <li class="nav-item">
                 <a href="{{ route('product.mapping') }}" class="nav-link">
-                    <i class="nav-icon far fa-address-card"></i>
+                    <i class="nav-icon fas fa-sitemap"></i>
                     <p>
                         {{ __('Mapping') }}
                     </p>
@@ -66,21 +48,12 @@
             </li>
 
             <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="nav-icon fas fa-circle nav-icon"></i>
+                <a href="{{ route('users.index') }}" class="nav-link">
+                    <i class="nav-icon fas fa-users"></i>
                     <p>
-                        Two-level menu
-                        <i class="fas fa-angle-left right"></i>
+                        {{ __('Setting Users') }}
                     </p>
                 </a>
-                <ul class="nav nav-treeview" style="display: none;">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="far fa-circle nav-icon"></i>
-                            <p>Child menu</p>
-                        </a>
-                    </li>
-                </ul>
             </li>
         </ul>
     </nav>

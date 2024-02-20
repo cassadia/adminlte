@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-//return type redirectResponse
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Hash;
 
 use App\Models\User;
 
@@ -41,16 +41,28 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $this->validate($request, [
-            'KodeProduk' => 'required|min:5',
-            'NamaProduk' => 'required|min:10'
+            'nmUser' => 'required|min:5',
+            'emailUser' => 'required|min:10|email', // Ubah 'email' menjadi 'emailUser' dan tambahkan unique:users,email
+            'password' => 'required|confirmed|min:6', // Gunakan 'confirmed' untuk memastikan bahwa 'Password' dan 'KonfPassword' sama
+        ], [
+            'nmUser.required' => 'Nama tidak boleh kosong.',
+            'nmUser.min' => 'Nama minimal harus terdiri dari 5 karakter.',
+            'emailUser.required' => 'Email tidak boleh kosong.',
+            'emailUser.min' => 'Email minimal harus terdiri dari 10 karakter.',
+            'emailUser.email' => 'Email harus dalam format yang benar.',
+            'emailUser.unique' => 'Email sudah digunakan.',
+            'password.required' => 'Password tidak boleh kosong.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'password.min' => 'Password minimal harus terdiri dari 6 karakter.',
         ]);
 
         // Periksa apakah kode produk sudah ada di database
-        $existingProduct = User::where('kd_produk', $request->KodeProduk)->first();
+        $existingUser = User::withoutGlobalScopes()
+            ->where('email', $request->emailUser)->first();
 
         // Jika kode produk sudah ada, tampilkan pesan kesalahan
-        if ($existingProduct) {
-            return redirect()->back()->withInput()->withErrors(['KodeProduk' => 'Kode Produk sudah ada di database.'])->with(['error' => 'Kode Produk sudah ada di database.']);
+        if ($existingUser) {
+            return redirect()->back()->withInput()->withErrors(['emailUser' => 'Email sudah ada di database!'])->with(['error' => 'Email sudah ada di database!']);
         }
 
         // Tentukan nilai status berdasarkan kondisi checkbox
@@ -58,13 +70,14 @@ class UserController extends Controller
 
         //create post
         User::create([
-            'kd_produk' => $request->KodeProduk,
-            'nm_produk' => $request->NamaProduk,
+            'name' => $request->nmUser,
+            'email' => $request->emailUser,
+            'password' => Hash::make($request->password),
             'status' => $status,
         ]);
 
         //redirect to index
-        return redirect()->route('product.index')->with(['success' => 'Data Berhasil Disimpan!']);
+        return redirect()->route('users.index')->with(['success' => 'Data Berhasil Disimpan!']);
     }
 
     public function show(string $id): View
@@ -85,29 +98,34 @@ class UserController extends Controller
         return view('users.edit', compact('users'));
     }
 
-    public function update(Request $request, $id): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
         //validate form
         $this->validate($request, [
-            'KodeProduk' => 'required|min:5',
-            'NamaProduk' => 'required|min:10'
+            'nmUser' => 'required|min:5',
+            'emailUser' => 'required|min:10|email', // Ubah 'email' menjadi 'emailUser' dan tambahkan unique:users,email
+        ], [
+            'nmUser.required' => 'Nama tidak boleh kosong.',
+            'nmUser.min' => 'Nama minimal harus terdiri dari 5 karakter.',
+            'emailUser.required' => 'Email tidak boleh kosong.',
+            'emailUser.min' => 'Email minimal harus terdiri dari 10 karakter.',
+            'emailUser.email' => 'Email harus dalam format yang benar.',
+            'emailUser.unique' => 'Email sudah digunakan.',
         ]);
 
-        //get post by ID
-        $product = User::findOrFail($id);
 
         // Tentukan nilai status berdasarkan kondisi checkbox
         $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
                     
         //update product without image
-        $product->update([
-            'kd_produk' => $request->KodeProduk,
-            'nm_produk' => $request->NamaProduk,
+        User::where("email", $request->emailUser)->update([
+            'name' => $request->nmUser,
+            'email' => $request->emailUser,
             'status' => $status,
         ]);
 
         //redirect to index
-        return redirect()->route('product.index')->with(['success' => 'Data Berhasil Diubah!']);
+        return redirect()->route('users.index')->with(['success' => 'Data Berhasil Diubah!']);
     }
 
     public function destroy($id): RedirectResponse
@@ -119,7 +137,7 @@ class UserController extends Controller
         $users->delete();
 
         //redirect to index
-        return redirect()->route('product.index')->with(['success' => 'Data Berhasil Dihapus!']);
+        return redirect()->route('users.index')->with(['success' => 'Data Berhasil Dihapus!']);
     }
 
     public function search(Request $request)

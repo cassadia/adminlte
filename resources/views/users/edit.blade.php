@@ -21,33 +21,37 @@
 
                     <div class="card card-primary">
                         <div class="card-header">
-                          <h3 class="card-title">Ubah Produk</h3>
+                          <h3 class="card-title">Ubah User</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
-                        <form action="{{ route('product.update', $products->id) }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('user.update') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
                             <div class="card-body">
                                 
                                 <div class="form-group">
-                                    <label for="KodeProduk">Kode Produk</label>
-                                    <input type="text" class="form-control  @error('KodeProduk') is-invalid @enderror" placeholder="Kode Produk" name="KodeProduk" value="{{ old('kd_produk', $products->kd_produk) }}">
+                                    <label for="nmUser">Nama</label>
+                                    <input type="text" name="nmUser"
+                                        class="form-control  @error('nmUser') is-invalid @enderror"
+                                            value="{{ old('nmUser', $users->name) }}">
 
                                     <!-- error message untuk title -->
-                                    @error('KodeProduk')
-                                        <div class="alert alert-danger mt-2 small">
+                                    @error('nmUser')
+                                        <div class="alertnmUser-danger mt-2 small">
                                             {{ $message }}
                                         </div>
                                     @enderror
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="NamaProduk">Nama Produk</label>
-                                    <input type="text" class="form-control @error('NamaProduk') is-invalid @enderror" placeholder="Nama Produk" name="NamaProduk" value="{{ old('nm_produk', $products->nm_produk) }}">
+                                    <label for="email">Email</label>
+                                    <input type="text" name="emailUser"
+                                        class="form-control @error('emailUser') is-invalid @enderror"
+                                            value="{{ old('emailUser', $users->email) }}">
 
                                     <!-- error message untuk title -->
-                                    @error('NamaProduk')
+                                    @error('emailUser')
                                         <div class="alert alert-danger mt-2 small">
                                             {{ $message }}
                                         </div>
@@ -55,7 +59,9 @@
                                 </div>
 
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="exampleCheck1" name="status" {{ $products->status == 'Aktif' ? 'checked' : '' }}>
+                                    <input type="checkbox" name="status"
+                                        class="form-check-input" id="exampleCheck1"
+                                            {{ $users->status == 'Aktif' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="exampleCheck1">Status</label>
                                 </div>
                             </div>
@@ -64,7 +70,7 @@
                           <div class="card-footer">
                             <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
                             <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>
-                            <a href="{{ route('product.index') }}" class="btn btn-info float-right">Back</a>
+                            <a href="{{ route('users.index') }}" class="btn btn-info float-right">Back</a>
                           </div>
                         </form>
                       </div>
