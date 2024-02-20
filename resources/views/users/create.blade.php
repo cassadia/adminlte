@@ -18,98 +18,25 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-6">
-                    {{-- <div class="card">
-                        <form action="{{ route('profile.update') }}" method="POST">
-                            @csrf
-                            @method('PUT')
-
-                            <div class="card-body">
-
-                                <div class="input-group mb-3">
-                                    <input type="text" name="name"
-                                           class="form-control @error('name') is-invalid @enderror"
-                                           placeholder="{{ __('Name') }}" value="{{ old('name', auth()->user()->name) }}" required>
-                                    <div class="input-group-append">
-                                        <div class="input-group-text">
-                                            <span class="fas fa-user"></span>
-                                        </div>
-                                    </div>
-                                    @error('name')
-                                    <span class="error invalid-feedback">
-                                        {{ $message }}
-                                    </span>
-                                    @enderror
-                                </div>
-
-                                <div class="input-group mb-3">
-                                    <input type="email" name="email"
-                                           class="form-control @error('email') is-invalid @enderror"
-                                           placeholder="{{ __('Email') }}" value="{{ old('email', auth()->user()->email) }}" required>
-                                    <div class="input-group-append">
-                                        <div class="input-group-text">
-                                            <span class="fas fa-envelope"></span>
-                                        </div>
-                                    </div>
-                                    @error('email')
-                                    <span class="error invalid-feedback">
-                                        {{ $message }}
-                                    </span>
-                                    @enderror
-                                </div>
-
-                                <div class="input-group mb-3">
-                                    <input type="password" name="password"
-                                           class="form-control @error('password') is-invalid @enderror"
-                                           placeholder="{{ __('New password') }}">
-                                    <div class="input-group-append">
-                                        <div class="input-group-text">
-                                            <span class="fas fa-lock"></span>
-                                        </div>
-                                    </div>
-                                    @error('password')
-                                    <span class="error invalid-feedback">
-                                        {{ $message }}
-                                    </span>
-                                    @enderror
-                                </div>
-
-                                <div class="input-group mb-3">
-                                    <input type="password" name="password_confirmation"
-                                           class="form-control @error('password_confirmation') is-invalid @enderror"
-                                           placeholder="{{ __('New password confirmation') }}"
-                                           autocomplete="new-password">
-                                    <div class="input-group-append">
-                                        <div class="input-group-text">
-                                            <span class="fas fa-lock"></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
-                            </div>
-                        </form>
-                    </div> --}}
-
                     <div class="card card-primary">
                         <div class="card-header">
                           <h3 class="card-title">Tambah Produk</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
-                        <form action="{{ route('product.store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('user.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            {{-- @method('PUT') --}}
                             <div class="card-body">
                                 
                                 <div class="form-group">
-                                    <label for="KodeProduk">Kode Produk</label>
-                                    <input type="text" class="form-control  @error('KodeProduk') is-invalid @enderror" placeholder="Kode Produk" name="KodeProduk" value="{{ old('KodeProduk') }}">
+                                    <label for="nmUser">Nama</label>
+                                    <input type="text" name="nmUser"
+                                        class="form-control @error('nmUser') is-invalid @enderror"
+                                            placeholder="{{ __('Name') }}" value="{{ old('nmUser') }}"
+                                                 autocomplete="nmUser">
 
                                     <!-- error message untuk title -->
-                                    @error('KodeProduk')
+                                    @error('nmUser')
                                         <div class="alert alert-danger mt-2 small">
                                             {{ $message }}
                                         </div>
@@ -117,29 +44,72 @@
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="NamaProduk">Nama Produk</label>
-                                    <input type="text" class="form-control @error('NamaProduk') is-invalid @enderror" placeholder="Nama Produk" name="NamaProduk" value="{{ old('NamaProduk') }}">
+                                    <label for="emailUser">Email</label>
+                                    <input type="text" name="emailUser"
+                                        class="form-control @error('emailUser') is-invalid @enderror"
+                                            placeholder="Email" value="{{ old('emailUser') }}">
 
                                     <!-- error message untuk title -->
-                                    @error('NamaProduk')
+                                    @error('emailUser')
                                         <div class="alert alert-danger mt-2 small">
                                             {{ $message }}
                                         </div>
                                     @enderror
                                 </div>
 
-                                {{-- <div class="form-group">
-                                <label for="exampleInputFile">File input</label>
-                                <div class="input-group">
-                                    <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="exampleInputFile">
-                                    <label class="custom-file-label" for="exampleInputFile">Choose file</label>
-                                    </div>
-                                    <div class="input-group-append">
-                                    <span class="input-group-text">Upload</span>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="passUser">Password</label>
+                                    <input type="password" name="password"
+                                        class="form-control @error('password') is-invalid @enderror"
+                                            placeholder="{{ __('Password') }}" autocomplete="new-password">
+                                    @error('password')
+                                        <div class="alert alert-danger mt-2 small">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
-                                </div> --}}
+                    
+                                <div class="input-group mb-3">
+                                    <input type="password" name="password_confirmation"
+                                        class="form-control @error('password_confirmation') is-invalid @enderror"
+                                            placeholder="{{ __('Konfirmasi Password') }}"
+                                                autocomplete="new-password">
+                                </div>
+
+                                {{-- <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" name="password"
+                                        class="form-control @error('password') is-invalid @enderror"
+                                            placeholder="password" value="{{ old('password') }}">
+
+                                    <!-- error message untuk title -->
+                                    @error('password')
+                                        <div class="alert alert-danger mt-2 small">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="KonfPassword">Konfirmasi Password</label>
+                                    <input type="password" name="KonfPassword"
+                                        class="form-control @error('KonfPassword') is-invalid @enderror"
+                                            placeholder="Konfirmasi Password" value="{{ old('KonfPassword') }}"> --}}
+
+                                    {{-- <!-- error message untuk title -->
+                                    @error('KonfPassword')
+                                        <div class="alert alert-danger mt-2 small">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                    <!-- tambahkan pesan kustom jika password tidak cocok -->
+                                    @error('Password')
+                                        <div class="alert alert-danger mt-2 small">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>--}}
+                                
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="exampleCheck1" name="status">
                                     <label class="form-check-label" for="exampleCheck1">Status</label>
@@ -150,7 +120,7 @@
                           <div class="card-footer">
                             <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
                             <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>
-                            <a href="{{ route('product.index') }}" class="btn btn-info float-right">Back</a>
+                            <a href="{{ route('users.index') }}" class="btn btn-info float-right">Back</a>
                           </div>
                         </form>
                       </div>
