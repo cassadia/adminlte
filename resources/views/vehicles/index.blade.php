@@ -69,12 +69,30 @@
                                         <td>{{ $vehicle->no_seri_mesin }}</td>
                                         <td>{{ $vehicle->no_seri_rangka }}</td>
                                         <td>
-                                            <a href="{{ asset('images/' . $vehicle->gambar) }}"
+                                            {{-- <a href="{{ asset('images/' . $vehicle->gambar) }}"
                                                 data-lightbox="gambar" data-title="{{ $vehicle->NamaMotor }}">
                                                 <img src="{{ asset('images/' . $vehicle->gambar) }}"
                                                      alt="{{ $vehicle->NamaMotor }}" class="img-fluid"
                                                         style="max-width: 100px; max-height: 50px;">
-                                            </a>
+                                            </a> --}}
+                                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageModal{{ $vehicle->id }}">
+                                                Lihat Gambar
+                                            </button>
+                                            <div class="modal fade" id="imageModal{{ $vehicle->id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ $vehicle->id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="imageModalLabel{{ $vehicle->id }}">Gambar Kendaraan</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <img src="{{ asset('images/' . $vehicle->gambar) }}" class="img-fluid" alt="Gambar Kendaraan">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>{{ $vehicle->status }}</td>
                                         <td>{{ $vehicle->created_at }}</td>
@@ -106,7 +124,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center">
+                                        <td colspan="9" class="text-center">
                                             <div class="alert alert-danger">
                                                 Data Produk belum Tersedia.
                                             </div>
