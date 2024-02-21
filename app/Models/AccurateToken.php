@@ -16,7 +16,8 @@ class AccurateToken extends Model
         'token_type',
         'refresh_token',
         'expires_in',
-        'deleted_at'
+        'deleted_at',
+        'kd_database'
     ];
 
 }

@@ -8,6 +8,7 @@ use App\Models\AccurateToken;
 use App\Models\AccurateSession;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\Accurate;
 use Illuminate\Support\Facades\DB;
 
 class AccurateController extends Controller
@@ -15,49 +16,62 @@ class AccurateController extends Controller
     //
     public function refreshToken()
     {
-        $client = new Client();
-        $headers = [
-            'Authorization' => 'Basic ZDE4OWFjM2EtYzhkNi00ZjY4LTg4YzctYTFlOTUzNjhmMzAwOjEwMTY2NTYyNDkxY2M5ODllZTEzYTRjMjcyYjAzNDNm'
-        ];
+        $cek = DB::table('accurate')->whereNull('deleted_at')->get();
 
-        $getRefreshToken = AccurateToken::whereNull('deleted_at')->first();
+        foreach ($cek as $data) {
+            $clientID = $data->client_id;
+            $clientSecret = $data->client_secret;
 
-        $url = 'https://account.accurate.id/oauth/token?grant_type=refresh_token&refresh_token=' . $getRefreshToken->refresh_token;
-        
-        try {
-            $response = $client->post($url, [
-                'headers' => $headers
-            ]);
+            $text = rtrim($clientID) . ":" . rtrim($clientSecret);
+            $enkrip = base64_encode($text);
 
-            // Ambil isi dari respons
-            $body = $response->getBody();
-            $contents = $body->getContents();
-
-            $responseArray = json_decode($contents, true);
-
-            $accessToken = $responseArray['access_token'];
-            $tokenType = $responseArray['token_type'];
-            $refreshToken = $responseArray['refresh_token'];
-            $expiresIn = $responseArray['expires_in'];
-
-            $getRefreshToken->update(['deleted_at' => now()]);
-
-            AccurateToken::create([
-                'access_token' => $accessToken,
-                'token_type' => $tokenType,
-                'refresh_token' => $refreshToken,
-                'expires_in' => $expiresIn
-            ]);
-
-            return response()->json([
-                'access_token' => $accessToken,
-                'token_type' => $tokenType,
-                'refresh_token' => $refreshToken,
-                'expires_in' => $expiresIn
-            ]);
-        } catch (\Exception $e) {
-            // Tangani kesalahan jika terjadi
-            return response()->json(['error' => $e->getMessage()], 500);
+            $client = new Client();
+            $headers = [
+                'Authorization' => 'Basic ' . $enkrip
+            ];
+    
+            $getRefreshToken = AccurateToken::whereNull('deleted_at')
+                ->where('kd_database', '=', $data->kd_database)->first();
+    
+            $url = 'https://account.accurate.id/oauth/token?grant_type=refresh_token&refresh_token=' . rtrim($getRefreshToken->refresh_token);
+            
+            try {
+                $response = $client->post($url, [
+                    'headers' => $headers
+                ]);
+    
+                // Ambil isi dari respons
+                $body = $response->getBody();
+                $contents = $body->getContents();
+    
+                $responseArray = json_decode($contents, true);
+    
+                $accessToken = $responseArray['access_token'];
+                $tokenType = $responseArray['token_type'];
+                $refreshToken = $responseArray['refresh_token'];
+                $expiresIn = $responseArray['expires_in'];
+    
+                $getRefreshToken->update(['deleted_at' => now()]);
+    
+                AccurateToken::create([
+                    'access_token' => $accessToken,
+                    'token_type' => $tokenType,
+                    'refresh_token' => $refreshToken,
+                    'kd_database' => $data->kd_database,
+                    'expires_in' => $expiresIn
+                ]);
+    
+                return response()->json([
+                    'access_token' => $accessToken,
+                    'token_type' => $tokenType,
+                    'refresh_token' => $refreshToken,
+                    'kd_database' => $data->kd_database,
+                    'expires_in' => $expiresIn
+                ]);
+            } catch (\Exception $e) {
+                // Tangani kesalahan jika terjadi
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
         }
     }
 
