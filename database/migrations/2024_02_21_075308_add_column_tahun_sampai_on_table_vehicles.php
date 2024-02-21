@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
         Schema::table('vehicles', function (Blueprint $table) {
-            $table->string('gambar')->nullable()->after('no_seri_rangka');
+            $table->integer('tahun_sampai')->nullable()->after('tahun_dari');
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('vehicles', function (Blueprint $table) {
+            $table->dropColumn('tahun_sampai');
+        });
     }
 };
