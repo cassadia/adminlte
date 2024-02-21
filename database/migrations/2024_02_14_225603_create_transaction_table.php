@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('kd_produk_accu');
             $table->string('kd_motor');
             $table->decimal('harga_jual');
-            $table->string('lokasi');
+            $table->string('kd_database');
             $table->integer('qty');
             $table->timestamps();
             $table->softDeletes();
