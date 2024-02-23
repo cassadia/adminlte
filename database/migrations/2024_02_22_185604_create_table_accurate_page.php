@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('startPage');
             $table->integer('endPage');
             $table->integer('totalBatches');
-            $table->integer('rowCount');
+            $table->integer('rowCount')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
