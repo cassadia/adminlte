@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/mappingStore', [\App\Http\Controllers\MappingController::class, 'store']);
     Route::post('/updateMapping', [\App\Http\Controllers\MappingController::class, 'updateMapping']);
     Route::post('/updateMappingAll', [\App\Http\Controllers\MappingController::class, 'updateMappingAll']);
+    Route::get('/mappingExport', [\App\Http\Controllers\MappingController::class, 'mappingExport'])->name('mapping.export');
 
     Route::post('/userStore', [\App\Http\Controllers\UserController::class, 'store'])->name('user.store');
     Route::put('/userUpdate', [\App\Http\Controllers\UserController::class, 'update'])->name('user.update');

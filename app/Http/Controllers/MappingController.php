@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 use App\Models\Mapping;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 
 class MappingController extends Controller
 {
@@ -176,6 +178,52 @@ class MappingController extends Controller
         }
     
         return response()->json($response, 200);
+    }
+
+    public function mappingExport(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = Vehicle::leftJoin('mappings as b', function ($join) use ($request) {
+                $join->on('b.kd_motor', '=', 'vehicles.kd_motor')
+                     ->where('b.kd_produk', '=', $request->kd_produk);
+            })
+            ->select(DB::raw("CASE WHEN b.deleted_at IS NULL THEN b.kd_produk ELSE NULL END AS kdproduk")
+                , 'vehicles.nm_motor', 'vehicles.kd_motor'
+                , DB::raw("CONCAT(vehicles.tahun_dari, '-', COALESCE(vehicles.tahun_sampai, 'Sekarang')) AS tahun_pembuatan")
+                , 'vehicles.no_seri_mesin', 'vehicles.no_seri_rangka'
+            )
+            ->orderBy('kdproduk', 'DESC')
+            ->get()
+            ->toArray();
+
+            // Buat file ekspor (misalnya, file CSV)
+            $fileName = 'mapping_export.csv';
+            $file = fopen('php://temp', 'w+');
+
+            $headers = array(
+                'Kode Produk',
+                'Nama Motor',
+                'Kode Motor',
+                'Tahun Pembuatan',
+                'No Seri Mesin',
+                'No Seri Rangka'
+            );
+
+            fputcsv($file, $headers);
+
+            // Tulis data ke file CSV
+            foreach ($data as $row) {
+                fputcsv($file, $row);
+            }
+            rewind($file);
+
+            return response()->stream(function () use ($file) {
+                fpassthru($file);
+            }, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            ]);
+        }
     }
 
     // public function updateMappingAll(Request $request)
