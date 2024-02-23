@@ -9,6 +9,7 @@ use App\Models\AccurateSession;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\Accurate;
+use App\Models\AccuratePage;
 use Illuminate\Support\Facades\DB;
 
 class AccurateController extends Controller
@@ -126,6 +127,8 @@ class AccurateController extends Controller
 
         $getDB = $this->getActiveDatabase();
 
+        $test = [];
+
         if (count($getDB)>0) {
             foreach ($getDB as $database) {
                 $getAccess = $this->getDatabaseAccess($database->kd_database);
@@ -137,47 +140,106 @@ class AccurateController extends Controller
                     try {
                         $jmlDataInsert = 1;
                         $res = $client->sendAsync($request)->wait();
-                        // $result = json_decode((string)$res->getBody(), true);
-            
-                        // for ($i=1; $i<=$result['sp']['pageCount']; $i++) {
-                        for ($i=1; $i<=3; $i++) {
-                            $request_new = new Request('GET'
-                                , $getAccess->host . '/accurate/api/item/list.do?fields=id,name,itemType,itemTypeName,unitPrice,no,charField1,availableToSell,charField4,charField5&sp.page=' . $i
-                                , $headers
-                            );
-                            $res_new = $client->sendAsync($request_new)->wait();
-                            $result_new = json_decode((string)$res_new->getBody(), true);
-            
-                            foreach ($result_new['d'] as $data) {
-                                $kdProduct = $data['no'];
-                                $kdProductAccu = $data['id'];
-                                $nmProduct = $data['name'];
-                                $hargaJual = $data['unitPrice'];
-                                $stockAvail = $data['availableToSell'];
-                                $status = $data['charField5']=='N' ? "Tidak Aktif" : "Aktif";
-                                $database = $kdDb;
-            
-                                $productExist = Product::where('kd_produk', $kdProduct)->count();
-            
-                                if ($productExist > 0) {
-            
-                                } else {
-                                    Product::create([
-                                        'kd_produk' => $kdProduct,
-                                        'kd_produk_accu' => $kdProductAccu,
-                                        'nm_produk' => $nmProduct,
-                                        'harga_jual' => $hargaJual,
-                                        'qty_available' => $stockAvail,
-                                        'database' => $database,
-                                        'status' => $status
-                                    ]);
-                                    $jmlDataInsert = $jmlDataInsert + 1;
+                        $result = json_decode((string)$res->getBody(), true);
+                        $totalPages = $result['sp']['pageCount'];
+                        $batchSize = 10;
+                        $totalBatches = ceil($totalPages / $batchSize);
+
+                        $cekPages = AccuratePage::whereNull('deleted_at')->first();
+
+                        if ($cekPages) {
+                            for ($page=$cekPages->startPage; $page<=$cekPages->endPage; $page++) {
+                                $request_new = new Request('GET'
+                                    , $getAccess->host . '/accurate/api/item/list.do?fields=id,name,itemType,itemTypeName,unitPrice,no,charField1,availableToSell,charField4,charField5&sp.page=' . $page
+                                    , $headers
+                                );
+                                $res_new = $client->sendAsync($request_new)->wait();
+                                $result_new = json_decode((string)$res_new->getBody(), true);
+                
+                                foreach ($result_new['d'] as $data) {
+                                    $kdProduct = $data['no'];
+                                    $kdProductAccu = $data['id'];
+                                    $nmProduct = $data['name'];
+                                    $hargaJual = $data['unitPrice'];
+                                    $stockAvail = $data['availableToSell'];
+                                    $status = $data['charField5']=='N' ? "Tidak Aktif" : "Aktif";
+                                    $database = $kdDb;
+                
+                                    $productExist = Product::where('kd_produk', $kdProduct)->count();
+
+                                    if ($productExist <= 0) {
+                                        Product::create([
+                                            'kd_produk' => $kdProduct,
+                                            'kd_produk_accu' => $kdProductAccu,
+                                            'nm_produk' => $nmProduct,
+                                            'harga_jual' => $hargaJual,
+                                            'qty_available' => $stockAvail,
+                                            'database' => $database,
+                                            'status' => $status
+                                        ]);
+                                        $jmlDataInsert = $jmlDataInsert + 1;
+                                    }
                                 }
                             }
+                            AccuratePage::where('id', '=', $cekPages->id)
+                            ->update([
+                                'deleted_at' => now(),
+                                'rowCount' => $jmlDataInsert
+                            ]);
+                            return response()->json([
+                                'message' => 'Data berhasil diimpor sebanyak: ' . $jmlDataInsert
+                            ], 200);
+                        } else {
+                            for ($batch=1; $batch<=$totalBatches; $batch++) {
+                                $startPage = ($batch - 1) * $batchSize + 1;
+                                $endPage = min($startPage + $batchSize - 1, $totalPages);
+    
+                                AccuratePage::create([
+                                    'batch' => $batch,
+                                    'startPage' => $startPage,
+                                    'endPage' => $endPage,
+                                    'totalBatches' => $totalBatches
+                                ]);
+                            }
                         }
-                        return response()->json([
-                            'message' => 'Data berhasil diimpor sebanyak: ' . $jmlDataInsert
-                        ], 200);
+            
+                        // for ($i=2; $i<=$result['sp']['pageCount']; $i++) {
+                        // for ($i=1; $i<=64; $i++) {
+                            // $request_new = new Request('GET'
+                            //     , $getAccess->host . '/accurate/api/item/list.do?fields=id,name,itemType,itemTypeName,unitPrice,no,charField1,availableToSell,charField4,charField5&sp.page=' . $i
+                            //     , $headers
+                            // );
+                            // $res_new = $client->sendAsync($request_new)->wait();
+                            // $result_new = json_decode((string)$res_new->getBody(), true);
+            
+                            // foreach ($result_new['d'] as $data) {
+                            //     $kdProduct = $data['no'];
+                            //     $kdProductAccu = $data['id'];
+                            //     $nmProduct = $data['name'];
+                            //     $hargaJual = $data['unitPrice'];
+                            //     $stockAvail = $data['availableToSell'];
+                            //     $status = $data['charField5']=='N' ? "Tidak Aktif" : "Aktif";
+                            //     $database = $kdDb;
+            
+                            //     $productExist = Product::where('kd_produk', $kdProduct)->count();
+            
+                            //     if ($productExist > 0) {
+            
+                            //     } else {
+                            //         Product::create([
+                            //             'kd_produk' => $kdProduct,
+                            //             'kd_produk_accu' => $kdProductAccu,
+                            //             'nm_produk' => $nmProduct,
+                            //             'harga_jual' => $hargaJual,
+                            //             'qty_available' => $stockAvail,
+                            //             'database' => $database,
+                            //             'status' => $status
+                            //         ]);
+                            //         $jmlDataInsert = $jmlDataInsert + 1;
+                            //     }
+                            // }
+                        // }
+                        
                     } catch (\Exception $e) {
                         return response()->json(['error' => $e->getMessage()], 500);
                     }
