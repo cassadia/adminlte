@@ -21,16 +21,25 @@
                 <div class="col-lg-12">
 
                     <div class="card card-primary">
-                        <div class="card-header">
+                        <div class="card-header d-flex align-items-center">
                             <h3 class="card-title">Mapping Produk dan Motor</h3>
+                            <div class="card-tools ml-auto">
+                                <button id="export-link" class="btn btn-sm btn-success" type="button" disabled>
+                                    <i class="fas fa-download"></i> Export Data
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <div class="input-group">
-                                        <input type="text" name="search" id="search" placeholder="Ketikkan tipe pencarian nama motor, kode motor" class="form-control form-control-sm" onfocus="this.value=''">
+                                        <input type="text" name="search" id="search"
+                                            placeholder="Ketikkan tipe pencarian nama motor, kode motor"
+                                                class="form-control form-control-sm" onfocus="this.value=''">
                                         <div class="input-group-append">
-                                            <button id="searchMotor" class="btn btn-primary btn-sm" type="button"><i class="fas fa-search"></i></button>
+                                            <button id="searchMotor" class="btn btn-primary btn-sm"
+                                                type="button">
+                                                <i class="fas fa-search"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -40,14 +49,18 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="KodeProduk">Kode Produk</label>
-                                        <input id="KodeProduk" type="text" class="form-control form-control-sm" placeholder="Kode Produk" name="KodeProduk" value="{{ old('KodeProduk') }}" readonly>
+                                        <input id="KodeProduk" type="text" class="form-control form-control-sm"
+                                            placeholder="Kode Produk" name="KodeProduk"
+                                                value="{{ old('KodeProduk') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="NamaMotor">Nama Motor</label>
                                         <div class="input-group">
-                                            <input id="NamaMotor" type="text" class="form-control form-control-sm" placeholder="Nama Motor" name="NamaMotor" value="{{ old('NamaMotor') }}" readonly>
+                                            <input id="NamaMotor" type="text" class="form-control form-control-sm"
+                                                placeholder="Nama Motor" name="NamaMotor"
+                                                    value="{{ old('NamaMotor') }}" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -55,7 +68,9 @@
                                     <div class="form-group">
                                         <label for="Lokasi">Lokasi</label>
                                         <div class="input-group">
-                                            <input id="Lokasi" type="text" class="form-control form-control-sm" placeholder="Lokasi" name="Lokasi" value="{{ old('Lokasi') }}" readonly>
+                                            <input id="Lokasi" type="text" class="form-control form-control-sm"
+                                                placeholder="Lokasi" name="Lokasi"
+                                                    value="{{ old('Lokasi') }}" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -121,13 +136,8 @@
     <!-- /.content -->
 @endsection
 
-@section('styles')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-@endsection
-
 @section('scripts')
     @if ($message = Session::get('success'))
-        <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
         <script>
             toastr.options = {
                 "closeButton": true,
@@ -195,6 +205,7 @@
                         
                         // Perbarui status tombol "Mapping" setelah data dimuat
                         updateMappingButtonStatus();
+                        $('#export-link').removeAttr('disabled');
                     }
                 });
             });
@@ -399,6 +410,39 @@
             //         }
             //     });
             // });
+
+            $('#export-link').on('click', function() {
+                // Lakukan ekspor data
+                exportData();
+            });
+
+            function exportData() {
+                var kd_produk = $('#KodeProduk').val();
+                $.ajax({
+                    url: "{{ route('mapping.export') }}",
+                    type: "GET",
+                    data: { kd_produk: kd_produk },
+                    success: function(data) {
+                        // Buat blob dari data yang diterima
+                        var blob = new Blob([data], { type: 'text/csv' });
+                        // Buat URL objek untuk blob
+                        var url = window.URL.createObjectURL(blob);
+                        // Buat elemen <a> untuk mengunduh file
+                        var downloadLink = document.createElement('a');
+                        // Set atribut href dan download
+                        downloadLink.href = url;
+                        downloadLink.download = 'mapping_export.csv';
+                        // Klik pada elemen <a> untuk mengunduh file
+                        downloadLink.click();
+                        // Hapus URL objek setelah file diunduh
+                        window.URL.revokeObjectURL(url);
+                    },
+                    error: function(xhr, status, error) {
+                        // Tangani kesalahan jika ekspor gagal
+                        console.error(error);
+                    }
+                });
+            }
         });
     </script>
 @endsection
