@@ -106,7 +106,9 @@
                                 
                                 <div class="form-group">
                                     <label for="KodeProduk">Kode Produk</label>
-                                    <input type="text" class="form-control  @error('KodeProduk') is-invalid @enderror" placeholder="Kode Produk" name="KodeProduk" value="{{ old('KodeProduk') }}">
+                                    <input type="text" class="form-control  @error('KodeProduk') is-invalid @enderror"
+                                        placeholder="Kode Produk" name="KodeProduk"
+                                            value="{{ old('KodeProduk') }}">
 
                                     <!-- error message untuk title -->
                                     @error('KodeProduk')
@@ -118,7 +120,9 @@
                                 
                                 <div class="form-group">
                                     <label for="NamaProduk">Nama Produk</label>
-                                    <input type="text" class="form-control @error('NamaProduk') is-invalid @enderror" placeholder="Nama Produk" name="NamaProduk" value="{{ old('NamaProduk') }}">
+                                    <input type="text" class="form-control @error('NamaProduk') is-invalid @enderror"
+                                        placeholder="Nama Produk" name="NamaProduk"
+                                            value="{{ old('NamaProduk') }}">
 
                                     <!-- error message untuk title -->
                                     @error('NamaProduk')
@@ -129,8 +133,25 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="Qty">Qty</label>
+                                    <input type="number" min="0" class="form-control @error('Qty') is-invalid @enderror"
+                                        placeholder="Qty Available" name="Qty"
+                                            value="{{ old('Qty') }}">
+
+                                    <!-- error message untuk title -->
+                                    @error('Qty')
+                                        <div class="alert alert-danger mt-2 small">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
                                     <label for="HargaJual">Harga Jual</label>
-                                    <input type="number" min="0" class="form-control @error('HargaJual') is-invalid @enderror" placeholder="Harga Jual" name="HargaJual" value="{{ old('HargaJual') }}">
+                                    <input type="number" min="0"
+                                        class="form-control @error('HargaJual') is-invalid @enderror"
+                                            placeholder="Harga Jual" name="HargaJual"
+                                                value="{{ old('HargaJual') }}">
 
                                     <!-- error message untuk title -->
                                     @error('HargaJual')
@@ -142,7 +163,8 @@
                                 
                                 <div class="form-group">
                                     <label for="Lokasi">Lokasi</label>
-                                    <input type="text" class="form-control @error('Lokasi') is-invalid @enderror" placeholder="Lokasi" name="Lokasi" value="{{ old('Lokasi') }}">
+                                    <input type="text" class="form-control @error('Lokasi') is-invalid @enderror"
+                                        placeholder="Lokasi" name="Lokasi" value="{{ old('Lokasi') }}">
 
                                     <!-- error message untuk title -->
                                     @error('Lokasi')

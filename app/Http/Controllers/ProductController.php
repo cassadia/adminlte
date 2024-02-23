@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use App\Models\Product;
 use App\Models\Vehicle;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class ProductController extends Controller
 {
@@ -67,6 +68,7 @@ class ProductController extends Controller
         Product::create([
             'kd_produk' => $request->KodeProduk,
             'nm_produk' => $request->NamaProduk,
+            'qty_available' => $request->Qty,
             'harga_jual' => $request->HargaJual,
             'database' => $request->Lokasi,
             'status' => $status,
@@ -80,6 +82,7 @@ class ProductController extends Controller
     {
         //get post by ID
         $products = Product::findOrFail($id);
+        Session::put('previous_url', url()->previous());
 
         //render view with post
         return view('products.show', compact('products'));
@@ -112,6 +115,7 @@ class ProductController extends Controller
         $product->update([
             'kd_produk' => $request->KodeProduk,
             'nm_produk' => $request->NamaProduk,
+            'qty_available' => $request->Qty,
             'harga_jual' => $request->HargaJual,
             'database' => $request->Lokasi,
             'status' => $status,
@@ -231,8 +235,15 @@ class ProductController extends Controller
                     $tahun = $row->tahun_dari ? $row->tahun_dari . '-' . $tahun_sampai : '';
                     $output .='
                     <tr>
-                        <td><input type="checkbox" name="motor_cek" class="motor_cek" value="' . $row->kdproduk . '" ' . $isChecked . ' data-id="'. $row->kd_motor .'"></td>
-                        <td><input type="text" name="produk_kode" class="produk_kode" value="'.$row->kdproduk.'" data-id="'.$row->kdproduk.'" hidden>'.$row->kdproduk.'</td>
+                        <td>
+                            <input type="checkbox" name="motor_cek" class="motor_cek"
+                                value="' . $row->kdproduk . '" ' . $isChecked . ' data-id="'. $row->kd_motor .'">
+                        </td>
+                        <td>
+                            <input type="text" name="produk_kode" class="produk_kode"
+                                value="'.$row->kdproduk.'" data-id="'.$row->kdproduk.'" hidden>
+                                '.$row->kdproduk.'
+                        </td>
                         <td>'.$row->nm_motor.'</td>
                         <td>'.$row->kd_motor.'</td>
                         <td>'.$tahun.'</td>

@@ -13,9 +13,6 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('css/adminlte.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
-    {{-- <link rel="stylesheet" href="{{ asset('css\tempusdominus-bootstrap-4.css') }}">
-    <link rel="stylesheet" href="{{ asset('css\tempusdominus-bootstrap-4.min.css') }}"> --}}
-    {{-- <link rel="stylesheet" href="{{ asset('css\daterangepicker.css') }}"> --}}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
     @yield('styles')
 </head>

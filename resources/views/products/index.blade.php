@@ -44,7 +44,6 @@
                             </form>
                         </div>
                     </div>
-                    
 
                     <div class="card">
                         <div class="card-body p-0">
@@ -79,10 +78,14 @@
                                                     <span class="sr-only">Toggle Dropdown</span>
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-right" role="menu">
-                                                    <a class="dropdown-item" href="{{ route('product.show', 1) }}">Lihat</a>
-                                                    <a class="dropdown-item" href="{{ route('product.edit', $product->id) }}">Ubah</a>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('product.show', $product->id) }}">Lihat</a>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('product.edit', $product->id) }}">Ubah</a>
                                             
-                                                    <form onsubmit="return confirm('Apakah Anda Yakin ?');" action="{{ route('product.destroy', $product->id) }}" method="POST">
+                                                    <form onsubmit="return confirm('Apakah Anda Yakin ?');"
+                                                        action="{{ route('product.destroy', $product->id) }}"
+                                                            method="POST">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="dropdown-item">Hapus</button>
@@ -93,7 +96,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center">
+                                        <td colspan="7" class="text-center">
                                             <div class="alert alert-danger">
                                                 Data Produk belum Tersedia.
                                             </div>
@@ -113,13 +116,20 @@
                             <div class="float-right">
                                 <form class="form-inline" method="GET" action="{{ route('product.index') }}">
                                     <label for="perPage" class="mr-2">Items per page:</label>
-                                    <select class="form-control form-control-sm" name="perPage" onchange="this.form.submit()">
-                                        <option value="10" {{ Request::get('perPage') == '10' ? 'selected' : '' }}>10</option>
-                                        <option value="25" {{ Request::get('perPage') == '25' ? 'selected' : '' }}>25</option>
-                                        <option value="50" {{ Request::get('perPage') == '50' ? 'selected' : '' }}>50</option>
-                                        <option value="75" {{ Request::get('perPage') == '75' ? 'selected' : '' }}>75</option>
-                                        <option value="100" {{ Request::get('perPage') == '100' ? 'selected' : '' }}>100</option>
+                                    <select class="form-control form-control-sm"
+                                        name="perPage" onchange="this.form.submit()">
+                                        <option value="10" {{ Request::get('perPage') == '10' ? 'selected' : '' }}>
+                                            10</option>
+                                        <option value="25" {{ Request::get('perPage') == '25' ? 'selected' : '' }}>
+                                            25</option>
+                                        <option value="50" {{ Request::get('perPage') == '50' ? 'selected' : '' }}>
+                                            50</option>
+                                        <option value="75" {{ Request::get('perPage') == '75' ? 'selected' : '' }}>
+                                            75</option>
+                                        <option value="100" {{ Request::get('perPage') == '100' ? 'selected' : '' }}>
+                                            100</option>
                                     </select>
+                                    <input type="hidden" name="keyword" value="{{ Request::get('keyword') }}">
                                 </form>
                             </div>
                         </div>
@@ -133,13 +143,8 @@
     <!-- /.content -->
 @endsection
 
-@section('styles')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-@endsection
-
 @section('scripts')
     @if ($message = Session::get('success'))
-        <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
         <script>
             toastr.options = {
                 "closeButton": true,
@@ -156,7 +161,6 @@
             toastr.success('{{ $message }}')
         </script>
     @endif
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
             $('#searchInput').on('input', function () {
