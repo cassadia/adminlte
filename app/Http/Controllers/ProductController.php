@@ -227,14 +227,15 @@ class ProductController extends Controller
             if (count($data)>0) {
                 foreach ($data as $row) {
                     $isChecked = !empty($row->kdproduk) ? 'checked' : '';
+                    $tahun_sampai = $row->tahun_sampai ?: 'Sekarang';
+                    $tahun = $row->tahun_dari ? $row->tahun_dari . '-' . $tahun_sampai : '';
                     $output .='
                     <tr>
                         <td><input type="checkbox" name="motor_cek" class="motor_cek" value="' . $row->kdproduk . '" ' . $isChecked . ' data-id="'. $row->kd_motor .'"></td>
                         <td><input type="text" name="produk_kode" class="produk_kode" value="'.$row->kdproduk.'" data-id="'.$row->kdproduk.'" hidden>'.$row->kdproduk.'</td>
                         <td>'.$row->nm_motor.'</td>
                         <td>'.$row->kd_motor.'</td>
-                        <td>'.$row->tahun_dari.'</td>
-                        <td>'.$row->tahun_sampai.'</td>
+                        <td>'.$tahun.'</td>
                         <td>'.$row->no_seri_mesin.'</td>
                         <td>'.$row->no_seri_rangka.'</td>
                     </tr>
