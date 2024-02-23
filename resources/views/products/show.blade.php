@@ -41,8 +41,15 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="Qty">Qty</label>
+                                    <input type="text" class="form-control"
+                                        value="{{ $products->qty_available }}" disabled>
+                                </div>
+
+                                <div class="form-group">
                                     <label for="HargaJual">Harga Jual</label>
-                                    <input type="text" class="form-control" value="{{ $products->harga_jual }}" disabled>
+                                    <input type="text" class="form-control"
+                                        value="{{ $products->harga_jual }}" disabled>
                                 </div>
 
                                 <div class="form-group">
@@ -51,16 +58,19 @@
                                 </div>
 
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="exampleCheck1" name="status" {{ $products->status == 'Aktif' ? 'checked' : '' }} @disabled(true)>
+                                    <input type="checkbox" class="form-check-input"
+                                        id="exampleCheck1" name="status" {{ $products->status == 'Aktif' ? 'checked' : '' }} @disabled(true)>
                                     <label class="form-check-label" for="exampleCheck1">Status</label>
                                 </div>
                             </div>
                           <!-- /.card-body -->
           
                           <div class="card-footer">
-                            {{-- <button type="submit" class="btn btn-warning">{{ __('Ubah') }}</button> --}}
-                            <a href="{{ route('product.edit', $products->id) }}" class="btn btn-warning">Ubah</a>
-                            <a href="{{ route('product.index') }}" class="btn btn-info float-right">Kembali</a>
+                            <a href="{{ route('product.edit', $products->id) }}" class="btn btn-warning">Edit</a>
+                            {{-- <a href="{{ route('product.index') }}" class="btn btn-info float-right">Kembali</a> --}}
+                            @if (session('previous_url'))
+                                <a href="{{ session('previous_url') }}" class="btn btn-info float-right">Back</a>
+                            @endif
                           </div>
                         </form>
                       </div>

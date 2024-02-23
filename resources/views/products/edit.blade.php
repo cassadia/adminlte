@@ -44,10 +44,26 @@
                                 
                                 <div class="form-group">
                                     <label for="NamaProduk">Nama Produk</label>
-                                    <input type="text" class="form-control @error('NamaProduk') is-invalid @enderror" placeholder="Nama Produk" name="NamaProduk" value="{{ old('nm_produk', $products->nm_produk) }}">
+                                    <input type="text" class="form-control @error('NamaProduk') is-invalid @enderror"
+                                        placeholder="Nama Produk" name="NamaProduk"
+                                            value="{{ old('nm_produk', $products->nm_produk) }}">
 
                                     <!-- error message untuk title -->
                                     @error('NamaProduk')
+                                        <div class="alert alert-danger mt-2 small">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="Qty">Qty</label>
+                                    <input type="number" min="0" class="form-control @error('Qty') is-invalid @enderror"
+                                        placeholder="Qty Available" name="Qty"
+                                            value="{{ old('Qty', $products->qty_available) }}">
+
+                                    <!-- error message untuk title -->
+                                    @error('Qty')
                                         <div class="alert alert-danger mt-2 small">
                                             {{ $message }}
                                         </div>
@@ -68,7 +84,7 @@
                                 
                                 <div class="form-group">
                                     <label for="Lokasi">Lokasi</label>
-                                    <input type="text" class="form-control @error('Lokasi') is-invalid @enderror" placeholder="Lokasi" name="Lokasi" value="{{ old('Lokasi', $products->lokasi) }}">
+                                    <input type="text" class="form-control @error('Lokasi') is-invalid @enderror" placeholder="Lokasi" name="Lokasi" value="{{ old('Lokasi', $products->database) }}">
 
                                     <!-- error message untuk title -->
                                     @error('Lokasi')
@@ -83,13 +99,15 @@
                                     <label class="form-check-label" for="exampleCheck1">Status</label>
                                 </div>
                             </div>
-                          <!-- /.card-body -->
+                            <!-- /.card-body -->
           
-                          <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
-                            <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>
-                            <a href="{{ route('product.index') }}" class="btn btn-info float-right">Back</a>
-                          </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
+                                <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>
+                                @if (session('previous_url'))
+                                    <a href="{{ session('previous_url') }}" class="btn btn-info float-right">Back</a>
+                                @endif
+                            </div>
                         </form>
                       </div>
 
