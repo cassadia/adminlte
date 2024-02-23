@@ -34,8 +34,12 @@
                         </div>
                         <div class="card-body">
                             <form action="{{ route('vehicle.index') }}" method="GET" class="form-inline mb-3">
-                                <input type="text" name="keyword" class="form-control form-control-sm mr-2" placeholder="Cari Produk" value="{{ Request::get('keyword') }}">
-                                <button type="submit" class="btn btn-sm btn-info"><i class="fas fa-search"></i> Cari</button>
+                                <input type="text" name="keyword"
+                                    class="form-control form-control-sm mr-2"
+                                        placeholder="Cari Produk" value="{{ Request::get('keyword') }}">
+                                <button type="submit" class="btn btn-sm btn-info">
+                                    <i class="fas fa-search"></i> Cari
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -75,9 +79,15 @@
                                                      alt="{{ $vehicle->NamaMotor }}" class="img-fluid"
                                                         style="max-width: 100px; max-height: 50px;">
                                             </a> --}}
-                                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageModal{{ $vehicle->id }}">
-                                                Lihat Gambar
-                                            </button>
+                                            @if ($vehicle->gambar)
+                                                <button type="button" class="btn btn-primary"
+                                                    data-toggle="modal" data-target="#imageModal{{ $vehicle->id }}">
+                                                    Lihat Gambar
+                                                </button>
+                                            @else
+                                                -
+                                            @endif
+
                                             <div class="modal fade" id="imageModal{{ $vehicle->id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ $vehicle->id }}" aria-hidden="true">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
@@ -88,7 +98,8 @@
                                                             </button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <img src="{{ asset('images/' . $vehicle->gambar) }}" class="img-fluid" alt="Gambar Kendaraan">
+                                                            <img src="{{ asset('images/' . $vehicle->gambar) }}"
+                                                                class="img-fluid" alt="Gambar Kendaraan">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -143,13 +154,20 @@
                             <div class="float-right">
                                 <form class="form-inline" method="GET" action="{{ route('vehicle.index') }}">
                                     <label for="perPage" class="mr-2">Items per page:</label>
-                                    <select class="form-control form-control-sm" name="perPage" onchange="this.form.submit()">
-                                        <option value="10" {{ Request::get('perPage') == '10' ? 'selected' : '' }}>10</option>
-                                        <option value="25" {{ Request::get('perPage') == '25' ? 'selected' : '' }}>25</option>
-                                        <option value="50" {{ Request::get('perPage') == '50' ? 'selected' : '' }}>50</option>
-                                        <option value="75" {{ Request::get('perPage') == '75' ? 'selected' : '' }}>75</option>
-                                        <option value="100" {{ Request::get('perPage') == '100' ? 'selected' : '' }}>100</option>
+                                    <select class="form-control form-control-sm"
+                                        name="perPage" onchange="this.form.submit()">
+                                        <option value="10" {{ Request::get('perPage') == '10' ? 'selected' : '' }}>
+                                            10</option>
+                                        <option value="25" {{ Request::get('perPage') == '25' ? 'selected' : '' }}>
+                                            25</option>
+                                        <option value="50" {{ Request::get('perPage') == '50' ? 'selected' : '' }}>
+                                            50</option>
+                                        <option value="75" {{ Request::get('perPage') == '75' ? 'selected' : '' }}>
+                                            75</option>
+                                        <option value="100" {{ Request::get('perPage') == '100' ? 'selected' : '' }}>
+                                            100</option>
                                     </select>
+                                    <input type="hidden" name="keyword" value="{{ Request::get('keyword') }}">
                                 </form>
                             </div>
                         </div>
