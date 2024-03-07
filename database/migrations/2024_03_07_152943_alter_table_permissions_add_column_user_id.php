@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         //
-        Schema::table('user_menu', function (Blueprint $table) {
+        Schema::table('permissions', function (Blueprint $table) {
             $table->integer('user_id')->after('name');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         //
-        Schema::table('user_menu', function (Blueprint $table) {
+        Schema::table('permissions', function (Blueprint $table) {
             $table->dropColumn('user_id');
         });
     }
