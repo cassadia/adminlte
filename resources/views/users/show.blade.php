@@ -21,7 +21,7 @@
 
                     <div class="card card-primary">
                         <div class="card-header">
-                          <h3 class="card-title">Lihat Produk</h3>
+                          <h3 class="card-title">Lihat User</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
@@ -50,8 +50,29 @@
                                     <input type="text" class="form-control" value="{{ $users->updated_at }}" disabled>
                                 </div>
 
+                                <div class="form-group">
+                                    <label for="">Menu</label>
+                                    <div class="row">
+                                        @foreach ($getMenu as $menu)
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input"
+                                                        value="{{ $menu->menu }}"
+                                                            {{ $menu->menuakses == 1 ? 'checked' : '' }}
+                                                                @disabled(true)>
+                                                    <label class="form-check-label">{{ $menu->menu }}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="exampleCheck1" name="status" {{ $users->status == 'Aktif' ? 'checked' : '' }} @disabled(true)>
+                                    <input type="checkbox" class="form-check-input"
+                                        id="exampleCheck1" name="status"
+                                            {{ $users->status == 'Aktif' ? 'checked' : '' }} @disabled(true)>
                                     <label class="form-check-label" for="exampleCheck1">Status</label>
                                 </div>
                             </div>

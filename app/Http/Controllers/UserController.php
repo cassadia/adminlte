@@ -6,20 +6,25 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\User;
+use App\Models\Permission;
+
+use App\Services\UserRoleService;
 
 class UserController extends Controller
 {
-    // public function index()
-    // {
-    //     $users = User::paginate();
+    protected $userRoleService;
 
-    //     return view('users.index', compact('users'));
-    // }
+    public  function __construct(UserRoleService $userRoleService)
+    {
+        $this->userRoleService = $userRoleService;
+    }
 
     public function index(Request $request)
     {
+        $emailUser = auth()->user()->email;
         $perPage = $request->input('perPage', 5);
         $keyword = $request->input('keyword');
 
@@ -30,12 +35,18 @@ class UserController extends Controller
             })
             ->paginate($perPage);
 
-        return view('users.index', compact('users'));
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+
+        return view('users.index', compact('users', 'menusdua'));
     }
 
     public function create(): View
     {
-        return view('users.create');
+        $emailUser = auth()->user()->email;
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $menus = $this->getMenu();
+
+        return view('users.create', compact('menusdua','menus'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -56,17 +67,30 @@ class UserController extends Controller
             'password.min' => 'Password minimal harus terdiri dari 6 karakter.',
         ]);
 
-        // Periksa apakah kode produk sudah ada di database
         $existingUser = User::withoutGlobalScopes()
             ->where('email', $request->emailUser)->first();
 
-        // Jika kode produk sudah ada, tampilkan pesan kesalahan
         if ($existingUser) {
             return redirect()->back()->withInput()->withErrors(['emailUser' => 'Email sudah ada di database!'])->with(['error' => 'Email sudah ada di database!']);
         }
 
         // Tentukan nilai status berdasarkan kondisi checkbox
         $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
+
+        $menus = $request->menu;
+
+        $detailRoutes = DB::table('user_menu as a')
+            ->join('user_menu_detail as b', 'b.master_route', '=', 'a.id')
+            ->select('b.detail_route', 'b.id')
+            ->where('a.status', 'Aktif')
+            ->whereNull('a.deleted_at')
+            ->whereIn('a.route', $menus)
+            ->get();
+
+        $detailAssign = DB::table('user_menu')
+            ->whereIn('route', $menus)
+            ->where('status', 'Aktif')
+            ->get();
 
         //create post
         User::create([
@@ -76,26 +100,72 @@ class UserController extends Controller
             'status' => $status,
         ]);
 
+        $getId = User::withoutGlobalScopes()
+            ->where('email', $request->emailUser)
+            ->first();
+
+        foreach ($detailRoutes as $route) {
+            Permission::create([
+                'name' => $route->detail_route,
+                'user_id' => $getId->id
+            ]);
+        }
+
+        foreach ($detailAssign as $assign) {
+            DB::table('user_assign')->insert([
+                'kd_user' => $getId->id,
+                'id_user_permission' => $assign->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        Permission::create([
+            'name' => 'profile.show',
+            'user_id' => $getId->id
+        ]);
+
+        Permission::create([
+            'name' => 'profile.update',
+            'user_id' => $getId->id
+        ]);
+
         //redirect to index
         return redirect()->route('users.index')->with(['success' => 'Data Berhasil Disimpan!']);
     }
 
     public function show(string $id): View
     {
+        $emailUser = auth()->user()->email;
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+
         //get post by ID
         $users = User::findOrFail($id);
 
+        $getMenu = DB::table('user_menu as um')
+            ->select('um.menu')
+            ->selectRaw('CASE WHEN (SELECT 1 FROM users u JOIN user_assign ua ON ua.kd_user = u.id AND ua.id_user_permission = um.id WHERE u.email = ? limit 1) IS NULL THEN 0 ELSE 1 END AS menuakses', [$users->email])
+            ->get();
+
         //render view with post
-        return view('users.show', compact('users'));
+        return view('users.show', compact('users', 'getMenu', 'menusdua'));
     }
 
     public function edit(string $id): View
     {
+        $emailUser = auth()->user()->email;
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+
         //get post by ID
         $users = User::findOrFail($id);
 
+        $getMenu = DB::table('user_menu as um')
+            ->select('um.menu')
+            ->selectRaw('CASE WHEN (SELECT 1 FROM users u JOIN user_assign ua ON ua.kd_user = u.id AND ua.id_user_permission = um.id WHERE u.email = ? limit 1) IS NULL THEN 0 ELSE 1 END AS menuakses', [$users->email])
+            ->get();
+
         //render view with post
-        return view('users.edit', compact('users'));
+        return view('users.edit', compact('users', 'menusdua', 'getMenu'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -116,7 +186,72 @@ class UserController extends Controller
 
         // Tentukan nilai status berdasarkan kondisi checkbox
         $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
-                    
+
+        $menusBefore = array_filter($request->before, function($value) {
+            return $value !== null;
+        });
+        $menusAfter = $request->after;
+        $getId = User::withoutGlobalScopes()
+            ->where('email', $request->emailUser)
+            ->first();
+
+        $jsonString = json_encode($getId);
+        $dataJson = json_decode($jsonString, true);
+
+        foreach ($menusBefore as $menu) {
+            $getMenus = DB::table('user_menu as a')
+                ->join('user_menu_detail as b', 'b.master_route', '=', 'a.id')
+                ->select('b.detail_route', 'a.id as idAssign')
+                ->where('a.status', 'Aktif')
+                ->whereNull('a.deleted_at')
+                ->where('a.menu', $menu)
+                ->get();
+
+            $menus = $getMenus->pluck('idAssign')->toArray();
+            $assigns = array_unique($menus);
+
+            foreach ($getMenus as $menus) {
+                DB::table('permissions')
+                    ->where('name', $menus->detail_route)
+                    ->where('user_id', $getId->id)
+                    ->delete();
+            }
+
+            foreach ($assigns as $assign) {
+                DB::table('user_assign')
+                    ->where('kd_user', $getId->id)
+                    ->where('id_user_permission', $assign)
+                    ->delete();
+            }
+        }
+
+        foreach ($menusAfter as $menu) {
+            $detailRoutes = DB::table('user_menu as a')
+                ->join('user_menu_detail as b', 'b.master_route', '=', 'a.id')
+                ->select('b.detail_route', 'b.id', 'a.id as idAssign')
+                ->where('a.status', 'Aktif')
+                ->whereNull('a.deleted_at')
+                ->where('a.menu', $menu)
+                ->get();
+
+            foreach ($detailRoutes as $route) {
+                Permission::create([
+                    'name' => $route->detail_route,
+                    'user_id' => $getId->id
+                ]);
+            }
+
+            $menus = $detailRoutes->pluck('idAssign')->toArray();
+            $assign = array_unique($menus);
+
+            DB::table('user_assign')->insert([
+                'kd_user' => $getId->id,
+                'id_user_permission' => $assign[0],
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+
         //update product without image
         User::where("email", $request->emailUser)->update([
             'name' => $request->nmUser,
@@ -178,5 +313,14 @@ class UserController extends Controller
             }
             return $output;
         }
+    }
+
+    private function getMenu()
+    {
+        return DB::table('user_menu as a')
+            ->select('a.menu', 'a.route')
+            ->where('a.status', 'Aktif')
+            ->whereNull('deleted_at')
+            ->get();
     }
 }

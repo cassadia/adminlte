@@ -111,7 +111,6 @@
                                                     <select class="form-control-sm lokasi" style="padding: 0.25rem 0.5rem; height: auto;">
                                                         <option value="none">Pilih Lokasi</option>
                                                         @foreach($item['productData'] as $lokasi)
-                                                            {{-- {{ var_dump($lokasi['productData']) }} --}}
                                                             <option value="{{ $lokasi->database }}">{{ $lokasi->database }}</option>
                                                         @endforeach
                                                     </select>
