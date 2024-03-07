@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('user_menu_detail', function (Blueprint $table) {
             $table->id();
             $table->string('detail_route');
-            $table->int('master_route');
+            $table->integer('master_route');
             $table->timestamps();
             $table->softDeletes();
         });
