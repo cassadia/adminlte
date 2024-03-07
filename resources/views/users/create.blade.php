@@ -20,7 +20,7 @@
                 <div class="col-lg-6">
                     <div class="card card-primary">
                         <div class="card-header">
-                          <h3 class="card-title">Tambah Produk</h3>
+                          <h3 class="card-title">Tambah User</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
@@ -74,6 +74,25 @@
                                         class="form-control @error('password_confirmation') is-invalid @enderror"
                                             placeholder="{{ __('Konfirmasi Password') }}"
                                                 autocomplete="new-password">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="">Menu</label>
+                                    <div class="row">
+                                        @foreach ($menus as $menu)
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input"
+                                                        id="{{ $menu->route }}" name="menu[]"
+                                                            value="{{ $menu->route }}">
+                                                    <label class="form-check-label"
+                                                        for="{{ $menu->route }}">{{ $menu->menu }}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
                                 </div>
 
                                 {{-- <div class="form-group">

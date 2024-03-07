@@ -11,20 +11,21 @@ use App\Models\Vehicle;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
+use App\Services\UserRoleService;
+
 class ProductController extends Controller
 {
-    //
-    // public function show() {
-    //     return view('product.product');
-    // }
+    protected $userRoleService;
 
-    // public function index(): View {
-    //     $product = Product::latest()->paginate(5);
-    //     return view('product.index', compact('product'));
-    // }
+    public  function __construct(UserRoleService $userRoleService)
+    {
+        $this->userRoleService = $userRoleService;
+    }
 
     public function index(Request $request)
     {
+        $emailUser = auth()->user()->email;
+
         $perPage = $request->input('perPage', 10);
         $keyword = $request->input('keyword');
 
@@ -37,13 +38,17 @@ class ProductController extends Controller
             ->paginate($perPage);
         
         $products->appends(['keyword' => $keyword]);
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
 
-        return view('products.index', compact('products'));
+        return view('products.index', compact('products', 'menusdua'));
     }
 
     public function create(): View
     {
-        return view('products.create');
+        $emailUser = auth()->user()->email;
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+
+        return view('products.create', compact('menusdua'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -84,8 +89,11 @@ class ProductController extends Controller
         $products = Product::findOrFail($id);
         Session::put('previous_url', url()->previous());
 
+        $emailUser = auth()->user()->email;
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+
         //render view with post
-        return view('products.show', compact('products'));
+        return view('products.show', compact('products', 'menusdua'));
     }
 
     public function edit(string $id): View
@@ -93,8 +101,11 @@ class ProductController extends Controller
         //get post by ID
         $products = Product::findOrFail($id);
 
+        $emailUser = auth()->user()->email;
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+
         //render view with post
-        return view('products.edit', compact('products'));
+        return view('products.edit', compact('products', 'menusdua'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -199,7 +210,10 @@ class ProductController extends Controller
 
     public function indexMapping()
     {
-        return view('mapping.index');
+        $emailUser = auth()->user()->email;
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+        
+        return view('mapping.index', compact('menusdua'));
     }
 
     public function myNewFunction()
@@ -210,14 +224,6 @@ class ProductController extends Controller
     public function searchMotor(Request $request)
     {
         if ($request->ajax()) {
-            // $data = Vehicle::leftJoin('mappings as b', function ($join) use ($request) {
-            //         $join->on('b.kd_motor', '=', 'vehicles.kd_motor')
-            //              ->where('b.kd_produk', '=', $request->kd_produk);
-            //     })
-            //     ->whereNull('b.deleted_at') // Where clause ini sekarang berhubungan dengan tabel mappings
-            //     ->select('b.id', 'b.kd_produk', 'vehicles.nm_motor', 'vehicles.kd_motor', 'vehicles.tahun', 'vehicles.no_seri_mesin', 'vehicles.no_seri_rangka')
-            //     ->get();
-
             $data = Vehicle::leftJoin('mappings as b', function ($join) use ($request) {
                     $join->on('b.kd_motor', '=', 'vehicles.kd_motor')
                          ->where('b.kd_produk', '=', $request->kd_produk);

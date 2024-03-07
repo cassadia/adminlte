@@ -30,8 +30,11 @@
                         </div>
                         <div class="card-body">
                             <form action="{{ route('users.index') }}" method="GET" class="form-inline mb-3">
-                                <input type="text" name="keyword" class="form-control form-control-sm mr-2" placeholder="Cari User" value="{{ Request::get('keyword') }}">
-                                <button type="submit" class="btn btn-sm btn-info"><i class="fas fa-search"></i> Cari</button>
+                                <input type="text" name="keyword"
+                                    class="form-control form-control-sm mr-2"
+                                        placeholder="Cari User" value="{{ Request::get('keyword') }}">
+                                <button type="submit" class="btn btn-sm btn-info">
+                                    <i class="fas fa-search"></i> Cari</button>
                             </form>
                             {{-- <div class="form-group row">
                                 <label for="inputEmail3" class="col-sm-2 col-form-label">Email</label>
@@ -79,14 +82,19 @@
                                         <td>
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-default">Aksi</button>
-                                                <button type="button" class="btn btn-default dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                                <button type="button"
+                                                    class="btn btn-default dropdown-toggle dropdown-icon"
+                                                        data-toggle="dropdown">
                                                   <span class="sr-only">Toggle Dropdown</span>
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-right" role="menu">
-                                                    <a class="dropdown-item" href="{{ route('users.show', $user->id) }}">Lihat</a>
-                                                    <a class="dropdown-item" href="{{ route('users.edit', $user->id) }}">Ubah</a>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('users.show', $user->id) }}">Lihat</a>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('users.edit', $user->id) }}">Ubah</a>
                                             
-                                                    <form onsubmit="return confirm('Apakah Anda Yakin ?');" action="{{ route('users.destroy', $user->id) }}" method="POST">
+                                                    <form onsubmit="return confirm('Apakah Anda Yakin ?');"
+                                                        action="{{ route('users.destroy', $user->id) }}" method="POST">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="dropdown-item">Hapus</button>

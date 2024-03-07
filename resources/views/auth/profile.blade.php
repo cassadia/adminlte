@@ -28,8 +28,9 @@
 
                                 <div class="input-group mb-3">
                                     <input type="text" name="name"
-                                           class="form-control @error('name') is-invalid @enderror"
-                                           placeholder="{{ __('Name') }}" value="{{ old('name', auth()->user()->name) }}" required>
+                                        class="form-control @error('name') is-invalid @enderror"
+                                            placeholder="{{ __('Name') }}"
+                                                value="{{ old('name', auth()->user()->name) }}" required>
                                     <div class="input-group-append">
                                         <div class="input-group-text">
                                             <span class="fas fa-user"></span>
@@ -44,8 +45,9 @@
 
                                 <div class="input-group mb-3">
                                     <input type="email" name="email"
-                                           class="form-control @error('email') is-invalid @enderror"
-                                           placeholder="{{ __('Email') }}" value="{{ old('email', auth()->user()->email) }}" required>
+                                        class="form-control @error('email') is-invalid @enderror"
+                                            placeholder="{{ __('Email') }}"
+                                                value="{{ old('email', auth()->user()->email) }}" required>
                                     <div class="input-group-append">
                                         <div class="input-group-text">
                                             <span class="fas fa-envelope"></span>

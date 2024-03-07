@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\DB;
 
 class LoginController extends Controller
 {
@@ -25,7 +26,23 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    // protected $redirectTo = '/users';
+
+    protected function redirectTo()
+    {
+        $emailUser = auth()->user()->email;
+
+        // {{ route($menu->menu_link) }}
+        
+        $cekRoute = DB::table('users as a')
+            ->select('um.menu_link')
+            ->join('user_assign as ua', 'ua.kd_user', '=', 'a.id')
+            ->join('user_menu as um', 'um.id', '=', 'ua.id_user_permission')
+            ->where('a.email', $emailUser)
+            ->first();
+
+        return route($cekRoute->menu_link);
+    }
 
     /**
      * Create a new controller instance.

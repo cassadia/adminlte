@@ -7,8 +7,24 @@
         </div>
     </div>
 
-    <!-- Sidebar Menu -->
     <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+            data-accordion="false">
+            @foreach ($menusdua as $menu)
+                <li class="nav-item">
+                    <a href="{{ route($menu->menu_link) }}" class="nav-link">
+                        <i class="nav-icon {{ $menu->menu_icon }}"></i>
+                        <p>
+                            {{ __($menu->menu) }}
+                        </p>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    <!-- Sidebar Menu -->
+    {{-- <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
             data-accordion="false">
             <li class="nav-item">
@@ -56,7 +72,7 @@
                 </a>
             </li>
         </ul>
-    </nav>
+    </nav> --}}
     <!-- /.sidebar-menu -->
 </div>
 <!-- /.sidebar -->

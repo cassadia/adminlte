@@ -6,12 +6,23 @@ use Illuminate\Http\Request;
 use App\Models\Vehicle;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+
+use App\Services\UserRoleService;
 
 class VehicleController extends Controller
 {
-    //
+    protected $userRoleService;
+
+    public  function __construct(UserRoleService $userRoleService)
+    {
+        $this->userRoleService = $userRoleService;
+    }
+    
     public function index(Request $request)
     {
+        $emailUser = auth()->user()->email;
         $perPage = $request->input('perPage', 10);
         $keyword = $request->input('keyword');
 
@@ -24,12 +35,27 @@ class VehicleController extends Controller
             })
             ->paginate($perPage);
 
-        return view('vehicles.index', compact('vehicles'));
+        // Menggunakan nama route
+        $routeName = 'product.searchAuto';
+        $route = Route::getRoutes()->getByName($routeName);
+
+        if ($route) {
+            $routePath = $route->uri();
+        } else {
+            echo "Route dengan nama '$routeName' tidak ditemukan.";
+        }
+
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+
+        return view('vehicles.index', compact('vehicles', 'menusdua'));
     }
 
     public function create(): View
     {
-        return view('vehicles.create');
+        $emailUser = auth()->user()->email;
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+
+        return view('vehicles.create', compact('menusdua'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -39,25 +65,6 @@ class VehicleController extends Controller
             'NamaMotor' => 'required|min:5',
             'gambar' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Menambahkan validasi untuk tipe gambar dan ukuran
         ]);
-
-        // Periksa apakah kode produk sudah ada di database
-        // $existingNoSerMesin = Vehicle::where('no_seri_mesin', $request->NoSeriMesin)
-        //                         ->orWhere('no_seri_rangka', $request->NoSeriRangka)
-        //                         ->first();
-        // $existingNoSerMesin = Vehicle::where('no_seri_mesin', $request->NoSeriMesin)->first();
-        
-        // Jika nomor seri mesin atau nomor seri rangka sudah ada, tampilkan pesan kesalahan
-        // if ($existingNoSerMesin) {
-        //     return redirect()->back()->withInput()->withErrors(['NoSeriMesin' => 'Nomor Seri Mesin sudah ada di database.'])->with(['error' => 'Nomor Seri Mesin sudah ada di database.']);
-        // }
-
-        // Periksa apakah kode produk sudah ada di database
-        // $existingNoSeriRangka = Vehicle::where('no_seri_rangka', $request->NoSeriRangka)->first();
-
-        // Jika kode produk sudah ada, tampilkan pesan kesalahan
-        // if ($existingNoSeriRangka) {
-        //     return redirect()->back()->withInput()->withErrors(['NoSeriRangka' => 'Nomor Seri Rangka sudah ada di database.'])->with(['error' => 'Nomor Seri Rangka sudah ada di database.']);
-        // }
 
         // Tentukan nilai status berdasarkan kondisi checkbox
         $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
@@ -105,8 +112,11 @@ class VehicleController extends Controller
         //get post by ID
         $vehicles = Vehicle::findOrFail($id);
 
+        $emailUser = auth()->user()->email;
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+
         //render view with post
-        return view('vehicles.show', compact('vehicles'));
+        return view('vehicles.show', compact('vehicles', 'menusdua'));
     }
 
     public function edit(string $id): View
@@ -114,8 +124,11 @@ class VehicleController extends Controller
         //get post by ID
         $vehicles = Vehicle::findOrFail($id);
 
+        $emailUser = auth()->user()->email;
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+
         //render view with post
-        return view('vehicles.edit', compact('vehicles'));
+        return view('vehicles.edit', compact('vehicles', 'menusdua'));
     }
 
     public function update(Request $request, $id): RedirectResponse

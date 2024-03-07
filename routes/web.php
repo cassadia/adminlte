@@ -23,17 +23,20 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth' , 'check.menu.access'])->group(function () {
     Route::view('about', 'about')->name('about');
 
-    Route::post('/insertTransaction', [\App\Http\Controllers\HomeController::class, 'insertTransaction']);
+    // Route::get('/user-menu', 'MenuController@index')->name('user-menu.index');
+    Route::get('/user-menu', [\App\Http\Controllers\UserMenuController::class, 'index'])->name('user-menu.index');
+
+    Route::post('/insertTransaction', [\App\Http\Controllers\HomeController::class, 'insertTransaction'])->name('home.transaction');
 
     // Route::get('users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
     // Route::get('/users/{user}', [\App\Http\Controllers\UserController::class, 'show'])->name('user.show');
     // Route::get('/users/{user}/edit', [\App\Http\Controllers\UserController::class, 'edit'])->name('user.edit');
     // Route::delete('/users/{user}', [\App\Http\Controllers\UserController::class, 'destroy'])->name('user.destroy');
     // Route::post('/users', [\App\Http\Controllers\UserController::class, 'store'])->name('users.store');
-    // Route::get('/users/create', [\App\Http\Controllers\UserController::class, 'create'])->name('users.create');
+    Route::get('/users/create', [\App\Http\Controllers\UserController::class, 'create'])->name('users.create');
     // Route::get('/users/search', [\App\Http\Controllers\UserController::class, 'search'])->name('users.search');
 
     Route::resource('/users', \App\Http\Controllers\UserController::class);
@@ -48,19 +51,18 @@ Route::middleware('auth')->group(function () {
     Route::resource('/vehicle', \App\Http\Controllers\VehicleController::class);
 
     Route::get('/mapping', [App\Http\Controllers\ProductController::class, 'indexMapping'])->name('product.mapping');
-    Route::get('/searchAuto', [\App\Http\Controllers\ProductController::class, 'searchAuto']);
-    Route::get('/searchMotor', [\App\Http\Controllers\ProductController::class, 'searchMotor']);
+    Route::get('/searchAuto', [\App\Http\Controllers\ProductController::class, 'searchAuto'])->name('product.searchAuto');
+    Route::get('/searchMotor', [\App\Http\Controllers\ProductController::class, 'searchMotor'])->name('product.searchMotor');
     Route::get('/productExport', [\App\Http\Controllers\ProductController::class, 'productExport'])->name('product.export');
     Route::get('/search-vehicles', [\App\Http\Controllers\VehicleController::class, 'search'])->name('vehicles.search');
     Route::get('/vehicleExport', [\App\Http\Controllers\VehicleController::class, 'vehicleExport'])->name('vehicle.export');
     Route::post('/mappingStore', [\App\Http\Controllers\MappingController::class, 'store']);
-    Route::post('/updateMapping', [\App\Http\Controllers\MappingController::class, 'updateMapping']);
-    Route::post('/updateMappingAll', [\App\Http\Controllers\MappingController::class, 'updateMappingAll']);
+    Route::post('/updateMapping', [\App\Http\Controllers\MappingController::class, 'updateMapping'])->name('mapping.updateMapp');
+    Route::post('/updateMappingAll', [\App\Http\Controllers\MappingController::class, 'updateMappingAll'])->name('mapping.updateMappAll');
     Route::get('/mappingExport', [\App\Http\Controllers\MappingController::class, 'mappingExport'])->name('mapping.export');
 
     Route::post('/userStore', [\App\Http\Controllers\UserController::class, 'store'])->name('user.store');
     Route::put('/userUpdate', [\App\Http\Controllers\UserController::class, 'update'])->name('user.update');
-
 
     // Route::get('/my-new-function', [App\Http\Controllers\ProductController::class, 'myNewFunction'])->name('product.my-new-function');
 

@@ -10,6 +10,8 @@ use App\Models\Mapping;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 
+use App\Services\UserRoleService;
+
 class HomeController extends Controller
 {
     /**
@@ -17,9 +19,13 @@ class HomeController extends Controller
      *
      * @return void
      */
-    public function __construct()
+
+    protected $userRoleService;
+    
+    public function __construct(UserRoleService $userRoleService)
     {
         $this->middleware('auth');
+        $this->userRoleService = $userRoleService;
     }
 
     /**
@@ -44,6 +50,8 @@ class HomeController extends Controller
 
         // $kdProduk = $request->input('kd_produk');
 
+        $emailUser = auth()->user()->email;
+
         if ($request->has('reset')) {
             return redirect()->route('home');
         }
@@ -52,41 +60,21 @@ class HomeController extends Controller
             return $this->search($request);
         }
 
-        // Eksekusi query
-        // $mappingData = DB::table('mappings as a')
-        //                 ->select('a.kd_produk as Kode Barang', 'b.nm_produk as Nama Barang', 'c.nm_motor as Model', 'c.tahun_dari as Dari', 'c.tahun_sampai as Sampai', 'b.harga_jual as Harga', 'b.qty_available as Stock')
-        //                 ->join('products as b', 'b.kd_produk', '=', 'a.kd_produk')
-        //                 ->join('vehicles as c', 'c.kd_motor', '=', 'a.kd_motor')
-        //                 // ->where('a.kd_produk', '51500-K15-305')
-        //                 ->distinct()
-        //                 ->get();
-
         // dd($mappingData[0]->{'Kode Barang'});
-
-        // $mergedData = [];
-        // $productDataCache = [];
-        // foreach ($mappingData as $mapping) {
-        //     $kd_produk = $mapping->{'Kode Barang'};
-        //     $productData = $this->getProductData($kd_produk);
-        //     if ($productData->isNotEmpty()) {
-        //         $mergedData[] = [
-        //             'mapping' => $mapping,
-        //             'productData' => $productData,
-        //         ];
-        //     }
-        // }
 
         // $mergedData = $this->prepareMergedData($mappingData);
 
         $mergedData = [];
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
 
-        return view('home', compact('mergedData'));
+        return view('home', compact('mergedData', 'menusdua'));
 
         // return view('home');
     }
 
     public function search(Request $request)
     {
+        $emailUser = auth()->user()->email;
         // Eksekusi query
         $query = DB::table('mappings as a')
                         ->select('a.kd_produk as Kode Barang', 'b.nm_produk as Nama Barang', 'c.nm_motor as Model', 'c.tahun_dari as Dari', 'c.tahun_sampai as Sampai', 'b.harga_jual as Harga', 'b.qty_available as Stock')
@@ -106,10 +94,6 @@ class HomeController extends Controller
             $query->where('c.nm_motor', 'like', '%' . $request->keyNmMtr . '%');
         }
 
-        // if ($request->filled('keyThn')) {
-        //     $query->where(''$request->keyThn . 'between c.tahun_dari and c.tahun_sampai');
-        // }
-
         if ($request->filled('keyThn')) {
             $query->where('c.tahun_dari', '<=', $request->keyThn)
                   ->where('c.tahun_sampai', '>=', $request->keyThn);
@@ -120,22 +104,11 @@ class HomeController extends Controller
         // var_dump($query->toSql());
         // var_dump($request->keyCrProd);
         $mergedData = $this->prepareMergedData($mappingData);
-        // Bentuk array mergedData
-        // $mergedData = [];
-        // $productDataCache = [];
-        // foreach ($mappingData as $mapping) {
-        //     $kd_produk = $mapping->{'Kode Barang'};
-        //     $productData = $this->getProductData($kd_produk);
-        //     if ($productData->isNotEmpty()) {
-        //         $mergedData[] = [
-        //             'mapping' => $mapping,
-        //             'productData' => $productData,
-        //         ];
-        //     }
-        // }
+
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
 
         // Kirim data ke view
-        return view('home', compact('mergedData'));
+        return view('home', compact('mergedData', 'menusdua'));
     }
 
     // Metode untuk mendapatkan data produk berdasarkan kd_produk

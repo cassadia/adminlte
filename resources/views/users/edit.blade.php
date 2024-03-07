@@ -58,6 +58,29 @@
                                     @enderror
                                 </div>
 
+                                <div class="form-group">
+                                    <label for="">Menu</label>
+                                    <div class="row">
+                                        @foreach ($getMenu as $menu)
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input"
+                                                        name="after[]" value="{{ $menu->menu }}"
+                                                            id="{{ $menu->menu }}"
+                                                                {{ $menu->menuakses == 1 ? 'checked' : '' }}>
+                                                    <input type="hidden" class="form-check-input"
+                                                        name="before[]"
+                                                            value="{{ $menu->menuakses == 1 ? $menu->menu : '' }}">
+                                                    <label class="form-check-label"
+                                                        for="{{ $menu->menu }}">{{ $menu->menu }}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+
                                 <div class="form-check">
                                     <input type="checkbox" name="status"
                                         class="form-check-input" id="exampleCheck1"
