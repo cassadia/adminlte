@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
 use App\Services\UserRoleService;
+use App\Services\ContentService;
 
 class ProductController extends Controller
 {
@@ -39,16 +40,18 @@ class ProductController extends Controller
         
         $products->appends(['keyword' => $keyword]);
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
 
-        return view('products.index', compact('products', 'menusdua'));
+        return view('products.index', compact('products', 'menusdua', 'content'));
     }
 
     public function create(): View
     {
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
 
-        return view('products.create', compact('menusdua'));
+        return view('products.create', compact('menusdua', 'content'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -91,9 +94,10 @@ class ProductController extends Controller
 
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
 
         //render view with post
-        return view('products.show', compact('products', 'menusdua'));
+        return view('products.show', compact('products', 'menusdua', 'content'));
     }
 
     public function edit(string $id): View
@@ -103,9 +107,10 @@ class ProductController extends Controller
 
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
 
         //render view with post
-        return view('products.edit', compact('products', 'menusdua'));
+        return view('products.edit', compact('products', 'menusdua', 'content'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -212,8 +217,9 @@ class ProductController extends Controller
     {
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
         
-        return view('mapping.index', compact('menusdua'));
+        return view('mapping.index', compact('menusdua', 'content'));
     }
 
     public function myNewFunction()
@@ -237,13 +243,15 @@ class ProductController extends Controller
             if (count($data)>0) {
                 foreach ($data as $row) {
                     $isChecked = !empty($row->kdproduk) ? 'checked' : '';
+                    // $isCheckedBefore = !empty($row->kdproduk) ? 'checked' : '';
+                    $isCheckedBefore = !empty($row->kdproduk) ? 'true' : 'false';
                     $tahun_sampai = $row->tahun_sampai ?: 'Sekarang';
                     $tahun = $row->tahun_dari ? $row->tahun_dari . '-' . $tahun_sampai : '';
                     $output .='
                     <tr>
                         <td>
                             <input type="checkbox" name="motor_cek" class="motor_cek"
-                                value="' . $row->kdproduk . '" ' . $isChecked . ' data-id="'. $row->kd_motor .'">
+                                value="' . $row->kdproduk . '" ' . $isChecked . ' data-id="'. $row->kd_motor .'" data-checked-before="'. $isCheckedBefore .'">
                         </td>
                         <td>
                             <input type="text" name="produk_kode" class="produk_kode"

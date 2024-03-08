@@ -7,6 +7,7 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Support\Facades\DB;
 
 use App\Services\UserRoleService;
+use App\Services\ContentService;
 
 class ProfileController extends Controller
 {
@@ -21,8 +22,9 @@ class ProfileController extends Controller
     {
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
 
-        return view('auth.profile', compact('menusdua'));
+        return view('auth.profile', compact('menusdua', 'content'));
     }
 
     public function update(ProfileUpdateRequest $request)

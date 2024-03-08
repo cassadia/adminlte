@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 
 use App\Services\UserRoleService;
+use App\Services\ContentService;
 
 class MappingController extends Controller
 {
@@ -56,6 +57,7 @@ class MappingController extends Controller
 
     public function updateMappingAll(Request $request)
     {
+        // dd($request->ajax());
         if (!$request->ajax()) {
             return response()->json(['message' => 'Akses ditolak'], 403);
         }
@@ -80,6 +82,30 @@ class MappingController extends Controller
                         $response = [
                             'code' => 'rest',
                             'message' => 'Data berhasil dikembalikan'
+                        ];
+                    }
+                } else {
+                    Mapping::create([
+                        'kd_motor' => $kdMotor,
+                        'kd_produk' => $kdProduk,
+                    ]);
+                    $response = [
+                        'code' => 'crea',
+                        'message' => 'Data berhasil disimpan'
+                    ];
+                }
+            } else {
+                $existingMapping = Mapping::withoutGlobalScopes()
+                    ->where('kd_motor', $kdMotor)
+                    ->where('kd_produk', $kdProduk)
+                    ->first();
+    
+                if ($existingMapping !== null) {
+                    if (!$existingMapping->deleted_at) {
+                        $existingMapping->update(['deleted_at' => now()]);
+                        $response = [
+                            'code' => 'del',
+                            'message' => 'Data berhasil dihapus'
                         ];
                     }
                 } else {

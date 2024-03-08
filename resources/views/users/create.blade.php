@@ -94,44 +94,14 @@
                                         @endforeach
                                     </div>
                                 </div>
-
-                                {{-- <div class="form-group">
-                                    <label for="password">Password</label>
-                                    <input type="password" name="password"
-                                        class="form-control @error('password') is-invalid @enderror"
-                                            placeholder="password" value="{{ old('password') }}">
-
-                                    <!-- error message untuk title -->
-                                    @error('password')
-                                        <div class="alert alert-danger mt-2 small">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="KonfPassword">Konfirmasi Password</label>
-                                    <input type="password" name="KonfPassword"
-                                        class="form-control @error('KonfPassword') is-invalid @enderror"
-                                            placeholder="Konfirmasi Password" value="{{ old('KonfPassword') }}"> --}}
-
-                                    {{-- <!-- error message untuk title -->
-                                    @error('KonfPassword')
-                                        <div class="alert alert-danger mt-2 small">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                    <!-- tambahkan pesan kustom jika password tidak cocok -->
-                                    @error('Password')
-                                        <div class="alert alert-danger mt-2 small">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>--}}
                                 
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="exampleCheck1" name="status">
-                                    <label class="form-check-label" for="exampleCheck1">Status</label>
+                                <div class="form-group">
+                                    <label for="Status">Status</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input"
+                                            id="exampleCheck1" name="status">
+                                        <label class="form-check-label" for="exampleCheck1">Aktif</label>
+                                    </div>
                                 </div>
                             </div>
                           <!-- /.card-body -->
