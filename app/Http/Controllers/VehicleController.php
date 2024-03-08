@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 use App\Services\UserRoleService;
+use App\Services\ContentService;
 
 class VehicleController extends Controller
 {
@@ -46,16 +47,18 @@ class VehicleController extends Controller
         }
 
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
 
-        return view('vehicles.index', compact('vehicles', 'menusdua'));
+        return view('vehicles.index', compact('vehicles', 'menusdua', 'content'));
     }
 
     public function create(): View
     {
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
 
-        return view('vehicles.create', compact('menusdua'));
+        return view('vehicles.create', compact('menusdua', 'content'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -114,9 +117,10 @@ class VehicleController extends Controller
 
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
 
         //render view with post
-        return view('vehicles.show', compact('vehicles', 'menusdua'));
+        return view('vehicles.show', compact('vehicles', 'menusdua', 'content'));
     }
 
     public function edit(string $id): View
@@ -126,9 +130,10 @@ class VehicleController extends Controller
 
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
 
         //render view with post
-        return view('vehicles.edit', compact('vehicles', 'menusdua'));
+        return view('vehicles.edit', compact('vehicles', 'menusdua', 'content'));
     }
 
     public function update(Request $request, $id): RedirectResponse

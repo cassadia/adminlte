@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Permission;
 
 use App\Services\UserRoleService;
+use App\Services\ContentService;
 
 class UserController extends Controller
 {
@@ -37,7 +38,9 @@ class UserController extends Controller
 
         $menusdua = $this->userRoleService->getUserRole($emailUser);
 
-        return view('users.index', compact('users', 'menusdua'));
+        $content = ContentService::getContent();
+
+        return view('users.index', compact('users', 'menusdua', 'content'));
     }
 
     public function create(): View
@@ -45,8 +48,9 @@ class UserController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $menus = $this->getMenu();
+        $content = ContentService::getContent();
 
-        return view('users.create', compact('menusdua','menus'));
+        return view('users.create', compact('menusdua','menus','content'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -147,8 +151,10 @@ class UserController extends Controller
             ->selectRaw('CASE WHEN (SELECT 1 FROM users u JOIN user_assign ua ON ua.kd_user = u.id AND ua.id_user_permission = um.id WHERE u.email = ? limit 1) IS NULL THEN 0 ELSE 1 END AS menuakses', [$users->email])
             ->get();
 
+        $content = ContentService::getContent();
+
         //render view with post
-        return view('users.show', compact('users', 'getMenu', 'menusdua'));
+        return view('users.show', compact('users', 'getMenu', 'menusdua', 'content'));
     }
 
     public function edit(string $id): View
@@ -164,8 +170,10 @@ class UserController extends Controller
             ->selectRaw('CASE WHEN (SELECT 1 FROM users u JOIN user_assign ua ON ua.kd_user = u.id AND ua.id_user_permission = um.id WHERE u.email = ? limit 1) IS NULL THEN 0 ELSE 1 END AS menuakses', [$users->email])
             ->get();
 
+        $content = ContentService::getContent();
+
         //render view with post
-        return view('users.edit', compact('users', 'menusdua', 'getMenu'));
+        return view('users.edit', compact('users', 'menusdua', 'getMenu', 'content'));
     }
 
     public function update(Request $request): RedirectResponse

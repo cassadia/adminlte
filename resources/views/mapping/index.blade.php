@@ -157,6 +157,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
+
             // Event click pada hasil pencarian
             $(document).on('click', '#search_list tr', function() {
                 // Ambil nilai dari kolom kode produk
@@ -193,6 +194,12 @@
 
             $('#searchMotor').on('click', function() {
                 var kd_produk = $('#KodeProduk').val();
+
+                // Perbarui status checkbox sebelumnya untuk semua checkbox yang dipilih sebelumnya
+                $('.motor_cek').each(function() {
+                    $(this).data('checked-before', $(this).is(':checked'));
+                });
+
                 $.ajax({
                     url: "searchMotor",
                     type: "GET",
@@ -206,71 +213,19 @@
                         // Perbarui status tombol "Mapping" setelah data dimuat
                         updateMappingButtonStatus();
                         $('#export-link').removeAttr('disabled');
+                        // updateSelectAllCheckbox();
                     }
                 });
             });
 
-            // $('#selectAll').on('click', function() {
-            //     var isChecked = $(this).is(':checked');
-            //     if (isChecked) {
-            //         $('#mappingButton').prop('disabled', false);
-            //         $('input[name="motor_cek"]').prop('checked', isChecked);
-            //     } else {
-            //         $('#mappingButton').prop('disabled', true);
-            //         $('input[name="motor_cek"]').prop('checked', isChecked);
-            //     }
-            //     // Ambil nilai kode produk
-            //     var kdProduk = $('#KodeProduk').val();
-
-            //     // Dapatkan semua nilai id yang dipilih
-            //     // var selectedIds = [];
-            //     var selectedData = [];
-            //     $('input[name="motor_cek"]').each(function() {
-
-            //         // Ambil nilai produk_kode dari atribut data-id
-            //         // var produkKode = $(this).data('id');
-
-            //         // Setel nilai produk_kode pada elemen yang sesuai dengan checkbox
-            //         // $(this).siblings('.produk_kode').val(isChecked ? produkKode : '');
-
-            //         var kd_motor = $(this).data('id');
-            //         // var kd_produk = $(this).siblings('.produk_kode').val();
-
-            //         console.log('kd_motor: ' . kd_motor);
-            //         // console.log('kd_produk: ' . kd_produk);
-
-            //         var rowData = {
-            //             kd_motor: kd_motor
-            //         };
-
-            //         // Jika checkbox dipilih, tambahkan id-nya ke dalam array
-            //         if ($(this).is(':checked')) {
-            //             // selectedIds.push($(this).data('id'));
-            //             selectedData.push(kd_motor);
-            //         }
-            //     });
-
-            //     console.log('selectedData: '. selectedData);
-
-            //     // Kirim data yang dipilih ke server untuk disimpan atau diupdate
-            //     $.ajax({
-            //         url: "updateMapping",
-            //         type: "POST",
-            //         data: { selectedData: selectedData },
-            //         // success: function(response) {
-            //         //     // Tampilkan pesan sukses atau lakukan tindakan lain setelah data disimpan
-            //         //     console.log(response);
-            //         // },
-            //         // error: function(xhr, status, error) {
-            //         //     // Tangani kesalahan jika ada
-            //         //     console.error(error);
-            //         // }
-            //     });
-            // });
-
             $('#selectAll').on('click', function() {
                 $('#loadingOverlay').show();
                 
+                // Perbarui status checkbox sebelumnya untuk semua checkbox yang dipilih sebelumnya
+                $('.motor_cek').each(function() {
+                    $(this).data('checked-before', $(this).is(':checked'));
+                });
+
                 // Set timer untuk menyembunyikan overlay loading setelah beberapa detik (misalnya, 3 detik)
                 setTimeout(function() {
                     $('#loadingOverlay').hide();
@@ -279,9 +234,6 @@
                 var isChecked = $(this).is(':checked');
                 if (isChecked) {
                     // $('#mappingButton').prop('disabled', false);
-                    $('input[name="motor_cek"]').prop('checked', isChecked);
-                } else {
-                    // $('#mappingButton').prop('disabled', true);
                     $('input[name="motor_cek"]').prop('checked', isChecked);
                 }
 
@@ -317,6 +269,7 @@
 
                         // Saat checkbox berubah, perbarui data tanpa harus menekan tombol "Cari Motor" lagi
                         $('#searchMotor').trigger('click');
+                        // updateSelectAllCheckbox();
                     },
                     error: function(xhr, status, error) {
                         console.error(error);
@@ -360,6 +313,7 @@
                         console.log(response);
                         // Saat checkbox berubah, perbarui data tanpa harus menekan tombol "Cari Motor" lagi
                         $('#searchMotor').trigger('click');
+                        // updateSelectAllCheckbox();
                     },
                     error: function(xhr, status, error) {
                         // Tangani kesalahan jika ada
@@ -374,13 +328,19 @@
                 var checkall = $('#selectAll');
                 var isAnyChecked = checkboxes.is(':checked');
                 var isAllChecked = checkboxes.length === checkboxes.filter(':checked').length;
+                var allChecked = true;
 
                 // Aktifkan atau nonaktifkan tombol "Mapping" berdasarkan status checkbox
                 // if (isAnyChecked || isAllChecked) {
-                //     $('#mappingButton').prop('disabled', false);
+                //     $('#selectAll').prop('disabled', false);
                 // } else {
-                //     $('#mappingButton').prop('disabled', true);
+                //     $('#selectAll').prop('disabled', true);
                 // }
+                // $('#selectAll').prop('checked', allChecked);
+
+                if (isAllChecked) {
+                    $('#selectAll').prop('checked', allChecked);
+                }
             }
 
             $.ajaxSetup({
@@ -388,28 +348,6 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-
-            // $('#mappingButton').on('click', function() {
-            //     var selectedIds = [];
-            //     $('input[name="motor_cek"]:checked').each(function() {
-            //         selectedIds.push($(this).data('id'));
-            //     });
-
-            //     // Kirim data yang dipilih ke server untuk disimpan
-            //     $.ajax({
-            //         url: "mappingStore",
-            //         type: "POST",
-            //         data: { ids: selectedIds },
-            //         success: function(response) {
-            //             // Tampilkan pesan sukses atau lakukan tindakan lain setelah data disimpan
-            //             console.log(response);
-            //         },
-            //         error: function(xhr, status, error) {
-            //             // Tangani kesalahan jika ada
-            //             console.error(error);
-            //         }
-            //     });
-            // });
 
             $('#export-link').on('click', function() {
                 // Lakukan ekspor data
@@ -443,6 +381,32 @@
                     }
                 });
             }
+
+            // function updateSelectAllCheckbox() {
+            //     var allChecked = true;
+
+            //     // $('.motor_cek').each(function() {
+            //     //     if (!$(this).prop('checked')) {
+            //     //         allChecked = false;
+            //     //         return false;
+            //     //     }
+            //     // });
+
+            //     $('.motor_cek').each(function() {
+            //         var checkedNow = $(this).is(':checked');
+            //         var checkedBefore = $(this).data('checked-before');
+
+            //         console.log('checkedNow >>> ', checkedNow);
+            //         console.log('checkedBefore >>> ', checkedBefore);
+
+            //         if (checkedNow !== checkedBefore) {
+            //             allChecked = false;
+            //             return false;
+            //         } else {
+            //             $('#selectAll').prop('checked', allChecked);
+            //         }
+            //     });
+            // }
         });
     </script>
 @endsection

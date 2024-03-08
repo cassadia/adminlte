@@ -11,6 +11,7 @@ use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 
 use App\Services\UserRoleService;
+use App\Services\ContentService;
 
 class HomeController extends Controller
 {
@@ -66,8 +67,9 @@ class HomeController extends Controller
 
         $mergedData = [];
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
 
-        return view('home', compact('mergedData', 'menusdua'));
+        return view('home', compact('mergedData', 'menusdua', 'content'));
 
         // return view('home');
     }
@@ -106,9 +108,10 @@ class HomeController extends Controller
         $mergedData = $this->prepareMergedData($mappingData);
 
         $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
 
         // Kirim data ke view
-        return view('home', compact('mergedData', 'menusdua'));
+        return view('home', compact('mergedData', 'menusdua', 'content'));
     }
 
     // Metode untuk mendapatkan data produk berdasarkan kd_produk
