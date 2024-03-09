@@ -61,10 +61,6 @@ class HomeController extends Controller
             return $this->search($request);
         }
 
-        // dd($mappingData[0]->{'Kode Barang'});
-
-        // $mergedData = $this->prepareMergedData($mappingData);
-
         $mergedData = [];
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
@@ -78,11 +74,21 @@ class HomeController extends Controller
     {
         $emailUser = auth()->user()->email;
         // Eksekusi query
+        // $query = DB::table('mappings as a')
+        //                 ->select('a.kd_produk as Kode Barang', 'b.nm_produk as Nama Barang', 'c.nm_motor as Model', 'c.tahun_dari as Dari', 'c.tahun_sampai as Sampai', 'b.harga_jual as Harga', 'b.qty_available as Stock')
+        //                 ->join('products as b', 'b.kd_produk', '=', 'a.kd_produk')
+        //                 ->join('vehicles as c', 'c.kd_motor', '=', 'a.kd_motor')
+        //                 ->distinct();
+
         $query = DB::table('mappings as a')
-                        ->select('a.kd_produk as Kode Barang', 'b.nm_produk as Nama Barang', 'c.nm_motor as Model', 'c.tahun_dari as Dari', 'c.tahun_sampai as Sampai', 'b.harga_jual as Harga', 'b.qty_available as Stock')
-                        ->join('products as b', 'b.kd_produk', '=', 'a.kd_produk')
-                        ->join('vehicles as c', 'c.kd_motor', '=', 'a.kd_motor')
-                        ->distinct();
+            ->join(DB::raw('(SELECT b.kd_produk, b.nm_produk, b.harga_jual, SUM(b.qty_available) AS qty_available  
+                            FROM products b
+                            GROUP BY b.kd_produk, b.nm_produk, b.harga_jual) AS b'), 'b.kd_produk', '=', 'a.kd_produk'
+                        )
+            ->join('vehicles as c', 'c.kd_motor', '=', 'a.kd_motor')
+            ->select('a.kd_produk as Kode Barang', 'b.nm_produk as Nama Barang', 'c.nm_motor as Model'
+            , 'c.tahun_dari as Dari', 'c.tahun_sampai as Sampai', 'b.harga_jual as Harga', 'b.qty_available as Stock')
+            ->whereNull('a.deleted_at');
 
         if ($request->filled('keyCrProd')) {
             $query->where('a.kd_produk', 'like', '%' . $request->keyCrProd . '%');
@@ -100,7 +106,6 @@ class HomeController extends Controller
             $query->where('c.tahun_dari', '<=', $request->keyThn)
                   ->where('c.tahun_sampai', '>=', $request->keyThn);
         }
-        
 
         $mappingData = $query->get();
         // var_dump($query->toSql());

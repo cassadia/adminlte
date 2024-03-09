@@ -172,13 +172,25 @@ class ProductController extends Controller
  
         if ($request->ajax()) {
  
-            $data = Product::whereNull('deleted_at') // Menambahkan kondisi untuk memeriksa apakah deleted_at null
-            ->where(function ($query) use ($request) {
-                $query->where('id', 'like', '%' . $request->search . '%')
-                    ->orWhere('kd_produk', 'like', '%' . $request->search . '%')
-                    ->orWhere('nm_produk', 'like', '%' . $request->search . '%');
-            })
-            ->get();
+            // $data = Product::whereNull('deleted_at') // Menambahkan kondisi untuk memeriksa apakah deleted_at null
+            // ->where(function ($query) use ($request) {
+            //     $query->where('id', 'like', '%' . $request->search . '%')
+            //         ->orWhere('kd_produk', 'like', '%' . $request->search . '%')
+            //         ->orWhere('nm_produk', 'like', '%' . $request->search . '%');
+            // })
+            // ->get();
+
+            $data = DB::table('products as p')
+                ->select('p.kd_produk', 'p.nm_produk')
+                ->whereNull('p.deleted_at')
+                ->where(function ($query) use ($request) {
+                    $query->where('p.kd_produk', 'like', '%' . $request->search . '%')
+                        ->orWhere('p.nm_produk', 'like', '%' . $request->search . '%');
+                })
+                ->distinct()
+                ->get();
+
+            $jml = 1;
  
             $output='';
             if (count($data)>0) {
@@ -189,17 +201,15 @@ class ProductController extends Controller
                         <th scope="col">#</th>
                         <th scope="col">Kode Produk</th>
                         <th scope="col">Nama Produk</th>
-                        <th scope="col">Lokasi</th>
                     </tr>
                     </thead>
                     <tbody>';
                         foreach ($data as $row) {
                             $output .='
                             <tr>
-                            <th scope="row">'.$row->id.'</th>
-                            <td>'.$row->kd_produk.'</td>
-                            <td>'.$row->nm_produk.'</td>
-                            <td>'.$row->database.'</td>
+                                <th scope="row">'.$jml++.'</th>
+                                <td>'.$row->kd_produk.'</td>
+                                <td>'.$row->nm_produk.'</td>
                             </tr>
                             ';
                         }
@@ -227,50 +237,114 @@ class ProductController extends Controller
         return view('mapping.index');
     }
 
+    // public function searchMotor(Request $request)
+    // {
+    //     if ($request->ajax()) {
+    //         $data = Vehicle::leftJoin('mappings as b', function ($join) use ($request) {
+    //                 $join->on('b.kd_motor', '=', 'vehicles.kd_motor')
+    //                      ->where('b.kd_produk', '=', $request->kd_produk);
+    //             })
+    //             ->select('b.id', DB::raw("CASE WHEN b.deleted_at IS NULL THEN b.kd_produk ELSE NULL END AS kdproduk")
+    //             , 'vehicles.nm_motor', 'vehicles.kd_motor', 'vehicles.tahun_dari', 'vehicles.tahun_sampai', 'vehicles.no_seri_mesin', 'vehicles.no_seri_rangka')
+    //             ->orderBy('kdproduk', 'DESC')
+    //             ->get();
+
+    //         $output='';
+    //         if (count($data)>0) {
+    //             foreach ($data as $row) {
+    //                 $isChecked = !empty($row->kdproduk) ? 'checked' : '';
+    //                 $isCheckedBefore = !empty($row->kdproduk) ? 'true' : 'false';
+    //                 $tahun_sampai = $row->tahun_sampai ?: 'Sekarang';
+    //                 $tahun = $row->tahun_dari ? $row->tahun_dari . '-' . $tahun_sampai : '';
+    //                 $output .='
+    //                 <tr>
+    //                     <td>
+    //                         <input type="checkbox" name="motor_cek" class="motor_cek"
+    //                             value="' . $row->kdproduk . '" ' . $isChecked . ' data-id="'. $row->kd_motor .'" data-checked-before="'. $isCheckedBefore .'">
+    //                     </td>
+    //                     <td>
+    //                         <input type="text" name="produk_kode" class="produk_kode"
+    //                             value="'.$row->kdproduk.'" data-id="'.$row->kdproduk.'" hidden>
+    //                             '.$row->kdproduk.'
+    //                     </td>
+    //                     <td>'.$row->nm_motor.'</td>
+    //                     <td>'.$row->kd_motor.'</td>
+    //                     <td>'.$tahun.'</td>
+    //                     <td>'.$row->no_seri_mesin.'</td>
+    //                     <td>'.$row->no_seri_rangka.'</td>
+    //                 </tr>
+    //                 ';
+    //             }
+    //         } else {
+    //             $output .='No results';
+    //         }
+    //         return $output;
+    //     }
+    // }
+
     public function searchMotor(Request $request)
     {
-        if ($request->ajax()) {
-            $data = Vehicle::leftJoin('mappings as b', function ($join) use ($request) {
-                    $join->on('b.kd_motor', '=', 'vehicles.kd_motor')
-                         ->where('b.kd_produk', '=', $request->kd_produk);
-                })
-                ->select('b.id', DB::raw("CASE WHEN b.deleted_at IS NULL THEN b.kd_produk ELSE NULL END AS kdproduk")
-                , 'vehicles.nm_motor', 'vehicles.kd_motor', 'vehicles.tahun_dari', 'vehicles.tahun_sampai', 'vehicles.no_seri_mesin', 'vehicles.no_seri_rangka')
-                ->orderBy('kdproduk', 'DESC')
-                ->get();
-
-            $output='';
-            if (count($data)>0) {
-                foreach ($data as $row) {
-                    $isChecked = !empty($row->kdproduk) ? 'checked' : '';
-                    // $isCheckedBefore = !empty($row->kdproduk) ? 'checked' : '';
-                    $isCheckedBefore = !empty($row->kdproduk) ? 'true' : 'false';
-                    $tahun_sampai = $row->tahun_sampai ?: 'Sekarang';
-                    $tahun = $row->tahun_dari ? $row->tahun_dari . '-' . $tahun_sampai : '';
-                    $output .='
-                    <tr>
-                        <td>
-                            <input type="checkbox" name="motor_cek" class="motor_cek"
-                                value="' . $row->kdproduk . '" ' . $isChecked . ' data-id="'. $row->kd_motor .'" data-checked-before="'. $isCheckedBefore .'">
-                        </td>
-                        <td>
-                            <input type="text" name="produk_kode" class="produk_kode"
-                                value="'.$row->kdproduk.'" data-id="'.$row->kdproduk.'" hidden>
-                                '.$row->kdproduk.'
-                        </td>
-                        <td>'.$row->nm_motor.'</td>
-                        <td>'.$row->kd_motor.'</td>
-                        <td>'.$tahun.'</td>
-                        <td>'.$row->no_seri_mesin.'</td>
-                        <td>'.$row->no_seri_rangka.'</td>
-                    </tr>
-                    ';
-                }
-            } else {
-                $output .='No results';
-            }
-            return $output;
+        if (!$request->ajax()) {
+            return '';
         }
+    
+        $data = $this->fetchVehicleData($request);
+    
+        if (count($data) > 0) {
+            return $this->generateOutput($data);
+        } else {
+            return 'No results';
+        }
+    }
+    
+    private function fetchVehicleData(Request $request)
+    {
+        return Vehicle::leftJoin('mappings as b', function ($join) use ($request) {
+                $join->on('b.kd_motor', '=', 'vehicles.kd_motor')
+                     ->where('b.kd_produk', '=', $request->kd_produk);
+            })
+            ->select('b.id', DB::raw("CASE WHEN b.deleted_at IS NULL THEN b.kd_produk ELSE NULL END AS kdproduk")
+                , 'vehicles.nm_motor', 'vehicles.kd_motor', 'vehicles.tahun_dari', 'vehicles.tahun_sampai'
+                , 'vehicles.no_seri_mesin', 'vehicles.no_seri_rangka'
+            )
+            ->orderBy('kdproduk', 'DESC')
+            ->get();
+    }
+    
+    private function generateOutput($data)
+    {
+        $output = '';
+        $tdSeparator = "</td><td>";
+    
+        foreach ($data as $row) {
+            $isChecked = !empty($row->kdproduk) ? 'checked' : '';
+            $isCheckedBefore = !empty($row->kdproduk) ? 'true' : 'false';
+            $tahun_sampai = $row->tahun_sampai ?: 'Sekarang';
+            $tahun = $row->tahun_dari ? $row->tahun_dari . '-' . $tahun_sampai : '';
+            $output .='
+            <tr>
+                <td>
+                    <input type="checkbox" name="motor_cek" class="motor_cek"
+                        value="' . $row->kdproduk . '" ' . $isChecked . '
+                            data-id="'. $row->kd_motor .'" data-checked-before="'. $isCheckedBefore .'">
+                </td>
+                <td>
+                    <input type="text" name="produk_kode" class="produk_kode"
+                        value="'.$row->kdproduk.'" data-id="'.$row->kdproduk.'" hidden>
+                        '.$row->kdproduk.'
+                </td>
+                <td>'.$row->nm_motor.'</td>
+                . $tdSeparator .
+                <td>'.$row->kd_motor.'</td>
+                <td>'.$tahun.'</td>
+                <td>'.$row->no_seri_mesin.'</td>
+                . $tdSeparator .
+                <td>'.$row->no_seri_rangka.'</td>
+            </tr>
+            ';
+        }
+    
+        return $output;
     }
 
     public function productExport(Request $request)
