@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('cms', function (Blueprint $table) {
             $table->id();
+            $table->string('title_icon')->nullable()->default(null);
             $table->string('brand_image')->nullable()->default(null);
             $table->string('brand_text')->nullable()->default(null);
             $table->string('footer_text_left')->nullable()->default(null);

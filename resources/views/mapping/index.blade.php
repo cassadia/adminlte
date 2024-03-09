@@ -34,7 +34,7 @@
                                 <div class="form-group">
                                     <div class="input-group">
                                         <input type="text" name="search" id="search"
-                                            placeholder="Ketikkan tipe pencarian nama motor, kode motor"
+                                            placeholder="Ketikkan tipe pencarian nama produk"
                                                 class="form-control form-control-sm" onfocus="this.value=''">
                                         <div class="input-group-append">
                                             <button id="searchMotor" class="btn btn-primary btn-sm"
@@ -56,15 +56,15 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label for="NamaMotor">Nama Motor</label>
+                                        <label for="NamaProduk">Nama Produk</label>
                                         <div class="input-group">
-                                            <input id="NamaMotor" type="text" class="form-control form-control-sm"
-                                                placeholder="Nama Motor" name="NamaMotor"
-                                                    value="{{ old('NamaMotor') }}" readonly>
+                                            <input id="NamaProduk" type="text" class="form-control form-control-sm"
+                                                placeholder="Nama Produk" name="NamaProduk"
+                                                    value="{{ old('NamaProduk') }}" readonly>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                {{-- <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="Lokasi">Lokasi</label>
                                         <div class="input-group">
@@ -73,7 +73,7 @@
                                                     value="{{ old('Lokasi') }}" readonly>
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>
@@ -86,8 +86,11 @@
                                     <tr>
                                         <th scope="col"><input type="checkbox" id="selectAll" disabled></th>
                                         <th scope="col">Kode Produk
-                                            <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
-                                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 20px;">
+                                            <div id="loadingOverlay" style="display: none; position: fixed;
+                                                top: 0; left: 0; width: 100%; height: 100%;
+                                                    background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+                                                <div style="position: absolute; top: 50%; left: 50%;
+                                                    transform: translate(-50%, -50%); color: white; font-size: 20px;">
                                                     <div class="spinner-grow" role="status" id="loading">
                                                         <span class="sr-only">Loading...</span>
                                                     </div>
@@ -158,17 +161,22 @@
     <script>
         $(document).ready(function() {
 
+            // Perbarui status checkbox sebelumnya untuk semua checkbox yang dipilih sebelumnya
+            $('.motor_cek').each(function() {
+                $(this).data('checked-before', $(this).is(':checked'));
+            });
+
             // Event click pada hasil pencarian
             $(document).on('click', '#search_list tr', function() {
                 // Ambil nilai dari kolom kode produk
                 var kodeProduk = $(this).find('td:eq(0)').text();
-                var namaMotor = $(this).find('td:eq(1)').text();
-                var lokasi = $(this).find('td:eq(2)').text();
+                var namaProduk = $(this).find('td:eq(1)').text();
+                // var lokasi = $(this).find('td:eq(2)').text();
                 
                 // Tempatkan nilai kode produk ke dalam input kode produk
                 $('#KodeProduk').val(kodeProduk);
-                $('#NamaMotor').val(namaMotor);
-                $('#Lokasi').val(lokasi);
+                $('#NamaProduk').val(namaProduk);
+                // $('#Lokasi').val(lokasi);
     
                 // Bersihkan daftar saran setelah nilai dimasukkan
                 $('#search_list').empty();
@@ -242,14 +250,29 @@
                 // Ambil semua nilai kdproduk dari child checkbox yang dipilih
                 var selectedProdukKode = [];
                 $('input[name="motor_cek"]:checked').each(function() {
-                    var produkKode = $(this).val(); // Ambil nilai kdproduk dari checkbox yang dipilih
-                    var kdMotor = $(this).data('id'); // Ambil nilai kdmotor dari atribut data-id checkbox yang dipilih
-                    selectedProdukKode.push({
-                        kdProduk: kdProdukMst,
-                        kdProdukSelected: produkKode,
-                        kdMotor: kdMotor
-                    }); // Tambahkan nilai kdproduk ke dalam array
+                    var isCheckedBefore = $(this).data('checked-before');
+                    if (isCheckedBefore == false) {
+                        var produkKode = $(this).val(); // Ambil nilai kdproduk dari checkbox yang dipilih
+                        var kdMotor = $(this).data('id'); // Ambil nilai kdmotor dari atribut data-id checkbox yang dipilih
+                        selectedProdukKode.push({
+                            kdProduk: kdProdukMst,
+                            kdProdukSelected: produkKode,
+                            kdMotor: kdMotor
+                        }); // Tambahkan nilai kdproduk ke dalam array
+                    }
                 });
+
+                if (selectedProdukKode.length == 0) {
+                    $('input[name="motor_cek"]:checked').each(function() {
+                        var produkKode = $(this).val(); // Ambil nilai kdproduk dari checkbox yang dipilih
+                        var kdMotor = $(this).data('id'); // Ambil nilai kdmotor dari atribut data-id checkbox yang dipilih
+                        selectedProdukKode.push({
+                            kdProduk: kdProdukMst,
+                            kdProdukSelected: produkKode,
+                            kdMotor: kdMotor
+                        }); // Tambahkan nilai kdproduk ke dalam array
+                    });
+                }
 
                 // Tampilkan nilai kdproduk yang dipilih dalam konsol untuk pemeriksaan
                 console.log(selectedProdukKode);
@@ -274,7 +297,7 @@
                     error: function(xhr, status, error) {
                         console.error(error);
                     }
-                })
+                });
             });
 
             // Event change pada checkbox
