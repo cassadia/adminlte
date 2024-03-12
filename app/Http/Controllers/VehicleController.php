@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Vehicle;
+use App\Models\Mapping;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -27,14 +28,22 @@ class VehicleController extends Controller
         $perPage = $request->input('perPage', 10);
         $keyword = $request->input('keyword');
 
-        $vehicles = Vehicle::whereNull('deleted_at')
+        $sort = $request->input('sort', 'kd_motor'); // Nilai default untuk $sort
+        $order = $request->input('order');
+
+        $query = Vehicle::withoutGlobalScopes()
             ->when($keyword, function ($query) use ($keyword) {
-                return $query->where('no_seri_rangka', 'like', '%' . $keyword . '%')
-                    ->orWhere('no_seri_mesin', 'like', '%' . $keyword . '%')
-                    ->orWhere('nm_motor', 'like', '%' . $keyword . '%')
-                    ->orWhere('status', 'like', '%' . $keyword . '%');
-            })
-            ->paginate($perPage);
+            return $query->where('no_seri_rangka', 'like', '%' . $keyword . '%')
+                ->orWhere('no_seri_mesin', 'like', '%' . $keyword . '%')
+                ->orWhere('nm_motor', 'like', '%' . $keyword . '%')
+                ->orWhere('status', 'like', '%' . $keyword . '%');
+        });
+
+        if ($order == 'asc' || $order == 'desc') {
+            $vehicles = $query->orderBy($sort, $order)->paginate($perPage);
+        } else {
+            $vehicles = $query->paginate($perPage);
+        }
 
         // Menggunakan nama route
         $routeName = 'product.searchAuto';
@@ -49,7 +58,7 @@ class VehicleController extends Controller
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
 
-        return view('vehicles.index', compact('vehicles', 'menusdua', 'content'));
+        return view('vehicles.index', compact('vehicles', 'menusdua', 'content', 'order', 'sort'));
     }
 
     public function create(): View
@@ -126,7 +135,8 @@ class VehicleController extends Controller
     public function edit(string $id): View
     {
         //get post by ID
-        $vehicles = Vehicle::findOrFail($id);
+        $vehicles = Vehicle::withoutGlobalScopes()
+            ->findOrFail($id);
 
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
@@ -140,12 +150,16 @@ class VehicleController extends Controller
     {
         //validate form
         $this->validate($request, [
-            'KodeMotor' => 'required|min:5',
-            'NamaMotor' => 'required|min:10',
-            'TahunMotor' => 'required|min:4',
-            'NoSeriMesin' => 'required|min:10',
-            'NoSeriRangka' => 'required|min:10'
+            'KodeMotor' => 'required|min:3',
+            'NamaMotor' => 'required|min:10'
         ]);
+        // $this->validate($request, [
+        //     'KodeMotor' => 'required|min:5',
+        //     'NamaMotor' => 'required|min:10',
+        //     'TahunMotor' => 'required|min:4',
+        //     'NoSeriMesin' => 'required|min:10',
+        //     'NoSeriRangka' => 'required|min:10'
+        // ]);
 
         //get post by ID
         $vehicles = Vehicle::findOrFail($id);
@@ -157,10 +171,12 @@ class VehicleController extends Controller
         $vehicles->update([
             'kd_motor' => $request->KodeMotor,
             'nm_motor' => $request->NamaMotor,
-            'tahun' => $request->TahunMotor,
+            'tahun_dari' => $request->TahunMotorDari,
+            'tahun_sampai' => $request->TahunMotorSampai,
             'no_seri_mesin' => $request->NoSeriMesin,
             'no_seri_rangka' => $request->NoSeriRangka,
             'status' => $status,
+            'deleted_at' => null,
         ]);
 
         //redirect to index
@@ -172,8 +188,26 @@ class VehicleController extends Controller
         //get post by ID
         $vehicles = Vehicle::findOrFail($id);
 
+        if ($vehicles) {
+            $checkMapping = Mapping::whereNull('deleted_at')
+                ->where([
+                    'kd_motor' => $vehicles->kd_motor,
+                    'id_motor' => $vehicles->id
+                ])
+                ->first();
+
+            if ($checkMapping) {
+                $checkMapping->update([
+                    'deleted_at' => now(),
+                ]);
+            }
+        }
+
         //delete post
-        $vehicles->delete();
+        $vehicles->update([
+            'deleted_at' => now(),
+            'status' => 'Tidak Aktif'
+        ]);
 
         //redirect to index
         return redirect()->route('vehicle.index')->with(['success' => 'Data Berhasil Dihapus!']);

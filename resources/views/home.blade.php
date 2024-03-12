@@ -61,13 +61,13 @@
 
                     <div class="card">
                         <div class="card-body p-0">
-                            <table class="table">
+                            <table class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th></th>
                                         <th>Kode Produk</th>
                                         <th>Nama Produk</th>
-                                        <th>Model</th>
+                                        <th style="background-color: red">Nama Motor</th>
                                         <th>Tahun</th>
                                         <th>Harga</th>
                                         <th>Stock</th>

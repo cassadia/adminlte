@@ -13,6 +13,7 @@ class Mapping extends Model
 
     protected $fillable = [
         'kd_motor',
+        'id_motor',
         'kd_produk',
         'deleted_at'
     ];

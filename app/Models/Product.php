@@ -18,6 +18,7 @@ class Product extends Model
         'harga_jual',
         'qty_available',
         'database',
+        'barcode',
         'status'
     ];
 }
