@@ -301,13 +301,14 @@ class ProductController extends Controller
     {
         return Vehicle::leftJoin('mappings as b', function ($join) use ($request) {
                 $join->on('b.kd_motor', '=', 'vehicles.kd_motor')
-                     ->where('b.kd_produk', '=', $request->kd_produk);
+                    ->on('b.id_motor', '=', 'vehicles.id')
+                    ->where('b.kd_produk', '=', $request->kd_produk);
             })
             ->select('b.id', DB::raw("CASE WHEN b.deleted_at IS NULL THEN b.kd_produk ELSE NULL END AS kdproduk")
-                , 'vehicles.nm_motor', 'vehicles.kd_motor', 'vehicles.tahun_dari', 'vehicles.tahun_sampai'
+                , 'vehicles.id as id_motor', 'vehicles.nm_motor', 'vehicles.kd_motor', 'vehicles.tahun_dari', 'vehicles.tahun_sampai'
                 , 'vehicles.no_seri_mesin', 'vehicles.no_seri_rangka'
             )
-            ->orderBy('kdproduk', 'DESC')
+            ->orderBy('nm_motor', 'ASC')
             ->get();
     }
     
@@ -321,12 +322,13 @@ class ProductController extends Controller
             $isCheckedBefore = !empty($row->kdproduk) ? 'true' : 'false';
             $tahun_sampai = $row->tahun_sampai ?: 'Sekarang';
             $tahun = $row->tahun_dari ? $row->tahun_dari . '-' . $tahun_sampai : '';
+            $idMotor = $row->id_motor;
             $output .='
             <tr>
                 <td>
                     <input type="checkbox" name="motor_cek" class="motor_cek"
                         value="' . $row->kdproduk . '" ' . $isChecked . '
-                            data-id="'. $row->kd_motor .'" data-checked-before="'. $isCheckedBefore .'">
+                            data-id="'. $row->kd_motor .'" data-checked-before="'. $isCheckedBefore .'" data-id-motor="'. $idMotor .'">
                 </td>
                 <td>
                     <input type="text" name="produk_kode" class="produk_kode"

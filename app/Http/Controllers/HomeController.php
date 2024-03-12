@@ -85,7 +85,10 @@ class HomeController extends Controller
                             FROM products b
                             GROUP BY b.kd_produk, b.nm_produk, b.harga_jual) AS b'), 'b.kd_produk', '=', 'a.kd_produk'
                         )
-            ->join('vehicles as c', 'c.kd_motor', '=', 'a.kd_motor')
+            ->join('vehicles as c', function ($join) {
+                $join->on('c.kd_motor', '=', 'a.kd_motor')
+                    ->on('c.id', '=', 'a.id_motor');
+            })
             ->select('a.kd_produk as Kode Barang', 'b.nm_produk as Nama Barang', 'c.nm_motor as Model'
             , 'c.tahun_dari as Dari', 'c.tahun_sampai as Sampai', 'b.harga_jual as Harga', 'b.qty_available as Stock')
             ->whereNull('a.deleted_at');
@@ -107,7 +110,7 @@ class HomeController extends Controller
                   ->where('c.tahun_sampai', '>=', $request->keyThn);
         }
 
-        $mappingData = $query->get();
+        $mappingData = $query->orderBy('c.nm_motor')->get();
         // var_dump($query->toSql());
         // var_dump($request->keyCrProd);
         $mergedData = $this->prepareMergedData($mappingData);

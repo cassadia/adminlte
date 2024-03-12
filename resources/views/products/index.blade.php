@@ -47,7 +47,7 @@
 
                     <div class="card">
                         <div class="card-body p-0">
-                            <table class="table">
+                            <table class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>Kode Produk</th>
@@ -55,8 +55,9 @@
                                         <th>Qty</th>
                                         <th>Harga</th>
                                         <th>Status</th>
-                                        <th>Tgl Buat</th>
-                                        <th>Tgl Ubah</th>
+                                        <th>Barcode</th>
+                                        {{-- <th>Tgl Buat</th>
+                                        <th>Tgl Ubah</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -65,10 +66,11 @@
                                         <td>{{ $product->kd_produk }}</td>
                                         <td>{{ $product->nm_produk }}</td>
                                         <td>{{ $product->qty_available }}</td>
-                                        <td>{{ $product->harga_jual }}</td>
+                                        <td>{{ number_format($product->harga_jual, 0) }}</td>
                                         <td>{{ $product->status }}</td>
-                                        <td>{{ $product->created_at }}</td>
-                                        <td>{{ $product->updated_at }}</td>
+                                        <td></td>
+                                        {{-- <td>{{ $product->created_at }}</td>
+                                        <td>{{ $product->updated_at }}</td> --}}
                                         <td>
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-default">Aksi</button>

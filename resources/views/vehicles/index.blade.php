@@ -46,14 +46,82 @@
 
                     <div class="card">
                         <div class="card-body p-0">
-                            <table class="table">
+                            <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>Kode</th>
-                                        <th>Nama Motor</th>
+                                        <th>
+                                            <a href="{{ route('vehicle.index'
+                                                , ['sort' => 'kd_motor', 'order' => $order == 'asc' ? 'desc'
+                                                : ($order == '' ? 'asc' : '')]) }}">
+                                                Kode
+                                                @if ($sort == 'kd_motor')
+                                                    @if ($order == 'asc')
+                                                        <i class="fas fa-sort-up"></i>
+                                                    @elseif ($order == 'desc')
+                                                        <i class="fas fa-sort-down"></i>
+                                                    @else
+                                                        <i class="fas fa-sort"></i>
+                                                    @endif
+                                                @else
+                                                    <i class="fas fa-sort"></i>
+                                                @endif
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a href="{{ route('vehicle.index'
+                                                , ['sort' => 'nm_motor', 'order' => $order == 'asc' ? 'desc'
+                                                    : ($order == '' ? 'asc' : '')]) }}">
+                                                Nama Motor
+                                                @if ($sort == 'nm_motor')
+                                                    @if ($order == 'asc')
+                                                        <i class="fas fa-sort-up"></i>
+                                                    @elseif ($order == 'desc')
+                                                        <i class="fas fa-sort-down"></i>
+                                                    @else
+                                                        <i class="fas fa-sort"></i>
+                                                    @endif
+                                                @else
+                                                    <i class="fas fa-sort"></i>
+                                                @endif
+                                            </a>
+                                        </th>
                                         <th>Tahun</th>
-                                        <th>No Seri Mesin</th>
-                                        <th>No Seri Rangka</th>
+                                        <th>
+                                            <a href="{{ route('vehicle.index'
+                                                , ['sort' => 'no_seri_mesin', 'order' => $order == 'asc' ? 'desc'
+                                                    : ($order == '' ? 'asc' : '')]) }}">
+                                                No Seri Mesin
+                                                @if ($sort == 'no_seri_mesin')
+                                                    @if ($order == 'asc')
+                                                        <i class="fas fa-sort-up"></i>
+                                                    @elseif ($order == 'desc')
+                                                        <i class="fas fa-sort-down"></i>
+                                                    @else
+                                                        <i class="fas fa-sort"></i>
+                                                    @endif
+                                                @else
+                                                    <i class="fas fa-sort"></i>
+                                                @endif
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a href="{{ route('vehicle.index'
+                                                , ['sort' => 'no_seri_rangka', 'order' => $order == 'asc' ? 'desc'
+                                                    : ($order == '' ? 'asc' : '')]) }}">
+                                                No Seri Rangka
+                                                @if ($sort == 'no_seri_rangka')
+                                                    @if ($order == 'asc')
+                                                        <i class="fas fa-sort-up"></i>
+                                                    @elseif ($order == 'desc')
+                                                        <i class="fas fa-sort-down"></i>
+                                                    @else
+                                                        <i class="fas fa-sort"></i>
+                                                    @endif
+                                                @else
+                                                    <i class="fas fa-sort"></i>
+                                                @endif
+                                            </a>
+                                        </th>
                                         <th>Gambar</th>
                                         <th>Status</th>
                                         <th>Tgl Buat</th>

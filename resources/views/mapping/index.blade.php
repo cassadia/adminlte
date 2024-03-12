@@ -81,7 +81,7 @@
                     
                     <div class="card">
                         <div class="card-body p-0">
-                            <table class="table">
+                            <table class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th scope="col"><input type="checkbox" id="selectAll" disabled></th>
@@ -254,10 +254,12 @@
                     if (isCheckedBefore == false) {
                         var produkKode = $(this).val(); // Ambil nilai kdproduk dari checkbox yang dipilih
                         var kdMotor = $(this).data('id'); // Ambil nilai kdmotor dari atribut data-id checkbox yang dipilih
+                        var idMotor = $(this).data('id-motor');
                         selectedProdukKode.push({
                             kdProduk: kdProdukMst,
                             kdProdukSelected: produkKode,
-                            kdMotor: kdMotor
+                            kdMotor: kdMotor,
+                            idMotor: idMotor
                         }); // Tambahkan nilai kdproduk ke dalam array
                     }
                 });
@@ -266,10 +268,12 @@
                     $('input[name="motor_cek"]:checked').each(function() {
                         var produkKode = $(this).val(); // Ambil nilai kdproduk dari checkbox yang dipilih
                         var kdMotor = $(this).data('id'); // Ambil nilai kdmotor dari atribut data-id checkbox yang dipilih
+                        var idMotor = $(this).data('id-motor');
                         selectedProdukKode.push({
                             kdProduk: kdProdukMst,
                             kdProdukSelected: produkKode,
-                            kdMotor: kdMotor
+                            kdMotor: kdMotor,
+                            idMotor: idMotor
                         }); // Tambahkan nilai kdproduk ke dalam array
                     });
                 }
@@ -315,15 +319,14 @@
                 // Dapatkan nilai yang diperlukan dari checkbox yang diubah
                 var id = $(this).data('id');
                 var isChecked = $(this).is(':checked');
-                // var kdMotor = $(this).data('KodeProduk');
-                // var kd_produk = $('#KodeProduk').val();
                 var kdProduk = $('#KodeProduk').val();
+                var idMotor = $(this).data('id-motor');
 
                 // Kirim data yang dipilih ke server untuk disimpan atau diupdate
                 $.ajax({
                     url: "updateMapping",
                     type: "POST",
-                    data: { id: id, isChecked: isChecked, kdProduk: kdProduk },
+                    data: { id: id, isChecked: isChecked, kdProduk: kdProduk, idMotor: idMotor },
                     success: function(response) {
                         if (response.code == 'rest') {
                             toastr.success(response.message);

@@ -55,11 +55,23 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Tahun:</label>
-                                    <input type="number" class="form-control @error('TahunMotor') is-invalid @enderror" placeholder="Tahun Motor" name="TahunMotor" id="TahunMotor" value="{{ old('TahunMotor', $vehicles->tahun) }}" min="0" max="9999">
+                                    <label>Tahun dari:</label>
+                                    <input type="number" class="form-control @error('TahunMotorDari') is-invalid @enderror" placeholder="Tahun Dari" name="TahunMotorDari" id="TahunMotorDari" value="{{ old('TahunMotor', $vehicles->tahun_dari) }}" min="0" max="9999">
                                 
                                     <!-- Pesan kesalahan untuk input tahun -->
-                                    @error('TahunMotor')
+                                    @error('TahunMotorDari')
+                                        <div class="alert alert-danger mt-2 small">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Tahun sampai:</label>
+                                    <input type="number" class="form-control @error('TahunMotorSampai') is-invalid @enderror" placeholder="Tahun Sampai" name="TahunMotorSampai" id="TahunMotorSampai" value="{{ old('TahunMotor', $vehicles->tahun_sampai) }}" min="0" max="9999">
+                                
+                                    <!-- Pesan kesalahan untuk input tahun -->
+                                    @error('TahunMotorSampai')
                                         <div class="alert alert-danger mt-2 small">
                                             {{ $message }}
                                         </div>

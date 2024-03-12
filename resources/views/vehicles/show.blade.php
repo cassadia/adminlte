@@ -41,6 +41,16 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="TahunMotor">Tahun</label>
+                                    <input type="text" class="form-control" value="{{ $vehicles->tahun_dari }}" disabled>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="TahunMotor">Tahun</label>
+                                    <input type="text" class="form-control" value="{{ $vehicles->tahun_sampai }}" disabled>
+                                </div>
+
+                                <div class="form-group">
                                     <label for="NoSeriMesin">No Seri Mesin</label>
                                     <input type="text" class="form-control" value="{{ $vehicles->no_seri_mesin }}" disabled>
                                 </div>

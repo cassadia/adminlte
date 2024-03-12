@@ -24,6 +24,7 @@ class MappingController extends Controller
         $existingMapping = Mapping::withoutGlobalScopes()
             ->where('kd_motor', $request->id)
             ->where('kd_produk', $request->kdProduk)
+            ->where('id_motor', $request->idMotor)
             ->first();
     
         if ($existingMapping !== null) {
@@ -46,6 +47,7 @@ class MappingController extends Controller
         } else {
             Mapping::create([
                 'kd_motor' => $request->id,
+                'id_motor' => $request->idMotor,
                 'kd_produk' => $request->kdProduk,
             ]);
             return response()->json([
@@ -69,11 +71,13 @@ class MappingController extends Controller
             $kdProduk = $data['kdProduk'];
             $kdProdukSelected = $data['kdProdukSelected'];
             $kdMotor = $data['kdMotor'];
+            $idMotor = $data['idMotor'];
     
             if ($kdProdukSelected == null) {
                 $existingMapping = Mapping::withoutGlobalScopes()
                     ->where('kd_motor', $kdMotor)
                     ->where('kd_produk', $kdProduk)
+                    ->where('id_motor', $idMotor)
                     ->first();
     
                 if ($existingMapping !== null) {
@@ -87,6 +91,7 @@ class MappingController extends Controller
                 } else {
                     Mapping::create([
                         'kd_motor' => $kdMotor,
+                        'id_motor' => $idMotor,
                         'kd_produk' => $kdProduk,
                     ]);
                     $response = [
@@ -98,6 +103,7 @@ class MappingController extends Controller
                 $existingMapping = Mapping::withoutGlobalScopes()
                     ->where('kd_motor', $kdMotor)
                     ->where('kd_produk', $kdProduk)
+                    ->where('id_motor', $idMotor)
                     ->first();
     
                 if ($existingMapping !== null) {
@@ -111,6 +117,7 @@ class MappingController extends Controller
                 } else {
                     Mapping::create([
                         'kd_motor' => $kdMotor,
+                        'id_motor' => $idMotor,
                         'kd_produk' => $kdProduk,
                     ]);
                     $response = [
@@ -129,7 +136,8 @@ class MappingController extends Controller
         if ($request->ajax()) {
             $data = Vehicle::leftJoin('mappings as b', function ($join) use ($request) {
                 $join->on('b.kd_motor', '=', 'vehicles.kd_motor')
-                     ->where('b.kd_produk', '=', $request->kd_produk);
+                    ->on('b.id_motor', '=', 'vehicles.id')
+                    ->where('b.kd_produk', '=', $request->kd_produk);
             })
             ->select(DB::raw("CASE WHEN b.deleted_at IS NULL THEN b.kd_produk ELSE NULL END AS kdproduk")
                 , 'vehicles.nm_motor', 'vehicles.kd_motor'
