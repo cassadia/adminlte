@@ -308,6 +308,7 @@ class ProductController extends Controller
                 , 'vehicles.id as id_motor', 'vehicles.nm_motor', 'vehicles.kd_motor', 'vehicles.tahun_dari', 'vehicles.tahun_sampai'
                 , 'vehicles.no_seri_mesin', 'vehicles.no_seri_rangka'
             )
+            ->where('vehicles.status', 'Aktif')
             ->orderBy('nm_motor', 'ASC')
             ->get();
     }
