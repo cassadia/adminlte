@@ -124,8 +124,8 @@
                                         </th>
                                         <th>Gambar</th>
                                         <th>Status</th>
-                                        <th>Tgl Buat</th>
-                                        <th>Tgl Ubah</th>
+                                        {{-- <th>Tgl Buat</th>
+                                        <th>Tgl Ubah</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -174,8 +174,8 @@
                                             </div>
                                         </td>
                                         <td>{{ $vehicle->status }}</td>
-                                        <td>{{ $vehicle->created_at }}</td>
-                                        <td>{{ $vehicle->updated_at }}</td>
+                                        {{-- <td>{{ $vehicle->created_at }}</td>
+                                        <td>{{ $vehicle->updated_at }}</td> --}}
                                         <td>
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-default">Aksi</button>

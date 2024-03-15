@@ -31,8 +31,7 @@ class VehicleController extends Controller
         $sort = $request->input('sort', 'kd_motor'); // Nilai default untuk $sort
         $order = $request->input('order');
 
-        $query = Vehicle::withoutGlobalScopes()
-            ->when($keyword, function ($query) use ($keyword) {
+        $query = Vehicle::when($keyword, function ($query) use ($keyword) {
             return $query->where('no_seri_rangka', 'like', '%' . $keyword . '%')
                 ->orWhere('no_seri_mesin', 'like', '%' . $keyword . '%')
                 ->orWhere('nm_motor', 'like', '%' . $keyword . '%')
@@ -72,9 +71,14 @@ class VehicleController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // $this->validate($request, [
+        //     'KodeMotor' => 'required|min:3',
+        //     'NamaMotor' => 'required|min:5',
+        //     'gambar' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Menambahkan validasi untuk tipe gambar dan ukuran
+        // ]);
+
         $this->validate($request, [
-            'KodeMotor' => 'required|min:3',
-            'NamaMotor' => 'required|min:5',
+            'KodeMotor' => 'required|min:2',
             'gambar' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Menambahkan validasi untuk tipe gambar dan ukuran
         ]);
 
@@ -150,8 +154,8 @@ class VehicleController extends Controller
     {
         //validate form
         $this->validate($request, [
-            'KodeMotor' => 'required|min:3',
-            'NamaMotor' => 'required|min:10'
+            'KodeMotor' => 'required|min:2',
+            'gambar' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Menambahkan validasi untuk tipe gambar dan ukuran
         ]);
         // $this->validate($request, [
         //     'KodeMotor' => 'required|min:5',
@@ -185,8 +189,7 @@ class VehicleController extends Controller
 
     public function destroy($id): RedirectResponse
     {
-        //get post by ID
-        $vehicles = Vehicle::findOrFail($id);
+        $vehicles = Vehicle::find($id);
 
         if ($vehicles) {
             $checkMapping = Mapping::whereNull('deleted_at')
@@ -197,19 +200,12 @@ class VehicleController extends Controller
                 ->first();
 
             if ($checkMapping) {
-                $checkMapping->update([
-                    'deleted_at' => now(),
-                ]);
+                $checkMapping->delete();
             }
+
+            // $vehicles->restore();
+            $vehicles->delete();
         }
-
-        //delete post
-        $vehicles->update([
-            'deleted_at' => now(),
-            'status' => 'Tidak Aktif'
-        ]);
-
-        //redirect to index
         return redirect()->route('vehicle.index')->with(['success' => 'Data Berhasil Dihapus!']);
     }
 

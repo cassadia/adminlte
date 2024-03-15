@@ -99,7 +99,7 @@
                                         </td>
                                         <td>
                                             <input type="text" id="hrgBarang" value="{{ $item['mapping']->{'Harga'} }}" hidden>
-                                            {{ $item['mapping']->{'Harga'} }}
+                                            {{ number_format($item['mapping']->{'Harga'}, 0) }}
                                         </td>
                                         <td>
                                             <input type="text" id="stkBarang" value="{{ $item['mapping']->{'Stock'} }}" hidden>
@@ -191,11 +191,6 @@
                 var lokasi = $row.find('.lokasi').val();
                 var qty = parseInt($row.find('.qty').val());
                 var stock = parseInt($row.find('#stkBarang').val());
-
-                console.log(stock);
-                console.log('lokasi: ', lokasi);
-                console.log('stkBarang: ', stock);
-                console.log('qty: ', qty);
 
                 if (isChecked && lokasi === 'none') {
                     toastr.error('Silakan pilih lokasi terlebih dahulu!');

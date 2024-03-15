@@ -36,11 +36,11 @@
                                         <input type="text" name="search" id="search"
                                             placeholder="Ketikkan tipe pencarian nama produk"
                                                 class="form-control form-control-sm" onfocus="this.value=''">
-                                        <div class="input-group-append">
+                                        {{-- <div class="input-group-append">
                                             <button id="searchMotor" class="btn btn-primary btn-sm"
                                                 type="button">
                                                 <i class="fas fa-search"></i></button>
-                                        </div>
+                                        </div> --}}
                                     </div>
                                 </div>
                             </div>
@@ -61,6 +61,17 @@
                                             <input id="NamaProduk" type="text" class="form-control form-control-sm"
                                                 placeholder="Nama Produk" name="NamaProduk"
                                                     value="{{ old('NamaProduk') }}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <div class="input-group">
+                                            <button id="searchMotor" type="button" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-search"></i> Cari
+                                            </button>
+                                            &nbsp;<a href="{{ route('product.mapping', ['reset' => true]) }}" class="btn btn-sm btn-warning"><i class="fas fa-eraser"></i> Clear</a>
                                         </div>
                                     </div>
                                 </div>
@@ -104,6 +115,8 @@
                                         <th scope="col">No Seri Rangka</th>
                                     </tr>
                                 </thead>
+                                <input type="text" id="searchInput" class="form-control form-control-sm"
+                                    placeholder="Pencarian..." disabled>
                                 <tbody id="search_motor">
                                 </tbody>
                             </table>
@@ -203,6 +216,10 @@
             $('#searchMotor').on('click', function() {
                 var kd_produk = $('#KodeProduk').val();
 
+                if (kd_produk == '') {
+                    return toastr.warning("Kata pencarian masih kosong!");
+                }
+
                 // Perbarui status checkbox sebelumnya untuk semua checkbox yang dipilih sebelumnya
                 $('.motor_cek').each(function() {
                     $(this).data('checked-before', $(this).is(':checked'));
@@ -222,9 +239,49 @@
                         updateMappingButtonStatus();
                         $('#export-link').removeAttr('disabled');
                         // updateSelectAllCheckbox();
+                        $('#searchInput').removeAttr('disabled');
+                        searchTable();
                     }
                 });
             });
+
+            // $('#selectAll').on('click', function() {
+            //     var isChecked = $(this).is(':checked');
+            //     if (isChecked) {
+            //         // Periksa apakah checkbox tersebut ada di dalam tabel hasil pencarian
+            //         if ($('#search_motor').children(':visible').length > 0) {
+            //             $('#search_motor').children(':visible').find('.motor_cek').prop('checked', true);
+            //         }
+            //     } else {
+            //         $('.motor_cek').prop('checked', false);
+            //     }
+            //     var kdProdukMst = $('#KodeProduk').val();
+            //     var selectedProdukKode = [];
+            //     $('#search_motor').find('input[name="motor_cek"]:checked').each(function() {
+            //         var isCheckedBefore = $(this).data('checked-before');
+            //         if (isCheckedBefore == false) {
+            //             var produkKode = $(this).val(); // Ambil nilai kdproduk dari checkbox yang dipilih
+            //             var kdMotor = $(this).data('id'); // Ambil nilai kdmotor dari atribut data-id checkbox yang dipilih
+            //             var idMotor = $(this).data('id-motor');
+            //             selectedProdukKode.push({
+            //                 kdProduk: kdProdukMst,
+            //                 kdProdukSelected: produkKode,
+            //                 kdMotor: kdMotor,
+            //                 idMotor: idMotor
+            //             }); // Tambahkan nilai kdproduk ke dalam array
+            //         }
+            //     });
+
+            //     $('#search_motor').each(function() {
+            //         console.log('test >>> ', $(this));
+            //     })
+
+            //     console.log('isChecked >>> ', isChecked);
+            //     console.log('length >>> ', $('#search_motor').children().length);
+            //     console.log('visible >>> ', $('#search_motor').children(':visible'));
+            //     console.log('visible length >>> ', $('#search_motor').children(':visible').length);
+            //     console.log('selectedProdukKode >>> ', selectedProdukKode);
+            // })
 
             $('#selectAll').on('click', function() {
                 $('#loadingOverlay').show();
@@ -241,8 +298,11 @@
                 
                 var isChecked = $(this).is(':checked');
                 if (isChecked) {
+                    if ($('#search_motor').children(':visible').length > 0) {
+                        $('#search_motor').children(':visible').find('.motor_cek').prop('checked', isChecked);
+                    }
                     // $('#mappingButton').prop('disabled', false);
-                    $('input[name="motor_cek"]').prop('checked', isChecked);
+                    // $('input[name="motor_cek"]').prop('checked', isChecked);
                 }
 
                 var kdProdukMst = $('#KodeProduk').val();
@@ -297,6 +357,7 @@
                         // Saat checkbox berubah, perbarui data tanpa harus menekan tombol "Cari Motor" lagi
                         $('#searchMotor').trigger('click');
                         // updateSelectAllCheckbox();
+                        searchTable();
                     },
                     error: function(xhr, status, error) {
                         console.error(error);
@@ -346,6 +407,29 @@
                         console.error(error);
                     }
                 });
+
+                // Fungsi untuk melakukan pencarian pada tabel
+                // var input, filter, table, tr, td, i, txtValue;
+                // input = document.getElementById("searchInput"); // Ambil elemen input pencarian
+                // filter = input.value.toUpperCase(); // Konversi nilai pencarian menjadi huruf besar untuk pencocokan yang tidak peka huruf besar/kecil
+                // table = document.getElementById("search_motor"); // Ambil tabel
+                // tr = table.getElementsByTagName("tr"); // Ambil baris dalam tabel
+
+                // // Loop melalui semua baris tabel, dan sembunyikan yang tidak cocok dengan query pencarian
+                // for (i = 0; i < tr.length; i++) {
+                //     td = tr[i].getElementsByTagName("td");
+                //     for (var j = 0; j < td.length; j++) {
+                //         if (td[j]) {
+                //             txtValue = td[j].textContent || td[j].innerText;
+                //             if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                //                 tr[i].style.display = "";
+                //                 break; // Jika ada kecocokan, hentikan pencarian untuk baris ini
+                //             } else {
+                //                 tr[i].style.display = "none";
+                //             }
+                //         }
+                //     }
+                // }
             });
 
             // Fungsi untuk mengupdate status tombol "Mapping"
@@ -433,6 +517,45 @@
             //         }
             //     });
             // }
+
+            // Fungsi untuk melakukan pencarian pada tabel
+            function searchTable() {
+                // var input, filter, table, tr, td, i, txtValue;
+                // input = document.getElementById("searchInput"); // Ambil elemen input pencarian
+                // filter = input.value.toUpperCase(); // Konversi nilai pencarian menjadi huruf besar untuk pencocokan yang tidak peka huruf besar/kecil
+                // table = document.getElementById("search_motor"); // Ambil tabel
+                // tr = table.getElementsByTagName("tr"); // Ambil baris dalam tabel
+
+                var input, filter, table, tr, td, i, j, txtValue;
+                input = document.getElementById("searchInput"); // Ambil elemen input pencarian
+                filter = input.value.toUpperCase(); // Konversi nilai pencarian menjadi huruf besar untuk pencocokan yang tidak peka huruf besar/kecil
+                table = document.getElementById("search_motor"); // Ambil tabel
+                tr = table.getElementsByTagName("tr"); // Ambil baris dalam tabel
+
+                // Loop melalui semua baris tabel, dan sembunyikan yang tidak cocok dengan query pencarian
+                for (i = 0; i < tr.length; i++) {
+                    td = tr[i].getElementsByTagName("td");
+                    for (var j = 0; j < td.length; j++) {
+                        if (td[j]) {
+                            txtValue = td[j].textContent || td[j].innerText;
+                            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                                tr[i].style.display = "";
+                                break; // Jika ada kecocokan, hentikan pencarian untuk baris ini
+                            } else {
+                                tr[i].style.display = "none";
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Panggil fungsi searchTable saat nilai dalam input pencarian berubah
+            document.getElementById("searchInput").addEventListener("input", searchTable);
+
+            // Panggil fungsi pencarian ketika ada perubahan dalam input pencarian
+            $('#searchInput').on('input', function() {
+                searchTable();
+            });
         });
     </script>
 @endsection
