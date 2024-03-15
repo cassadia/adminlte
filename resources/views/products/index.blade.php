@@ -55,7 +55,7 @@
                                         <th>Qty</th>
                                         <th>Harga</th>
                                         <th>Status</th>
-                                        <th>Barcode</th>
+                                        <th>Lokasi</th>
                                         {{-- <th>Tgl Buat</th>
                                         <th>Tgl Ubah</th> --}}
                                     </tr>
@@ -68,7 +68,7 @@
                                         <td>{{ $product->qty_available }}</td>
                                         <td>{{ number_format($product->harga_jual, 0) }}</td>
                                         <td>{{ $product->status }}</td>
-                                        <td></td>
+                                        <td>{{ $product->nm_database }}</td>
                                         {{-- <td>{{ $product->created_at }}</td>
                                         <td>{{ $product->updated_at }}</td> --}}
                                         <td>

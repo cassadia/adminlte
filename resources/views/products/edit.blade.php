@@ -84,8 +84,13 @@
                                 
                                 <div class="form-group">
                                     <label for="Lokasi">Lokasi</label>
-                                    <input type="text" class="form-control @error('Lokasi') is-invalid @enderror" placeholder="Lokasi" name="Lokasi" value="{{ old('Lokasi', $products->database) }}">
-
+                                    {{-- <input type="text" class="form-control @error('Lokasi') is-invalid @enderror" placeholder="Lokasi" name="Lokasi" value="{{ old('Lokasi', $products->database) }}"> --}}
+                                    <select name="Lokasi" id="" class="form-control @error('Lokasi') is-invalid @enderror">
+                                        <option value="" selected>--- Pilih Lokasi ---</option>
+                                        @foreach ($menuLokasi as $item)
+                                            <option value="{{ $item->kd_database }}">{{ $item->nm_database }}</option>
+                                        @endforeach
+                                    </select>
                                     <!-- error message untuk title -->
                                     @error('Lokasi')
                                         <div class="alert alert-danger mt-2 small">
