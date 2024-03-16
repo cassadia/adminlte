@@ -60,6 +60,16 @@
                                     <input type="text" class="form-control" value="{{ $vehicles->no_seri_rangka }}" disabled>
                                 </div>
 
+                                <div class="form-group">
+                                    {{-- <label for="gambar">Gambar</label> --}}
+                                    {{-- <input type="text" class="form-control" value="{{ asset('images/' . $vehicles->gambar) }}" disabled> --}}
+                                    @if ($vehicles->gambar)
+                                        <img src="{{ asset('images/' . $vehicles->gambar ?? 'Tidak ada gambar!') }}" class="img-fluid" alt="Gambar Kendaraan">
+                                    @else
+                                        Tidak ada gambar!
+                                    @endif
+                                </div>
+
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="exampleCheck1" name="status" {{ $vehicles->status == 'Aktif' ? 'checked' : '' }} @disabled(true)>
                                     <label class="form-check-label" for="exampleCheck1">Status</label>

@@ -30,6 +30,7 @@ Route::middleware(['auth' , 'check.menu.access'])->group(function () {
     Route::get('/user-menu', [\App\Http\Controllers\UserMenuController::class, 'index'])->name('user-menu.index');
 
     Route::post('/insertTransaction', [\App\Http\Controllers\HomeController::class, 'insertTransaction'])->name('home.transaction');
+    Route::get('/getStockPerLokasi', [\App\Http\Controllers\HomeController::class, 'getStockPerLokasi'])->name('home.getstockperlokasi');
 
     // Route::get('users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
     // Route::get('/users/{user}', [\App\Http\Controllers\UserController::class, 'show'])->name('user.show');

@@ -70,7 +70,8 @@
                                         <th style="background-color: red">Nama Motor</th>
                                         <th>Tahun</th>
                                         <th>Harga</th>
-                                        <th>Stock</th>
+                                        <th>Total Stock</th>
+                                        <th>Stock Per Lokasi</th>
                                         <th>Lokasi</th>
                                         <th>Qty Jual</th>
                                     </tr>
@@ -106,12 +107,26 @@
                                             {{ $item['mapping']->{'Stock'} }}
                                         </td>
                                         <td>
+                                            <div id="loadingOverlay" style="display: none; position: fixed;
+                                                top: 0; left: 0; width: 100%; height: 100%;
+                                                    background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+                                                <div style="position: absolute; top: 50%; left: 50%;
+                                                    transform: translate(-50%, -50%); color: white; font-size: 20px;">
+                                                    <div class="spinner-grow" role="status" id="loading">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <input type="text" id="stkPerBarangVal" value="" hidden>
+                                            <p id="stkPerBarang">0</p>
+                                        </td>
+                                        <td>
                                             <div>
                                                 <div class="form-group">
                                                     <select class="form-control-sm lokasi" style="padding: 0.25rem 0.5rem; height: auto;">
                                                         <option value="none">Pilih Lokasi</option>
                                                         @foreach($item['productData'] as $lokasi)
-                                                            <option value="{{ $lokasi->database }}">{{ $lokasi->database }}</option>
+                                                            <option value="{{ $lokasi->database }}">{{ $lokasi->nm_database }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -190,7 +205,7 @@
                 var hrgBarang = $('#hrgBarang').val();
                 var lokasi = $row.find('.lokasi').val();
                 var qty = parseInt($row.find('.qty').val());
-                var stock = parseInt($row.find('#stkBarang').val());
+                var stock = parseInt($row.find('#stkPerBarangVal').val());
 
                 if (isChecked && lokasi === 'none') {
                     toastr.error('Silakan pilih lokasi terlebih dahulu!');
@@ -227,16 +242,7 @@
                             if (response.code == 200) {
                                 toastr.success(response.message);
                             }
-                            // if (response.code == 'rest') {
-                            //     toastr.success(response.message);
-                            // } else if (response.code == 'del') {
-                            //     toastr.success(response.message);
-                            // } else if (response.code == 'crea') {
-                            //     toastr.success(response.message);
-                            // }
-                            // // Tampilkan pesan sukses atau lakukan tindakan lain setelah data disimpan
-                            // console.log(response);
-                            // // Saat checkbox berubah, perbarui data tanpa harus menekan tombol "Cari Motor" lagi
+                            // Saat checkbox berubah, perbarui data tanpa harus menekan tombol "Cari Motor" lagi
                             $('.btnCari').trigger('click');
                         },
                         error: function(xhr, status, error) {
@@ -265,6 +271,34 @@
                 // // var kdMotor = $(this).data('KodeProduk');
                 // // var kd_produk = $('#KodeProduk').val();
                 // var kdProduk = $('#KodeProduk').val();
+            });
+
+            $('.lokasi').on('change', function() {
+                var lokasi = $(this).val();
+                var sku = $('#kdBarang').val();
+
+                if (lokasi === "none") {
+                    $('#stkPerBarang').text('0');
+                    $('#stkPerBarangVal').val('0');
+                    return false;
+                }
+
+                $('#loadingOverlay').show();
+
+                // Set timer untuk menyembunyikan overlay loading setelah beberapa detik (misalnya, 3 detik)
+                setTimeout(function() {
+                    $('#loadingOverlay').hide();
+                }, 2000); // 3000 milidetik = 3 detik
+
+                $.ajax({
+                    url: "getStockPerLokasi",
+                    type: "GET",
+                    data: { lokasi: lokasi, sku: sku },
+                    success: function(response) {
+                        $('#stkPerBarang').text(response.qty_available);
+                        $('#stkPerBarangVal').val(response.qty_available);
+                    }
+                })
             });
         });
     </script>
