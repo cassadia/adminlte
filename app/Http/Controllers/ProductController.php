@@ -30,12 +30,16 @@ class ProductController extends Controller
         $perPage = $request->input('perPage', 10);
         $keyword = $request->input('keyword');
 
-        $products = Product::whereNull('deleted_at')
+        $products = Product::join('accurate_db as b', function ($join) use ($request) {
+            $join->on('b.kd_database', '=', 'products.database');
+        })
+            ->whereNull('products.deleted_at')
             ->when($keyword, function ($query) use ($keyword) {
-                return $query->where('kd_produk', 'like', '%' . $keyword . '%')
-                    ->orWhere('nm_produk', 'like', '%' . $keyword . '%')
-                    ->orWhere('status', 'like', '%' . $keyword . '%');
+                return $query->where('products.kd_produk', 'like', '%' . $keyword . '%')
+                    ->orWhere('products.nm_produk', 'like', '%' . $keyword . '%')
+                    ->orWhere('products.status', 'like', '%' . $keyword . '%');
             })
+            ->select('products.id', 'products.kd_produk', 'products.nm_produk', 'products.qty_available', 'products.harga_jual', 'products.status', 'b.nm_database')
             ->paginate($perPage);
         
         $products->appends(['keyword' => $keyword]);
@@ -50,8 +54,9 @@ class ProductController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $menuLokasi = DB::table('accurate_db')->whereNull('deleted_at')->get();
 
-        return view('products.create', compact('menusdua', 'content'));
+        return view('products.create', compact('menusdua', 'content', 'menuLokasi'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -89,7 +94,11 @@ class ProductController extends Controller
     public function show(string $id): View
     {
         //get post by ID
-        $products = Product::findOrFail($id);
+        $products = Product::join('accurate_db as b', function ($join) {
+            $join->on('b.kd_database', '=', 'products.database');
+        })
+        ->select('products.id', 'products.kd_produk', 'products.nm_produk', 'products.qty_available', 'products.harga_jual', 'products.status', 'b.nm_database')
+        ->findOrFail($id);
         Session::put('previous_url', url()->previous());
 
         $emailUser = auth()->user()->email;
@@ -155,7 +164,6 @@ class ProductController extends Controller
 
     public function search(Request $request)
     {
-        print('$request' . $request);
         $keyword = $request->input('keyword');
     
         // Lakukan pencarian berdasarkan keyword dan kirimkan saran kembali dalam bentuk JSON

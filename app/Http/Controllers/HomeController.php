@@ -125,11 +125,13 @@ class HomeController extends Controller
     // Metode untuk mendapatkan data produk berdasarkan kd_produk
     private function getProductData($kd_produk)
     {
-        return DB::table('products')
-                    ->select('database', 'kd_produk')
-                    ->whereNotNull('database')
-                    ->where('kd_produk', $kd_produk)
-                    ->get();
+        return Product::Join('accurate_db as b', function ($join) {
+            $join->on('b.kd_database', '=', 'products.database');
+        })
+        ->select('products.*', 'b.nm_database')
+        ->where('kd_produk', $kd_produk)
+        ->whereNotNull('database')
+        ->get();
     }
 
     private function prepareMergedData($mappingData)
@@ -191,5 +193,12 @@ class HomeController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+
+    public function getStockPerLokasi(Request $request)
+    {
+        return Product::where('kd_produk', $request->sku)
+            ->where('database', $request->lokasi)
+            ->first();
     }
 }

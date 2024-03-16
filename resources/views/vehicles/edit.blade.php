@@ -102,6 +102,17 @@
                                     @enderror
                                 </div>
 
+                                <div class="form-group">
+                                    <label for="gambar">Gambar</label>
+                                    <div class="input-group">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="gambar" name="gambar">
+                                            <label class="custom-file-label" for="gambar"
+                                                id="gambar-label">{{ $vehicles->gambar ?? 'Pilih Gambar' }}</label>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="exampleCheck1" name="status" {{ $vehicles->status == 'Aktif' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="exampleCheck1">Status</label>

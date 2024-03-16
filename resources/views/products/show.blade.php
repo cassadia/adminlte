@@ -54,7 +54,7 @@
 
                                 <div class="form-group">
                                     <label for="Lokasi">Lokasi</label>
-                                    <input type="text" class="form-control" value="{{ $products->database }}" disabled>
+                                    <input type="text" class="form-control" value="{{ $products->nm_database }}" disabled>
                                 </div>
 
                                 <div class="form-check">
