@@ -112,14 +112,22 @@ class ProductController extends Controller
     public function edit(string $id): View
     {
         //get post by ID
-        $products = Product::findOrFail($id);
+        $products = Product::Join('accurate_db as b', function ($join) {
+            $join->on('b.kd_database', '=', 'products.database');
+        })
+        ->select('products.*', 'b.nm_database')
+        ->findOrFail($id);
+
+        $getLokasi = DB::table('accurate_db')
+            ->whereNull('deleted_at')
+            ->get();
 
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
 
         //render view with post
-        return view('products.edit', compact('products', 'menusdua', 'content'));
+        return view('products.edit', compact('products', 'menusdua', 'content', 'getLokasi'));
     }
 
     public function update(Request $request, $id): RedirectResponse
