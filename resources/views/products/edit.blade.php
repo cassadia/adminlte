@@ -84,11 +84,14 @@
                                 
                                 <div class="form-group">
                                     <label for="Lokasi">Lokasi</label>
-                                    {{-- <input type="text" class="form-control @error('Lokasi') is-invalid @enderror" placeholder="Lokasi" name="Lokasi" value="{{ old('Lokasi', $products->database) }}"> --}}
                                     <select name="Lokasi" id="" class="form-control @error('Lokasi') is-invalid @enderror">
                                         <option value="" selected>--- Pilih Lokasi ---</option>
-                                        @foreach ($menuLokasi as $item)
-                                            <option value="{{ $item->kd_database }}">{{ $item->nm_database }}</option>
+                                        @foreach ($getLokasi as $item)
+                                            @if ($item->kd_database == $products->database)
+                                                <option value="{{ $item->kd_database }}" selected>{{ $item->nm_database }}</option>
+                                            @else
+                                                <option value="{{ $item->kd_database }}">{{ $item->nm_database }}</option>
+                                            @endif
                                         @endforeach
                                     </select>
                                     <!-- error message untuk title -->
