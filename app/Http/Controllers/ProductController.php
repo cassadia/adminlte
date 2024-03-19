@@ -37,9 +37,10 @@ class ProductController extends Controller
             ->when($keyword, function ($query) use ($keyword) {
                 return $query->where('products.kd_produk', 'like', '%' . $keyword . '%')
                     ->orWhere('products.nm_produk', 'like', '%' . $keyword . '%')
-                    ->orWhere('products.status', 'like', '%' . $keyword . '%');
+                    ->orWhere('products.status', 'like', '%' . $keyword . '%')
+                    ->orWhere('products.barcode', 'like', '%' . $keyword . '%');
             })
-            ->select('products.id', 'products.kd_produk', 'products.nm_produk', 'products.qty_available', 'products.harga_jual', 'products.status', 'b.nm_database')
+            ->select('products.id', 'products.kd_produk', 'products.nm_produk', 'products.qty_available', 'products.harga_jual', 'products.status', 'b.nm_database', 'products.barcode')
             ->paginate($perPage);
         
         $products->appends(['keyword' => $keyword]);

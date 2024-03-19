@@ -43,6 +43,9 @@ class TestScheduler extends Command
             case 'updatePriceAndStock':
                 $result = $accurateController->updatePriceAndStock();
                 break;
+            case 'getSession':
+                $result = $accurateController->getSession();
+                break;
             default:
                 // Tangani jika tugas tidak valid
                 \Log::channel('scheduler')->error('Tugas yang diminta tidak valid pada: ' . now());
