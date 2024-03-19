@@ -11,6 +11,7 @@ class AccuratePage extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'accurate_page';
+    public $timestamps = true;
 
     protected $fillable = [
         'batch',
@@ -18,6 +19,9 @@ class AccuratePage extends Model
         'endPage',
         'totalBatches',
         'rowCount',
-        'deleted_at'
+        'deleted_at',
+        'kd_database',
+        'updateRowCount',
+        'updated_at'
     ];
 }

@@ -15,6 +15,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('scheduler:command postTransaction')->everyMinute();
         $schedule->command('scheduler:command getListItem')->everyThreeMinutes();
         $schedule->command('scheduler:command updatePriceAndStock')->everyFiveMinutes();
+        $schedule->command('scheduler:command getSession')->weekly()->mondays()->at('23:00');
+        $schedule->command('scheduler:command refreshToken')->weekly()->mondays()->at('23:30');
 
         // Panggil getListitem setiap jam 2 pagi
         // $schedule->command('scheduler:command getListitem')->dailyAt('2:00');

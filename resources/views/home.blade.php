@@ -142,7 +142,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="text-center">
+                                        <td colspan="10" class="text-center">
                                             <div class="alert alert-danger">
                                                 Data Pencarian masih kosong.
                                             </div>

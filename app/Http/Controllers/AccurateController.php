@@ -79,45 +79,55 @@ class AccurateController extends Controller
     public function getSession()
     {
         $client = new Client();
+        $cek = DB::table('accurate')->whereNull('deleted_at')->get();
 
-        $getRefreshToken = AccurateToken::whereNull('deleted_at')->first();
+        foreach ($cek as $data) {
+            $getRefreshToken = AccurateToken::whereNull('deleted_at')
+                ->where('kd_database', $data->kd_database)
+                ->first();
+    
+            $headers = [
+                'Authorization' => 'Bearer ' . $getRefreshToken->access_token
+            ];
+    
+            $request = new Request('GET'
+                , 'https://account.accurate.id/api/open-db.do?id=' . $data->kd_database, $headers
+            );
+    
+            try {
+                $res = $client->sendAsync($request)->wait();
+                $result = json_decode((string)$res->getBody(), true);
+    
+                $host = $result['host'];
+                $session = $result['session'];
+                $admin = $result['admin'];
+                $dataVersion = $result['dataVersion'];
+                $accessibleUntil = $result['accessibleUntil'];
+                $licenseEnd = $result['licenseEnd'];
+    
+                $getSession = AccurateSession::whereNull('deleted_at')
+                    ->where('kd_database', $data->kd_database)
+                    ->first();
 
-        $headers = [
-            'Authorization' => 'Bearer ' . $getRefreshToken->access_token
-        ];
-
-        $request = new Request('GET', 'https://account.accurate.id/api/open-db.do?id=512847', $headers);
-
-        try {
-            $res = $client->sendAsync($request)->wait();
-            $result = json_decode((string)$res->getBody(), true);
-
-            $host = $result['host'];
-            $session = $result['session'];
-            $admin = $result['admin'];
-            $dataVersion = $result['dataVersion'];
-            $accessibleUntil = $result['accessibleUntil'];
-            $licenseEnd = $result['licenseEnd'];
-
-            $getSession = AccurateSession::whereNull('deleted_at')->get();
-
-            if (count($getSession)>0) {
-                $getSession->update(['deleted_at' => now()]);
+                if ($getSession) {
+                    $getSession->delete();
+                }
+    
+                AccurateSession::create([
+                    'host' => $host,
+                    'session' => $session,
+                    'admin' => $admin,
+                    'data_version' => $dataVersion,
+                    'accessible_until' => $accessibleUntil,
+                    'license_end' => $licenseEnd,
+                    'kd_database' => $data->kd_database
+                ]);
+    
+                return $res->getBody();
+    
+            } catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
             }
-
-            AccurateSession::create([
-                'host' => $host,
-                'session' => $session,
-                'admin' => $admin,
-                'data_version' => $dataVersion,
-                'accessible_until' => $accessibleUntil,
-                'license_end' => $licenseEnd
-            ]);
-
-            return $res->getBody();
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -138,113 +148,40 @@ class AccurateController extends Controller
                     $kdDb = $database->kd_database;
 
                     try {
-                        $jmlDataInsert = 1;
+                        // $jmlDataInsert = 1;
+                        // $jmlDataUpdate = 1;
                         $res = $client->sendAsync($request)->wait();
                         $result = json_decode((string)$res->getBody(), true);
                         $totalPages = $result['sp']['pageCount'];
                         $batchSize = 10;
                         $totalBatches = ceil($totalPages / $batchSize);
-
-                        $cekPages = AccuratePage::whereNull('deleted_at')->first();
+                        $cekPages = $this->cekPages($kdDb);
 
                         if ($cekPages) {
-                            for ($page=$cekPages->startPage; $page<=$cekPages->endPage; $page++) {
-                                $request_new = new Request('GET'
-                                    , $getAccess->host . '/accurate/api/item/list.do?fields=id,name,itemType,itemTypeName,unitPrice,no,charField1,availableToSell,charField4,charField5&sp.page=' . $page
-                                    , $headers
-                                );
-                                $res_new = $client->sendAsync($request_new)->wait();
-                                $result_new = json_decode((string)$res_new->getBody(), true);
-                
-                                foreach ($result_new['d'] as $data) {
-                                    $kdProduct = $data['no'];
-                                    $kdProductAccu = $data['id'];
-                                    $nmProduct = $data['name'];
-                                    $hargaJual = $data['unitPrice'];
-                                    $stockAvail = $data['availableToSell'];
-                                    $status = $data['charField5']=='N' ? "Tidak Aktif" : "Aktif";
-                                    $database = $kdDb;
-                
-                                    $productExist = Product::where('kd_produk', $kdProduct)->count();
-
-                                    if ($productExist <= 0) {
-                                        Product::create([
-                                            'kd_produk' => $kdProduct,
-                                            'kd_produk_accu' => $kdProductAccu,
-                                            'nm_produk' => $nmProduct,
-                                            'harga_jual' => $hargaJual,
-                                            'qty_available' => $stockAvail,
-                                            'database' => $database,
-                                            'status' => $status
-                                        ]);
-                                        $jmlDataInsert = $jmlDataInsert + 1;
-                                    }
-                                }
-                            }
-                            AccuratePage::where('id', '=', $cekPages->id)
-                            ->update([
-                                'deleted_at' => now(),
-                                'rowCount' => $jmlDataInsert
-                            ]);
-                            return response()->json([
-                                'message' => 'Data berhasil diimpor sebanyak: ' . $jmlDataInsert
-                            ], 200);
+                            return $this->insertProduct(
+                                $getAccess,
+                                $cekPages->id,
+                                $cekPages->startPage,
+                                $cekPages->endPage,
+                                $kdDb
+                            );
                         } else {
-                            for ($batch=1; $batch<=$totalBatches; $batch++) {
-                                $startPage = ($batch - 1) * $batchSize + 1;
-                                $endPage = min($startPage + $batchSize - 1, $totalPages);
-    
-                                AccuratePage::create([
-                                    'batch' => $batch,
-                                    'startPage' => $startPage,
-                                    'endPage' => $endPage,
-                                    'totalBatches' => $totalBatches
-                                ]);
+                            $this->createAccuratePages($totalBatches, $totalPages, $kdDb);
+                            $cekPages = $this->cekPages($kdDb);
+
+                            if ($cekPages) {
+                                return $this->insertProduct(
+                                    $getAccess,
+                                    $cekPages->id,
+                                    $cekPages->startPage,
+                                    $cekPages->endPage,
+                                    $kdDb
+                                );
                             }
                         }
-            
-                        // for ($i=2; $i<=$result['sp']['pageCount']; $i++) {
-                        // for ($i=1; $i<=64; $i++) {
-                            // $request_new = new Request('GET'
-                            //     , $getAccess->host . '/accurate/api/item/list.do?fields=id,name,itemType,itemTypeName,unitPrice,no,charField1,availableToSell,charField4,charField5&sp.page=' . $i
-                            //     , $headers
-                            // );
-                            // $res_new = $client->sendAsync($request_new)->wait();
-                            // $result_new = json_decode((string)$res_new->getBody(), true);
-            
-                            // foreach ($result_new['d'] as $data) {
-                            //     $kdProduct = $data['no'];
-                            //     $kdProductAccu = $data['id'];
-                            //     $nmProduct = $data['name'];
-                            //     $hargaJual = $data['unitPrice'];
-                            //     $stockAvail = $data['availableToSell'];
-                            //     $status = $data['charField5']=='N' ? "Tidak Aktif" : "Aktif";
-                            //     $database = $kdDb;
-            
-                            //     $productExist = Product::where('kd_produk', $kdProduct)->count();
-            
-                            //     if ($productExist > 0) {
-            
-                            //     } else {
-                            //         Product::create([
-                            //             'kd_produk' => $kdProduct,
-                            //             'kd_produk_accu' => $kdProductAccu,
-                            //             'nm_produk' => $nmProduct,
-                            //             'harga_jual' => $hargaJual,
-                            //             'qty_available' => $stockAvail,
-                            //             'database' => $database,
-                            //             'status' => $status
-                            //         ]);
-                            //         $jmlDataInsert = $jmlDataInsert + 1;
-                            //     }
-                            // }
-                        // }
-                        
                     } catch (\Exception $e) {
                         return response()->json(['error' => $e->getMessage()], 500);
                     }
-                } else {
-                    echo 'else out';
                 }
             }
         }
@@ -399,5 +336,91 @@ class AccurateController extends Controller
             'X-Session-ID' => $getAccess->session,
             'Authorization' => 'Bearer ' . $getAccess->access_token
         ];
+    }
+
+    private function cekPages($kdDb)
+    {
+        return AccuratePage::whereNull('deleted_at')
+            ->where('kd_database', $kdDb)
+            ->first();
+    }
+
+    private function insertProduct($Access, $id, $startPage, $endPage, $kdDb)
+    {
+        $client = new Client();
+
+        $jmlDataInsert = 0;
+        $jmlDataUpdate = 0;
+
+        for ($page=$startPage; $page<=$endPage; $page++) {
+            $request_new = new Request('GET'
+                , $Access->host . '/accurate/api/item/list.do?fields=id,name,itemType,itemTypeName,unitPrice,no,charField1,availableToSell,charField4,charField5,upcNo&sp.page=' . $page
+                , $this->buildHeaders($Access)
+            );
+            $res_new = $client->sendAsync($request_new)->wait();
+            $result_new = json_decode((string)$res_new->getBody(), true);
+
+            foreach ($result_new['d'] as $data) {
+                $kdProduct = $data['no'];
+                $kdProductAccu = $data['id'];
+                $nmProduct = $data['name'];
+                $hargaJual = $data['unitPrice'];
+                $stockAvail = $data['availableToSell'];
+                $status = $data['charField5']=='N' ? "Tidak Aktif" : "Aktif";
+                $barcode = $data['upcNo'];
+                $database = $kdDb;
+
+                $productExist = Product::where('kd_produk', $kdProduct)->count();
+
+                if ($productExist <= 0) {
+                    Product::create([
+                        'kd_produk' => $kdProduct,
+                        'kd_produk_accu' => $kdProductAccu,
+                        'nm_produk' => $nmProduct,
+                        'harga_jual' => $hargaJual,
+                        'qty_available' => $stockAvail,
+                        'database' => $database,
+                        'status' => $status,
+                        'barcode' => $barcode
+                    ]);
+                    $jmlDataInsert = $jmlDataInsert + 1;
+                } else {
+                    Product::where('kd_produk', $kdProduct)
+                        ->where('kd_produk_accu', $kdProductAccu)
+                        ->whereNull('deleted_at')
+                        ->update([
+                            'nm_produk' => $nmProduct,
+                            'barcode' => $barcode,
+                            'status' => $status
+                        ]);
+                    $jmlDataUpdate = $jmlDataUpdate + 1;
+                }
+            }
+        }
+        AccuratePage::where('id', '=', $id)
+        ->update([
+            'deleted_at' => now(),
+            'rowCount' => $jmlDataInsert,
+            'updateRowCount' => $jmlDataUpdate
+        ]);
+        return response()->json([
+            'message' => 'Data berhasil diimpor sebanyak: ' . $jmlDataInsert . ', Data berhasil diupdate sebanyak: ' . $jmlDataUpdate
+        ], 200);
+    }
+
+    private function createAccuratePages($totalBatches, $totalPages, $kdDb)
+    {
+        for ($batch = 1; $batch <= $totalBatches; $batch++) {
+            $startPage = ($batch - 1) * 10 + 1;
+            $endPage = min($startPage + 10 - 1, $totalPages);
+    
+            AccuratePage::create([
+                'batch' => $batch,
+                'startPage' => $startPage,
+                'endPage' => $endPage,
+                'totalBatches' => $totalBatches,
+                'kd_database' => $kdDb
+            ]);
+        }
     }
 }

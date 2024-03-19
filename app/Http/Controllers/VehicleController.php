@@ -170,6 +170,19 @@ class VehicleController extends Controller
 
         // Tentukan nilai status berdasarkan kondisi checkbox
         $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
+
+        if ($vehicles) {
+            $checkMapping = Mapping::whereNull('deleted_at')
+            ->where([
+                'kd_motor' => $vehicles->kd_motor,
+                'id_motor' => $vehicles->id
+            ])
+            ->first();
+
+            if ($checkMapping) {
+                $checkMapping->delete();
+            }
+        }
                     
         //update vehi$vehicles without image
         $vehicles->update([

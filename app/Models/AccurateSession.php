@@ -18,6 +18,7 @@ class AccurateSession extends Model
         'data_version',
         'accessible_until',
         'license_end',
-        'deleted_at'
+        'deleted_at',
+        'kd_database'
     ];
 }
