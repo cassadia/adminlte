@@ -135,3 +135,36 @@
     </div>
     <!-- /.content -->
 @endsection
+@section('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Mengubah teks label saat memilih file
+            $('#gambar').change(function() {
+                var fileName = $(this).val().split('\\').pop(); // Mendapatkan nama file yang dipilih
+                $('#gambar-label').text(fileName); // Memperbarui teks label dengan nama file
+            });
+            // Mendapatkan elemen input tahun
+            var tahunInputDari = document.getElementById('TahunMotorDari');
+            var tahunInputSampai = document.getElementById('TahunMotorSampai');
+            
+            // Menambahkan event listener untuk membatasi panjang input tahun
+            tahunInputDari.addEventListener('input', function(event) {
+                // Ambil nilai input
+                var tahunValue = event.target.value;
+                // Batasi nilai input menjadi maksimal 4 digit
+                if (tahunValue.length > 4) {
+                    event.target.value = tahunValue.slice(0, 4);
+                }
+            });
+            tahunInputSampai.addEventListener('input', function(event) {
+                // Ambil nilai input
+                var tahunValue = event.target.value;
+                // Batasi nilai input menjadi maksimal 4 digit
+                if (tahunValue.length > 4) {
+                    event.target.value = tahunValue.slice(0, 4);
+                }
+            });
+        });
+    </script>
+@endsection
