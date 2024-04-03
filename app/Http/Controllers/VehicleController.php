@@ -179,22 +179,57 @@ class VehicleController extends Controller
             ])
             ->first();
 
-            if ($checkMapping) {
+            if ($checkMapping && $status == 'Tidak Aktif') {
                 $checkMapping->delete();
             }
         }
+
+        if ($request->hasFile('gambar')) {
+            // Dapatkan file yang diunggah
+            $file = $request->file('gambar');
+            
+            // Buat nama unik untuk file
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            
+            // Simpan file ke dalam direktori penyimpanan (misalnya: public/images)
+            $file->move(public_path('images'), $fileName);
+            // Simpan data ke dalam database termasuk nama file gambar
+            $vehicles->update([
+                'kd_motor' => $request->KodeMotor,
+                'nm_motor' => $request->NamaMotor,
+                'tahun_dari' => $request->TahunMotorDari,
+                'tahun_sampai' => $request->TahunMotorSampai,
+                'no_seri_mesin' => $request->NoSeriMesin,
+                'no_seri_rangka' => $request->NoSeriRangka,
+                'status' => $status,
+                'gambar' => $fileName, // Simpan nama file gambar ke dalam database
+                'deleted_at' => null,
+            ]);
+        } else {
+            //create post
+            $vehicles->update([
+                'kd_motor' => $request->KodeMotor,
+                'nm_motor' => $request->NamaMotor,
+                'tahun_dari' => $request->TahunMotorDari,
+                'tahun_sampai' => $request->TahunMotorSampai,
+                'no_seri_mesin' => $request->NoSeriMesin,
+                'no_seri_rangka' => $request->NoSeriRangka,
+                'status' => $status,
+                'deleted_at' => null,
+            ]);
+        }
                     
         //update vehi$vehicles without image
-        $vehicles->update([
-            'kd_motor' => $request->KodeMotor,
-            'nm_motor' => $request->NamaMotor,
-            'tahun_dari' => $request->TahunMotorDari,
-            'tahun_sampai' => $request->TahunMotorSampai,
-            'no_seri_mesin' => $request->NoSeriMesin,
-            'no_seri_rangka' => $request->NoSeriRangka,
-            'status' => $status,
-            'deleted_at' => null,
-        ]);
+        // $vehicles->update([
+        //     'kd_motor' => $request->KodeMotor,
+        //     'nm_motor' => $request->NamaMotor,
+        //     'tahun_dari' => $request->TahunMotorDari,
+        //     'tahun_sampai' => $request->TahunMotorSampai,
+        //     'no_seri_mesin' => $request->NoSeriMesin,
+        //     'no_seri_rangka' => $request->NoSeriRangka,
+        //     'status' => $status,
+        //     'deleted_at' => null,
+        // ]);
 
         //redirect to index
         return redirect()->route('vehicle.index')->with(['success' => 'Data Berhasil Diubah!']);

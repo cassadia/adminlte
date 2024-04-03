@@ -53,7 +53,13 @@ class TestScheduler extends Command
         }
 
         if ($result) {
-            \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . "\n" . $result);
+            foreach($result as $results) {
+                \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . "\n" . $results['message']);
+                if (isset($results['data'])) {
+                    \Log::channel('scheduler')->info("Detail data session: " . "\n" . $results['data']);
+                }
+            }
+            // \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . "\n" . $result);
         } else {
             \Log::channel('scheduler')->error("Terjadi kesalahan saat menjalankan fungsi controller '$task': " . "\n" . $result );
         }
