@@ -52,14 +52,22 @@ class TestScheduler extends Command
                 return;
         }
 
+        // dd($result->getData()->message);
         if ($result) {
-            foreach($result as $results) {
-                \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . "\n" . $results['message']);
-                if (isset($results['data'])) {
-                    \Log::channel('scheduler')->info("Detail data session: " . "\n" . $results['data']);
+            if (count($result) > 0) {
+                foreach ($result as $results) {
+                    if (isset($results['message'])) {
+                        \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . "\n" . $results['message']);
+                    } else {
+                        \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . "\n" . $results);
+                    }
+                    if (isset($results['data'])) {
+                        \Log::channel('scheduler')->info("Detail data session: " . "\n" . print_r($results['data'], true));
+                    }
                 }
+            } else {
+                \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . "\n" . $result);
             }
-            // \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . "\n" . $result);
         } else {
             \Log::channel('scheduler')->error("Terjadi kesalahan saat menjalankan fungsi controller '$task': " . "\n" . $result );
         }

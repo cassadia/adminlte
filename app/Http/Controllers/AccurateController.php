@@ -83,7 +83,11 @@ class AccurateController extends Controller
                 // ]);
             } catch (\Exception $e) {
                 // Tangani kesalahan jika terjadi
-                return response()->json(['error' => $e->getMessage()], 500);
+                // return response()->json(['error' => $e->getMessage()], 500);
+                return [
+                    'message' => 'Error ' . $e->getMessage(),
+                    'code' => 500
+                ];
             }
         }
         // return response()->json($message);
@@ -162,8 +166,10 @@ class AccurateController extends Controller
             foreach ($getDB as $database) {
                 $getAccess = $this->getDatabaseAccess($database->kd_database);
                 if ($getAccess) {
-                    $headers = $this->buildHeaders($getAccess);
-                    $request = new Request('GET', $getAccess->host . '/accurate/api/item/list.do', $headers);
+
+                    $headers = $this->buildHeaders($getAccess->first());
+                    $host = $getAccess->first()->host;
+                    $request = new Request('GET', $host . '/accurate/api/item/list.do', $headers);
                     $kdDb = $database->kd_database;
 
                     try {
@@ -176,7 +182,7 @@ class AccurateController extends Controller
 
                         if ($cekPages) {
                             $insert = $this->insertProduct(
-                                $getAccess,
+                                $getAccess->first(),
                                 $cekPages->id,
                                 $cekPages->startPage,
                                 $cekPages->endPage,
@@ -191,7 +197,7 @@ class AccurateController extends Controller
 
                             if ($cekPages) {
                                 $insert = $this->insertProduct(
-                                    $getAccess,
+                                    $getAccess->first(),
                                     $cekPages->id,
                                     $cekPages->startPage,
                                     $cekPages->endPage,
@@ -302,7 +308,8 @@ class AccurateController extends Controller
             }
             return $message;
         } else {
-            return response()->json(['message' => 'Belum ada transaksi yang perlu diproses!'], 200);
+            // return response()->json(['message' => 'Belum ada transaksi yang perlu diproses!'], 200);
+            return ['message' => 'Belum ada transaksi yang perlu diproses!'];
         }
     }
 
@@ -317,8 +324,9 @@ class AccurateController extends Controller
             foreach ($getDB as $database) {
                 $getAccess = $this->getDatabaseAccess($database->kd_database);
                 if ($getAccess) {
-                    $headers = $this->buildHeaders($getAccess);
-                    $request = new Request('GET', $getAccess->host . '/accurate/api/item/list.do', $headers);
+                    $headers = $this->buildHeaders($getAccess->first());
+                    $host = $getAccess->first()->host;
+                    $request = new Request('GET', $host . '/accurate/api/item/list.do', $headers);
                     $kdDb = $database->kd_database;
 
                     try {
@@ -329,7 +337,7 @@ class AccurateController extends Controller
                         // for ($i=1; $i<=$result['sp']['pageCount']; $i++) {
                         for ($i=1; $i<=3; $i++) {
                             $request_new = new Request('GET'
-                                , $getAccess->host . '/accurate/api/item/list.do?fields=id,name,itemType,itemTypeName,unitPrice,no,charField1,availableToSell,charField4,charField5&sp.page=' . $i
+                                , $host . '/accurate/api/item/list.do?fields=id,name,itemType,itemTypeName,unitPrice,no,charField1,availableToSell,charField4,charField5&sp.page=' . $i
                                 , $headers
                             );
                             $res_new = $client->sendAsync($request_new)->wait();
