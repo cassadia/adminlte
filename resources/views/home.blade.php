@@ -275,19 +275,23 @@
 
             $('.lokasi').on('change', function() {
                 var lokasi = $(this).val();
-                var sku = $('#kdBarang').val();
+                // var sku = $('#kdBarang').val();
+                var $row = $(this).closest('tr'); // Temukan baris terkait
+                var sku = $row.find('#kdBarang').val(); // Gunakan kelas untuk mencari elemen terkait dalam baris
 
                 if (lokasi === "none") {
-                    $('#stkPerBarang').text('0');
-                    $('#stkPerBarangVal').val('0');
+                    // $('#stkPerBarang').text('0');
+                    // $('#stkPerBarangVal').val('0');
+                    $row.find('#stkPerBarang').text('0');
+                    $row.find('#stkPerBarangVal').val('0');
                     return false;
                 }
 
-                $('#loadingOverlay').show();
+                $row.find('#loadingOverlay').show();
 
                 // Set timer untuk menyembunyikan overlay loading setelah beberapa detik (misalnya, 3 detik)
                 setTimeout(function() {
-                    $('#loadingOverlay').hide();
+                    $row.find('#loadingOverlay').hide();
                 }, 2000); // 3000 milidetik = 3 detik
 
                 $.ajax({
@@ -295,8 +299,10 @@
                     type: "GET",
                     data: { lokasi: lokasi, sku: sku },
                     success: function(response) {
-                        $('#stkPerBarang').text(response.qty_available);
-                        $('#stkPerBarangVal').val(response.qty_available);
+                        // $('#stkPerBarang').text(response.qty_available);
+                        // $('#stkPerBarangVal').val(response.qty_available);
+                        $row.find('#stkPerBarang').text(response.qty_available);
+                        $row.find('#stkPerBarangVal').val(response.qty_available);
                     }
                 })
             });
