@@ -81,15 +81,17 @@ class HomeController extends Controller
         //                 ->distinct();
 
         $query = DB::table('mappings as a')
-            ->join(DB::raw('(SELECT b.kd_produk, b.nm_produk, b.harga_jual, SUM(b.qty_available) AS qty_available  
+            ->join(DB::raw('(SELECT b.kd_produk, b.harga_jual, SUM(b.qty_available) AS qty_available  
                             FROM products b
-                            GROUP BY b.kd_produk, b.nm_produk, b.harga_jual) AS b'), 'b.kd_produk', '=', 'a.kd_produk'
+                            GROUP BY b.kd_produk, b.harga_jual) AS b'), 'b.kd_produk', '=', 'a.kd_produk'
                         )
             ->join('vehicles as c', function ($join) {
                 $join->on('c.kd_motor', '=', 'a.kd_motor')
                     ->on('c.id', '=', 'a.id_motor');
             })
-            ->select('a.kd_produk as Kode Barang', 'b.nm_produk as Nama Barang', 'c.nm_motor as Model'
+            // ->select('a.kd_produk as Kode Barang', 'b.nm_produk as Nama Barang', 'c.nm_motor as Model'
+            // , 'c.tahun_dari as Dari', 'c.tahun_sampai as Sampai', 'b.harga_jual as Harga', 'b.qty_available as Stock')
+            ->select('a.kd_produk as Kode Barang', DB::raw('(SELECT p.nm_produk FROM products p WHERE p.kd_produk=a.kd_produk LIMIT 1) AS `Nama Barang`'), 'c.nm_motor as Model'
             , 'c.tahun_dari as Dari', 'c.tahun_sampai as Sampai', 'b.harga_jual as Harga', 'b.qty_available as Stock')
             ->whereNull('a.deleted_at');
 
@@ -98,7 +100,14 @@ class HomeController extends Controller
         }
 
         if ($request->filled('keyNmPro')) {
-            $query->where('b.nm_produk', 'like', '%' . $request->keyNmPro . '%');
+            // $query->where('b.nm_produk', 'like', '%' . $request->keyNmPro . '%');
+            $query->whereExists(function ($query) use ($request) {
+                $query->select(DB::raw(1))
+                      ->from('products as p')
+                      ->whereRaw("p.nm_produk like '%{$request->keyNmPro}%'")
+                      ->whereRaw('p.kd_produk = a.kd_produk')
+                      ->limit(1);
+            });
         }
 
         if ($request->filled('keyNmMtr')) {
