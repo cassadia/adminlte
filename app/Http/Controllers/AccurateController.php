@@ -332,10 +332,10 @@ class AccurateController extends Controller
                     try {
                         $jmlDataUpdate = 1;
                         $res = $client->sendAsync($request)->wait();
-                        // $result = json_decode((string)$res->getBody(), true);
+                        $result = json_decode((string)$res->getBody(), true);
             
-                        // for ($i=1; $i<=$result['sp']['pageCount']; $i++) {
-                        for ($i=1; $i<=3; $i++) {
+                        for ($i=1; $i<=$result['sp']['pageCount']; $i++) {
+                        // for ($i=1; $i<=3; $i++) {
                             $request_new = new Request('GET'
                                 , $host . '/accurate/api/item/list.do?fields=id,name,itemType,itemTypeName,unitPrice,no,charField1,availableToSell,charField4,charField5&sp.page=' . $i
                                 , $headers
@@ -348,14 +348,15 @@ class AccurateController extends Controller
                                 $kdProductAccu = $data['id'];
                                 $nmProduct = $data['name'];
                                 $hargaJual = $data['unitPrice'];
-                                $stockAvail = $data['availableToSell'];
+                                $stockAvail = intval($data['availableToSell']);
                                 $status = $data['charField5']=='N' ? "Tidak Aktif" : "Aktif";
                                 $database = $kdDb;
-            
-                                $productExist = Product::where('kd_produk', $kdProduct)->count();
+
+                                $productExist = Product::where('kd_produk', $kdProduct)->where('database', $database)->count();
             
                                 if ($productExist > 0) {
                                     Product::where('kd_produk', $kdProduct)
+                                        ->where('database', $database)
                                         ->update([
                                             'harga_jual' => $hargaJual,
                                             'qty_available' => $stockAvail,
