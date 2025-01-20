@@ -31,8 +31,8 @@ class TestScheduler extends Command
         $accurateController = new AccurateController();
 
         switch ($task) {
-            case 'getListItem':
-                $result = $accurateController->getListItem();
+            case 'getListItemNew':
+                $result = $accurateController->getListItemNew();
                 break;
             case 'postTransaction':
                 $result = $accurateController->postTransaction();
@@ -40,8 +40,8 @@ class TestScheduler extends Command
             case 'refreshToken':
                 $result = $accurateController->refreshToken();
                 break;
-            case 'updatePriceAndStock':
-                $result = $accurateController->updatePriceAndStock();
+            case 'updatePriceAndStockNew':
+                $result = $accurateController->updatePriceAndStockNew();
                 break;
             case 'getSession':
                 $result = $accurateController->getSession();
@@ -52,24 +52,22 @@ class TestScheduler extends Command
                 return;
         }
 
-        // dd($result->getData()->message);
-        if ($result) {
-            if (count($result) > 0) {
-                foreach ($result as $results) {
-                    if (isset($results['message'])) {
-                        \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . "\n" . $results['message']);
-                    } else {
-                        \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . "\n" . $results);
-                    }
-                    if (isset($results['data'])) {
-                        \Log::channel('scheduler')->info("Detail data session: " . "\n" . print_r($results['data'], true));
-                    }
+        \Log::channel('scheduler')->info('Debug Result:', ['result' => $result]); // Log hasil
+        $this->line('Result: ' . json_encode($result)); // Tampilkan ke terminal
+    
+        if ($result instanceof \Illuminate\Http\JsonResponse) {
+            // Akses data dari JsonResponse
+            $data = $result->getData(true);
+    
+            if (isset($data['messages']) && is_array($data['messages']) && count($data['messages']) > 0) {
+                foreach ($data['messages'] as $message) {
+                    \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . $message['message']);
                 }
             } else {
-                \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . "\n" . $result);
+                \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan tanpa pesan.");
             }
         } else {
-            \Log::channel('scheduler')->error("Terjadi kesalahan saat menjalankan fungsi controller '$task': " . "\n" . $result );
-        }
+            \Log::channel('scheduler')->error("Terjadi kesalahan: Hasil bukan instance JsonResponse.");
+        }        
     }
 }

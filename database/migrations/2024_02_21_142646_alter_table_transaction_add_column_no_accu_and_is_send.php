@@ -12,9 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('transaction', function (Blueprint $table) {
-            //
             $table->string('no_accu_trans')->nullable()->after('id');
-            $table->smallInteger('is_send_to_accu')->nullable()->default(0);
+            $table->smallInteger('is_send_to_accu')->nullable()->default(0)->change();
         });
     }
 
@@ -24,9 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('transaction', function (Blueprint $table) {
-            //
             $table->dropColumn('no_accu_trans');
-            $table->dropColumn('is_send_to_accu');
+            $table->boolean('is_send_to_accu')->nullable()->default(false)->change();
         });
     }
 };

@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Promise;
+use GuzzleHttp\Pool;
 use App\Models\AccurateToken;
 use App\Models\AccurateSession;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\Accurate;
 use App\Models\AccuratePage;
+use App\Models\AccurateLogNew;
 use Illuminate\Support\Facades\DB;
 
 class AccurateController extends Controller
@@ -217,6 +220,66 @@ class AccurateController extends Controller
         return $message;
     }
 
+    public function getListItemNew()
+    {
+        $client = new Client();
+        $getDB = $this->getActiveDatabase();
+        $messages = [];
+        $insert = [];
+
+        if (count($getDB)>0) {
+            foreach ($getDB as $database) {
+                $getAccess = $this->getDatabaseAccess($database->kd_database);
+                
+                if ($getAccess) {
+                    $firstAccess = $getAccess->first();
+                    $headers = $this->buildHeaders($firstAccess);
+                    $host = $firstAccess->host;
+                    $kdDb = $database->kd_database;
+
+                    try {
+                        $request = $client->getAsync($host . '/accurate/api/item/list.do', ['headers' => $headers]);
+                        $response = $request->wait();
+                        $result = json_decode((string)$response->getBody(), true);
+    
+                        $totalPages = $result['sp']['pageCount'];
+                        $pageSize = $result['sp']['pageSize'];
+                        $promises = [];
+    
+                        $startTime = microtime(true);
+                        for ($i = 1; $i <= $totalPages; $i++) {
+                            $promises[] = $client->getAsync(
+                                $host . '/accurate/api/item/list.do?fields=id,name,itemType,itemTypeName,unitPrice,no,charField1,availableToSell,charField4,charField5,upcNo&sp.page=' . $i . '&sp.pageSize=' . $pageSize,
+                                ['headers' => $headers]
+                            );
+                        }
+    
+                        $responses = Promise\Utils::settle($promises)->wait();
+
+                        foreach ($responses as $response) {
+                            if ($response['state'] === 'fulfilled') {
+                                $result = json_decode((string)$response['value']->getBody(), true);
+                                $insert = $this->insertProductNew(
+                                    $getAccess->first(),
+                                    $result['d'],
+                                    $kdDb,
+                                    $startTime
+                                );
+                            }
+                        }
+    
+                        $messages[] = ['message' => 'Proses berhasil untuk database: ' . $kdDb];
+                        // $messages[] = ['message' => $insert];
+                    } catch (\Throwable $e) {
+                        $messages[] = ['error' => $e->getMessage()];
+                    }
+                }
+            }
+        }
+
+        return response()->json(['messages' => $messages]);
+    }
+
     public function postTransaction()
     {
         $cekTrans = DB::table('transaction')
@@ -385,6 +448,93 @@ class AccurateController extends Controller
         return $message;
     }
 
+    public function updatePriceAndStockNew()
+    {
+        $client = new Client();
+        $getDB = $this->getActiveDatabase();
+        $message = [];
+
+        if (count($getDB) > 0) {
+            foreach ($getDB as $database) {
+                $getAccess = $this->getDatabaseAccess($database->kd_database);
+                if ($getAccess) {
+                    $headers = $this->buildHeaders($getAccess->first());
+                    $host = $getAccess->first()->host;
+                    $kdDb = $database->kd_database;
+
+                    try {
+                        $startTime = microtime(true);
+                        $initialRequest = new Request('GET', $host . '/accurate/api/item/list.do', $headers);
+                        $res = $client->send($initialRequest);
+                        $result = json_decode((string)$res->getBody(), true);
+
+                        // Buat batch request untuk semua halaman
+                        $promises = [];
+                        for ($i = 1; $i <= 1; $i++) {
+                        // for ($i = 1; $i <= $result['sp']['pageCount']; $i++) {
+                            $promises[] = $client->getAsync(
+                                $host . '/accurate/api/item/list.do?fields=id,name,itemType,itemTypeName,unitPrice,no,charField1,availableToSell,charField4,charField5&sp.page=' . $i,
+                                ['headers' => $headers]
+                            );
+                        }
+
+                        // Kirim semua request secara bersamaan
+                        $responses = Promise\Utils::settle($promises)->wait();
+
+                        $productsToUpdate = [];
+                        foreach ($responses as $response) {
+                            if ($response['state'] === 'fulfilled') {
+                                $result_new = json_decode((string)$response['value']->getBody(), true);
+                                foreach ($result_new['d'] as $data) {
+                                    $productsToUpdate[] = [
+                                        'kd_produk' => $data['no'],
+                                        'nm_produk' => $data['name'],
+                                        'database' => $kdDb,
+                                        'harga_jual' => $data['unitPrice'],
+                                        'qty_available' => intval($data['availableToSell']),
+                                        'status' => $data['charField5'] == 'N' ? "Tidak Aktif" : "Aktif",
+                                        'updated_at' => now()
+                                    ];
+                                }
+                            }
+                        }
+
+                        // Bulk Update Database
+                        foreach (array_chunk($productsToUpdate, 500) as $chunk) {
+                            Product::upsert($chunk, ['kd_produk', 'database'], ['harga_jual', 'qty_available', 'status', 'updated_at']);
+                        }
+
+                        $endTime = microtime(true);
+
+                        $duration = $endTime - $startTime;
+                
+                        AccurateLogNew::create([
+                            'kd_database' => $kdDb,
+                            'scheduler' => 'updatePriceAndStockNew',
+                            'rowCount' => 0,
+                            'updateRowCount' => count($productsToUpdate),
+                            'startTime' => date('Y-m-d H:i:s', $startTime),
+                            'endTime' => date('Y-m-d H:i:s', $endTime),
+                            'duration' => number_format($duration, 2) . ' seconds'
+                        ]);                        
+
+                        $message[] = [
+                            'message' => response()->json([
+                                'message' => 'Data berhasil diperbaharui sebanyak: ' . count($productsToUpdate) . ', Pada database: ' . $kdDb
+                            ], 200)
+                        ];
+                    } catch (\Exception $e) {
+                        return response()->json(['error' => $e->getMessage()], 500);
+                    }
+                } else {
+                    echo 'else out';
+                }
+            }
+        }
+        // dd($message);
+        return $message;
+    }
+
     private function getActiveDatabase()
     {
         return DB::table('accurate_db')
@@ -482,6 +632,88 @@ class AccurateController extends Controller
         ]);
         return response()->json([
             'message' => 'Data berhasil diimpor sebanyak: ' . $jmlDataInsert . ', Data berhasil diupdate sebanyak: ' . $jmlDataUpdate . ', Pada database: ' . $kdDb
+        ], 200);
+    }
+
+    private function insertProductNew($Access, $result, $kdDb, $startTime)
+    {
+        $client = new Client();
+        $newProducts = [];
+        $updateProducts = [];
+        $existingProducts = Product::where('database', $kdDb)
+            ->pluck('kd_produk', 'kd_produk_accu')
+            ->toArray();
+
+        foreach($result as $data) {
+            $kdProduct = $data['no'];
+            $kdProductAccu = $data['id'];
+            $nmProduct = $data['name'];
+            $hargaJual = $data['unitPrice'];
+            $stockAvail = $data['availableToSell'];
+            $status = $data['charField5'] === 'N' ? "Tidak Aktif" : "Aktif";
+            $barcode = $data['upcNo'];
+
+            if (!isset($existingProducts[$kdProductAccu])) {
+                $newProducts[] = [
+                    'kd_produk' => $kdProduct,
+                    'kd_produk_accu' => $kdProductAccu,
+                    'nm_produk' => $nmProduct,
+                    'harga_jual' => $hargaJual,
+                    'qty_available' => $stockAvail,
+                    'database' => $kdDb,
+                    'status' => $status,
+                    'barcode' => $barcode,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            } else {
+                $updateProducts[] = [
+                    'kd_produk' => $kdProduct,
+                    'kd_produk_accu' => $kdProductAccu,
+                    'nm_produk' => $nmProduct,
+                    'barcode' => $barcode,
+                    'status' => $status,
+                    'updated_at' => now()
+                ];
+            }
+        }
+
+        // Insert batch data baru
+        if (!empty($newProducts)) {
+            Product::insert($newProducts);
+        }
+
+        // Update batch data
+        foreach ($updateProducts as $product) {
+            Product::where('kd_produk', $product['kd_produk'])
+                ->where('kd_produk_accu', $product['kd_produk_accu'])
+                ->where('database', $kdDb)
+                ->update([
+                    'nm_produk' => $product['nm_produk'],
+                    'barcode' => $product['barcode'],
+                    'status' => $product['status'],
+                    'updated_at' => $product['updated_at']
+                ]);
+        }
+
+        $endTime = microtime(true);
+
+        $duration = $endTime - $startTime;
+
+        AccurateLogNew::create([
+            'kd_database' => $kdDb,
+            'scheduler' => 'insertProductNew',
+            'rowCount' => count($newProducts),
+            'updateRowCount' => count($updateProducts),
+            'startTime' => date('Y-m-d H:i:s', $startTime),
+            'endTime' => date('Y-m-d H:i:s', $endTime),
+            'duration' => number_format($duration, 2) . ' seconds'
+        ]);
+
+        return response()->json([
+            'message' => 'Data berhasil diimpor sebanyak: ' . count($newProducts) .
+                ', Data berhasil diupdate sebanyak: ' . count($updateProducts) .
+                ', Pada database: ' . $kdDb
         ], 200);
     }
 
