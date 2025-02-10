@@ -18,22 +18,26 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
-
+                    @php
+                        $publicPath = session('public_path'); // Ambil nilai dari session
+                    @endphp
                     <div class="card card-primary">
                         <div class="card-header d-flex align-items-center">
                             <h3 class="card-title">Product</h3>
-                            <div class="card-tools ml-auto">
-                                <a href="{{ route('product.export', ['keyword' => Request::get('keyword')]) }}"
-                                    class="btn btn-sm btn-success">
-                                    <i class="fas fa-download"></i> Ekspor Data
-                                </a>
-                                <a href="{{ route('product.create') }}" class="btn btn-sm btn-success">
-                                    <i class="fas fa-plus"></i> Product
-                                </a>
-                            </div>
+                            @if ($publicPath != 1)
+                                <div class="card-tools ml-auto">
+                                    <a href="{{ route('product.export', ['keyword' => Request::get('keyword')]) }}"
+                                        class="btn btn-sm btn-success">
+                                        <i class="fas fa-download"></i> Ekspor Data
+                                    </a>
+                                    <a href="{{ route('product.create') }}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-plus"></i> Product
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('product.index') }}" method="GET" class="form-inline mb-3">
+                            <form action="{{ route($publicPath == 1 ? 'public.product.index' : 'product.index') }}" method="GET" class="form-inline mb-3">
                                 <input type="text" name="keyword" class="form-control form-control-sm mr-2"
                                     placeholder="Cari Produk" value="{{ Request::get('keyword') }}">
                                 {{-- <input type="hidden" name="export_keyword"
@@ -82,16 +86,18 @@
                                                 <div class="dropdown-menu dropdown-menu-right" role="menu">
                                                     <a class="dropdown-item"
                                                         href="{{ route('product.show', $product->id) }}">Lihat</a>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('product.edit', $product->id) }}">Ubah</a>
-                                            
-                                                    <form onsubmit="return confirm('Apakah Anda Yakin ?');"
-                                                        action="{{ route('product.destroy', $product->id) }}"
-                                                            method="POST">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="dropdown-item">Hapus</button>
-                                                    </form>
+                                                    @if ($publicPath != 1)
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('product.edit', $product->id) }}">Ubah</a>
+
+                                                        <form onsubmit="return confirm('Apakah Anda Yakin ?');"
+                                                            action="{{ route('product.destroy', $product->id) }}"
+                                                                method="POST">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="dropdown-item">Hapus</button>
+                                                        </form>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </td>
@@ -116,7 +122,7 @@
                                 {{ $products->appends(['perPage' => Request::get('perPage')])->links() }}
                             </div>
                             <div class="float-right">
-                                <form class="form-inline" method="GET" action="{{ route('product.index') }}">
+                                <form class="form-inline" method="GET" action="{{ route($publicPath == 1 ? 'public.product.index' : 'product.index') }}">
                                     <label for="perPage" class="mr-2">Items per page:</label>
                                     <select class="form-control form-control-sm"
                                         name="perPage" onchange="this.form.submit()">

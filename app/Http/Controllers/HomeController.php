@@ -22,7 +22,7 @@ class HomeController extends Controller
      */
 
     protected $userRoleService;
-    
+
     public function __construct(UserRoleService $userRoleService)
     {
         $this->middleware('auth');
@@ -46,7 +46,7 @@ class HomeController extends Controller
         //             ->orWhere('status', 'like', '%' . $keyword . '%');
         //     })
         //     ->paginate($perPage);
-        
+
         // $products->appends(['keyword' => $keyword]);
 
         // $kdProduk = $request->input('kd_produk');
@@ -81,7 +81,7 @@ class HomeController extends Controller
         //                 ->distinct();
 
         $query = DB::table('mappings as a')
-            ->join(DB::raw('(SELECT b.kd_produk, b.harga_jual, SUM(b.qty_available) AS qty_available  
+            ->join(DB::raw('(SELECT b.kd_produk, b.harga_jual, SUM(b.qty_available) AS qty_available
                             FROM products b
                             GROUP BY b.kd_produk, b.harga_jual) AS b'), 'b.kd_produk', '=', 'a.kd_produk'
                         )
@@ -119,7 +119,7 @@ class HomeController extends Controller
                   ->where('c.tahun_sampai', '>=', $request->keyThn);
         }
 
-        $mappingData = $query->orderBy('c.nm_motor')->get();
+        $mappingData = $query->orderBy('c.nm_motor')->skip(0)->take(100)->get();
         // var_dump($query->toSql());
         // var_dump($request->keyCrProd);
         $mergedData = $this->prepareMergedData($mappingData);
@@ -147,14 +147,14 @@ class HomeController extends Controller
     {
         $mergedData = [];
         $productDataCache = [];
-    
+
         foreach ($mappingData as $mapping) {
             $kd_produk = $mapping->{'Kode Barang'};
-    
+
             // Cek apakah data produk sudah ada di cache
             if (!isset($productDataCache[$kd_produk])) {
                 $productData = $this->getProductData($kd_produk);
-    
+
                 // Jika data produk ditemukan, simpan di cache
                 if ($productData->isNotEmpty()) {
                     $productDataCache[$kd_produk] = $productData;
@@ -163,16 +163,16 @@ class HomeController extends Controller
                     continue;
                 }
             }
-    
+
             // Gunakan data produk dari cache
             $productData = $productDataCache[$kd_produk];
-    
+
             $mergedData[] = [
                 'mapping' => $mapping,
                 'productData' => $productData,
             ];
         }
-    
+
         return $mergedData;
     }
 

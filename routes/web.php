@@ -21,13 +21,13 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::middleware(['auth' , 'check.menu.access', 'check.public.path'])->group(function () {
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::middleware(['auth' , 'check.menu.access'])->group(function () {
-    Route::view('about', 'about')->name('about');
+    Route::view('show.user', 'showUser')->name('showUser');
 
     // Route::get('/user-menu', 'MenuController@index')->name('user-menu.index');
-    Route::get('/user-menu', [\App\Http\Controllers\UserMenuController::class, 'index'])->name('user-menu.index');
+    // Route::get('/user-menu', [\App\Http\Controllers\UserMenuController::class, 'index'])->name('user-menu.index');
 
     Route::post('/insertTransaction', [\App\Http\Controllers\HomeController::class, 'insertTransaction'])->name('home.transaction');
     Route::get('/getStockPerLokasi', [\App\Http\Controllers\HomeController::class, 'getStockPerLokasi'])->name('home.getstockperlokasi');
@@ -78,4 +78,45 @@ Route::middleware(['auth' , 'check.menu.access'])->group(function () {
     Route::get('/getlistitem', [AccurateController::class, 'getListItem']);
     Route::get('/postTransaction', [AccurateController::class, 'postTransaction']);
     Route::get('/updatePriceAndStock', [AccurateController::class, 'updatePriceAndStock']);
+
+    // Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart');
+    Route::resource('/cart', \App\Http\Controllers\CartController::class);
+    // Route::resource('/about', \App\Http\Controllers\AboutController::class);
+    // Route::get('about', [App\Http\Controllers\AboutController::class, 'index'])->name('about.index');
+    // Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('/about', [App\Http\Controllers\AboutController::class, 'index'])->name('about');
+    Route::get('/users/detail/{id}', [App\Http\Controllers\UserController::class, 'getUserId'])->name('show.user');
+});
+
+// Tambahkan juga route untuk akses /public
+Route::prefix('public')->group(function () {
+    Route::middleware(['auth', 'check.menu.access', 'check.public.path'])->group(function () {
+        Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('public.home');
+        Route::post('/insertTransaction', [\App\Http\Controllers\HomeController::class, 'insertTransaction'])->name('home.transaction');
+        Route::get('/getStockPerLokasi', [\App\Http\Controllers\HomeController::class, 'getStockPerLokasi'])->name('home.getstockperlokasi');
+
+        Route::resource('/product', \App\Http\Controllers\ProductController::class)->names([
+            'index' => 'public.product.index',
+            'show' => 'public.product.show'
+        ]);
+
+        Route::resource('/vehicle', \App\Http\Controllers\VehicleController::class)->names([
+            'index' => 'public.vehicle.index',
+            'show' => 'public.vehicle.show'
+        ]);
+
+        Route::get('/searchAuto', [\App\Http\Controllers\ProductController::class, 'searchAuto'])->name('product.searchAuto');
+        Route::get('/searchMotor', [\App\Http\Controllers\ProductController::class, 'searchMotor'])->name('product.searchMotor');
+
+        Route::get('/mapping', [App\Http\Controllers\ProductController::class, 'indexMapping'])->name('public.product.mapping');
+        // Route::get('users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
+        Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('public.users.index');
+        Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('public.cart.index');
+        // Route::resource('/users', \App\Http\Controllers\UserController::class);
+
+        // Route::resource('/cart', \App\Http\Controllers\CartController::class);
+        Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+        Route::put('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+        Route::get('/users/detail/{id}', [App\Http\Controllers\UserController::class, 'getUserId'])->name('show.user');
+    });
 });

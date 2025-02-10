@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'Laravel') }}</title>
-    <link rel="icon" href="{!! asset($content->title_icon) !!}"/>
+    <link rel="icon" href="{!! asset($content->title_icon ?? 'default_icon.png') !!}"/>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"
@@ -29,6 +29,10 @@
             </li> --}}
         </ul>
 
+        @php
+            $publicPath = session('public_path');
+        @endphp
+
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
             <li class="nav-item dropdown">
@@ -41,14 +45,26 @@
                         {{ __('My profile') }}
                     </a>
                     <div class="dropdown-divider"></div>
-                    <form method="POST" action="{{ route('logout') }}">
+                    {{-- <form method="POST" action="{{ route($publicPath == 1 ? 'public.logout' : 'logout') }}">
                         @csrf
                         <a href="{{ route('logout') }}" class="dropdown-item"
                            onclick="event.preventDefault(); this.closest('form').submit();">
                             <i class="mr-2 fas fa-sign-out-alt"></i>
                             {{ __('Log Out') }}
                         </a>
-                    </form>
+                    </form> --}}
+                    {{-- <form id="logout-form" method="POST" action="{{ route($publicPath == 1 ? 'public.logout' : 'logout') }}"> --}}
+                    {{-- <form id="logout-form">
+                        @csrf
+                        <button type="submit" class="dropdown-item">
+                            <i class="mr-2 fas fa-sign-out-alt"></i>
+                            {{ __('Log Out') }}
+                        </button>
+                    </form> --}}
+                    <a href="#" class="dropdown-item" id="logout-btn">
+                        <i class="mr-2 fas fa-sign-out-alt"></i>
+                        {{ __('Log Out') }}
+                    </a>
                 </div>
             </li>
         </ul>
@@ -59,10 +75,10 @@
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <!-- Brand Logo -->
         <a href="/" class="brand-link">
-            <img src="{{ asset($content->brand_image) }}" alt="AdminLTE Logo"
+            <img src="{{ asset($content->brand_image ?? 'default_icon.png') }}" alt="AdminLTE Logo"
                 class="brand-image img-circle elevation-3"
                     style="opacity: .8">
-            <span class="brand-text font-weight-light">{{ $content->brand_text }}</span>
+            <span class="brand-text font-weight-light">{{ $content->brand_text ?? 'default_icon.png' }}</span>
         </a>
 
         @include('layouts.navigation')
@@ -102,6 +118,238 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <!-- Impor Tempus Dominus Bootstrap 4 JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js"></script>
+
+{{-- <script>
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "5000"
+    };
+
+    @if (session('error'))
+        toastr.error("{{ session('error') }}", "Error");
+    @endif
+
+    @if (session('success'))
+        toastr.success("{{ session('success') }}", "Success");
+    @endif
+
+    @if (session('info'))
+        toastr.info("{{ session('info') }}", "Info");
+    @endif
+
+    @if (session('warning'))
+        toastr.warning("{{ session('warning') }}", "Warning");
+    @endif
+</script> --}}
+
+{{-- <script>
+    document.getElementById("logout-btn").addEventListener("click", function(event) {
+        event.preventDefault();
+        const apiToken = '{{ session('api_token') }}';
+
+        try {
+            const response = await fetch(`{{ url('api/logout') }}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + apiToken
+                },
+            });
+
+            console.log('response >>> ', response);
+
+            if (response.ok) {
+                return response.json();
+                console.log('test >>> ', response);
+            }
+        } catch (error) {
+            console.log('error >>> ', error);
+        }
+
+        // const response = await fetch(`{{ url('api/user/getUser?id=${userId}') }}`, {
+        // fetch("{{ route('logout') }}", {
+        // fetch(`{{ url('api/logout') }}`, {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json",
+        //         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+        //         "Accept": "application/json",
+        //         'Authorization': 'Bearer ' + apiToken
+        //     },
+        //     credentials: "same-origin"
+        // }).then(response => {
+        //     if (response.ok) {
+        //         return response.json();
+        //     }
+        //     throw new Error("Logout failed");
+        // }).then(data => {
+        //     console.log(data.message);
+        //     window.location.href = "/";
+        // }).catch(error => console.error(error));
+    });
+</script> --}}
+
+<script>
+    // document.getElementById("logout-btn").addEventListener("click", async function(event) {
+    //     event.preventDefault();
+
+    //     const apiToken = '{{ session('api_token') }}'; // Ambil API token dari session
+
+    //     try {
+    //         const response = await fetch(`{{ url('api/logout') }}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer ' + apiToken
+    //             }
+    //         });
+
+    //         console.log('Response >>> ', response);
+
+    //         if (!response.ok) {
+    //             throw new Error('Logout failed');
+    //         }
+
+    //         const data = await response.json(); // Parse JSON response
+    //         console.log('Logout Success:', data);
+
+    //         // ✅ Tampilkan toastr success
+    //         toastr.success("Logout berhasil!");
+
+    //         // console.log('test >>> ' {{ route('login') }});
+
+    //         // ✅ Redirect ke halaman login setelah 1.5 detik
+    //         setTimeout(() => {
+    //             console.log("Redirecting to:", "{{ route('login') }}");
+    //             window.location.href = "{{ route('login') }}";
+    //         }, 1500);
+
+    //     } catch (error) {
+    //         console.error('Error >>> ', error);
+    //         toastr.error("Gagal logout!");
+    //     }
+    // });
+
+
+
+    // document.getElementById("logout-btn").addEventListener("click", async function(event) {
+    //     event.preventDefault();
+
+    //     const apiToken = '{{ session('api_token') }}'; // Ambil API token dari session
+
+    //     try {
+    //         const response = await fetch(`{{ url('api/logout') }}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer ' + apiToken
+    //             }
+    //         });
+
+    //         console.log('Response >>> ', response);
+
+    //         if (!response.ok) {
+    //             throw new Error('Logout failed');
+    //         }
+
+    //         const data = await response.json(); // Parse JSON response
+    //         console.log('Logout Success:', data);
+
+    //         // ✅ Tampilkan toastr success
+    //         toastr.success("Logout berhasil!");
+
+    //         // ✅ Redirect ke halaman login setelah 1.5 detik
+    //         setTimeout(() => {
+    //             window.location.href = data.redirect; // Redirect sesuai response dari server
+    //         }, 1500);
+
+    //     } catch (error) {
+    //         console.error('Error >>> ', error);
+    //         toastr.error("Gagal logout!");
+    //     }
+    // });
+
+
+
+    // document.getElementById("logout-btn").addEventListener("click", async function(event) {
+    //     event.preventDefault();
+
+    //     try {
+    //         const response = await fetch(`{{ url('api/logout') }}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer ' + '{{ session('api_token') }}'
+    //             }
+    //         });
+
+    //         const data = await response.json();
+    //         console.log('Logout Response:', data);
+
+    //         if (response.ok) {
+    //             toastr.success("Logout berhasil!");
+
+    //             // 🔥 Hapus token dari localStorage/sessionStorage
+    //             localStorage.removeItem('token');
+    //             sessionStorage.removeItem('token');
+
+    //             // 🔄 Redirect ke halaman login setelah logout sukses
+    //             setTimeout(() => {
+    //                 window.location.href = data.redirect;
+    //             }, 1500);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error:', error);
+    //         toastr.error("Gagal logout!");
+    //     }
+    // });
+
+
+    document.getElementById("logout-btn").addEventListener("click", async function(event) {
+        event.preventDefault();
+
+        try {
+            const response = await fetch(`{{ url('api/logout') }}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + '{{ session('api_token') }}' // Ambil token dari localStorage
+                }
+            });
+
+            const data = await response.json();
+            console.log('Logout Response:', data);
+
+            if (response.ok) {
+                toastr.success("Logout berhasil!");
+
+                // 🔥 Hapus token dari localStorage/sessionStorage
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
+
+                // 🔄 Redirect ke halaman login setelah logout sukses
+                setTimeout(() => {
+                    // window.location.href = data.redirect;
+                    window.location.href = "{{ route('login') }}";
+                }, 1500);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            toastr.error("Gagal logout!");
+        }
+    });
+
+</script>
+
+
+
 @yield('scripts')
 </body>
 </html>

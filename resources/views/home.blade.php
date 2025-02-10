@@ -19,13 +19,15 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
-
+                    @php
+                        $publicPath = session('public_path');
+                    @endphp
                     <div class="card card-primary">
                         <div class="card-header d-flex align-items-center">
                             <h3 class="card-title">Home</h3>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('home') }}" method="GET" class="form-inline mb-3">
+                            <form action="{{ route($publicPath == 1 ? 'public.home' : 'home') }}" method="GET" class="form-inline mb-3">
                                 <input type="text" name="keyCrProd" class="form-control form-control-sm mr-2" placeholder="Cari Produk" value="{{ Request::get('keyCrProd') }}">
                                 <input type="text" name="keyNmPro" class="form-control form-control-sm mr-2" placeholder="Nama Produk" value="{{ Request::get('keyNmPro') }}">
                                 <input type="text" name="keyNmMtr" class="form-control form-control-sm mr-2" placeholder="Nama Motor" value="{{ Request::get('keyNmMtr') }}">
