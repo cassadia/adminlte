@@ -81,9 +81,9 @@ class HomeController extends Controller
         //                 ->distinct();
 
         $query = DB::table('mappings as a')
-            ->join(DB::raw('(SELECT b.kd_produk, b.harga_jual, SUM(b.qty_available) AS qty_available
+            ->join(DB::raw('(SELECT b.kd_produk, SUM(b.qty_available) AS qty_available
                             FROM products b
-                            GROUP BY b.kd_produk, b.harga_jual) AS b'), 'b.kd_produk', '=', 'a.kd_produk'
+                            GROUP BY b.kd_produk) AS b'), 'b.kd_produk', '=', 'a.kd_produk'
                         )
             ->join('vehicles as c', function ($join) {
                 $join->on('c.kd_motor', '=', 'a.kd_motor')
@@ -92,7 +92,7 @@ class HomeController extends Controller
             // ->select('a.kd_produk as Kode Barang', 'b.nm_produk as Nama Barang', 'c.nm_motor as Model'
             // , 'c.tahun_dari as Dari', 'c.tahun_sampai as Sampai', 'b.harga_jual as Harga', 'b.qty_available as Stock')
             ->select('a.kd_produk as Kode Barang', DB::raw('(SELECT p.nm_produk FROM products p WHERE p.kd_produk=a.kd_produk LIMIT 1) AS `Nama Barang`'), 'c.nm_motor as Model'
-            , 'c.tahun_dari as Dari', 'c.tahun_sampai as Sampai', 'b.harga_jual as Harga', 'b.qty_available as Stock')
+            , 'c.tahun_dari as Dari', 'c.tahun_sampai as Sampai', 'b.qty_available as Stock')
             ->whereNull('a.deleted_at');
 
         if ($request->filled('keyCrProd')) {
