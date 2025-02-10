@@ -71,7 +71,8 @@
                                         <th>Nama Produk</th>
                                         <th style="background-color: red">Nama Motor</th>
                                         <th>Tahun</th>
-                                        <th>Harga</th>
+                                        {{-- <th>Harga</th> --}}
+                                        <th>Harga Per Lokasi</th>
                                         <th>Total Stock</th>
                                         <th>Stock Per Lokasi</th>
                                         <th>Lokasi</th>
@@ -100,9 +101,13 @@
                                             {{-- <input type="text" id="kdBarang" value="{{ $item['mapping']->{'Kode Barang'} }}" hidden> --}}
                                             {{ $item['mapping']->Dari }} - {{ $item['mapping']->Sampai ?: 'Sekarang' }}
                                         </td>
-                                        <td>
+                                        {{-- <td>
                                             <input type="text" id="hrgBarang" value="{{ $item['mapping']->{'Harga'} }}" hidden>
                                             {{ number_format($item['mapping']->{'Harga'}, 0) }}
+                                        </td> --}}
+                                        <td>
+                                            <input type="text" id="hrgBarangPerLokVal" value="" hidden>
+                                            <p id="hrgBarangPerLok">0</p>
                                         </td>
                                         <td>
                                             <input type="text" id="stkBarang" value="{{ $item['mapping']->{'Stock'} }}" hidden>
@@ -286,6 +291,8 @@
                     // $('#stkPerBarangVal').val('0');
                     $row.find('#stkPerBarang').text('0');
                     $row.find('#stkPerBarangVal').val('0');
+                    $row.find('#hrgBarangPerLok').val('0');
+                    $row.find('#hrgBarangPerLokVal').val('0');
                     return false;
                 }
 
@@ -301,10 +308,12 @@
                     type: "GET",
                     data: { lokasi: lokasi, sku: sku },
                     success: function(response) {
-                        // $('#stkPerBarang').text(response.qty_available);
-                        // $('#stkPerBarangVal').val(response.qty_available);
                         $row.find('#stkPerBarang').text(response.qty_available);
                         $row.find('#stkPerBarangVal').val(response.qty_available);
+                        $row.find('#hrgBarangPerLok').text(
+                            new Intl.NumberFormat('id-ID').format(Math.floor(response.harga_jual))
+                        );
+                        $row.find('#hrgBarangPerLokVal').val(response.harga_jual);
                     }
                 })
             });

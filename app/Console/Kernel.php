@@ -18,6 +18,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('scheduler:command getSession')->weekly()->mondays()->at('23:00');
         $schedule->command('scheduler:command refreshToken')->weekly()->mondays()->at('23:30');
 
+        $schedule->command('logs:clear')->dailyAt('00:00');
+
         // Panggil getListitem setiap jam 2 pagi
         // $schedule->command('scheduler:command getListitem')->dailyAt('2:00');
 
