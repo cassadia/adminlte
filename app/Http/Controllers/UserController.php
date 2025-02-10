@@ -285,13 +285,13 @@ class UserController extends Controller
 
     public function search(Request $request)
     {
- 
+
         if ($request->ajax()) {
- 
+
             $data=User::where('id', 'like', '%'.$request->search.'%')
             ->orwhere('name', 'like', '%'.$request->search.'%')
             ->orwhere('email', 'like', '%'.$request->search.'%')->get();
- 
+
             $output='';
             if (count($data)>0) {
                 $output ='
@@ -330,5 +330,36 @@ class UserController extends Controller
             ->where('a.status', 'Aktif')
             ->whereNull('deleted_at')
             ->get();
+    }
+
+    // public function showUser($id)
+    // {
+    //     $response = Http::get(env('APP_URL') . 'api/getUser', [
+    //         'id' => $id
+    //     ]);
+
+    //     dd($response)->all();
+
+    //     if ($response.ok()) {
+    //         $user = $response->json()['data'];
+
+    //         dd($user)->all();
+    //     }
+    // }
+
+    public function getUserId(Request $request)
+    {
+        $emailUser = auth()->user()->email;
+        $menusdua = $this->userRoleService->getUserRole($emailUser);
+        $content = ContentService::getContent();
+
+        return view('show.user', compact('menusdua','content'));
+        // $users = User::findOrFail($id);
+
+        // if ($users) {
+        //     return response()->json($data, 200, $headers);
+        // }
+
+        // return response()->json($data, 400, $headers);
     }
 }

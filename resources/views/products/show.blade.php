@@ -29,12 +29,12 @@
                             @csrf
                             {{-- @method('PUT') --}}
                             <div class="card-body">
-                                
+
                                 <div class="form-group">
                                     <label for="KodeProduk">Kode Produk</label>
                                     <input type="text" class="form-control" value="{{ $products->kd_produk }}" disabled>
                                 </div>
-                                
+
                                 <div class="form-group">
                                     <label for="NamaProduk">Nama Produk</label>
                                     <input type="text" class="form-control" value="{{ $products->nm_produk }}" disabled>
@@ -64,13 +64,18 @@
                                 </div>
                             </div>
                           <!-- /.card-body -->
-          
+
                           <div class="card-footer">
-                            <a href="{{ route('product.edit', $products->id) }}" class="btn btn-warning">Edit</a>
-                            {{-- <a href="{{ route('product.index') }}" class="btn btn-info float-right">Kembali</a> --}}
-                            @if (session('previous_url'))
-                                <a href="{{ session('previous_url') }}" class="btn btn-info float-right">Back</a>
+                            @php
+                                $publicPath = session('public_path'); // Ambil nilai dari session
+                            @endphp
+                            @if ($publicPath != 1)
+                                <a href="{{ route('product.edit', $products->id) }}" class="btn btn-warning">Ubah</a>
                             @endif
+                            <a href="{{ route('product.index') }}" class="btn btn-info float-right">Kembali</a>
+                            {{-- @if (session('previous_url'))
+                                <a href="{{ session('previous_url') }}" class="btn btn-info float-right">Kembali</a>
+                            @endif --}}
                           </div>
                         </form>
                       </div>

@@ -18,25 +18,29 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
-
+                    @php
+                        $publicPath = session('public_path'); // Ambil nilai dari session
+                    @endphp
                     <div class="card card-primary">
                         <div class="card-header d-flex align-items-center">
                             <h3 class="card-title">Vehicle</h3>
-                            <div class="card-tools ml-auto">
-                                <a href="{{ route('vehicle.export', ['keyword' => Request::get('keyword')]) }}"
-                                    class="btn btn-sm btn-success">
-                                    <i class="fas fa-download"></i> Ekspor Data
-                                </a>
-                                <a href="{{ route('vehicle.create') }}" class="btn btn-sm btn-success">
-                                    <i class="fas fa-plus"></i> Vehicle
-                                </a>
-                            </div>
+                            @if($publicPath != 1)
+                                <div class="card-tools ml-auto">
+                                    <a href="{{ route('vehicle.export', ['keyword' => Request::get('keyword')]) }}"
+                                        class="btn btn-sm btn-success">
+                                        <i class="fas fa-download"></i> Ekspor Data
+                                    </a>
+                                    <a href="{{ route('vehicle.create') }}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-plus"></i> Vehicle
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('vehicle.index') }}" method="GET" class="form-inline mb-3">
+                            <form action="{{ route($publicPath == 1 ? 'public.vehicle.index' : 'vehicle.index') }}" method="GET" class="form-inline mb-3">
                                 <input type="text" name="keyword"
                                     class="form-control form-control-sm mr-2"
-                                        placeholder="Cari Produk" value="{{ Request::get('keyword') }}">
+                                        placeholder="Cari Kendaraan" value="{{ Request::get('keyword') }}">
                                 <button type="submit" class="btn btn-sm btn-info">
                                     <i class="fas fa-search"></i> Cari
                                 </button>
@@ -50,7 +54,7 @@
                                 <thead>
                                     <tr>
                                         <th>
-                                            <a href="{{ route('vehicle.index'
+                                            <a href="{{ route($publicPath == 1 ? 'public.vehicle.index' : 'vehicle.index'
                                                 , ['sort' => 'kd_motor', 'order' => $order == 'asc' ? 'desc'
                                                 : ($order == '' ? 'asc' : '')]) }}">
                                                 Kode
@@ -68,7 +72,7 @@
                                             </a>
                                         </th>
                                         <th>
-                                            <a href="{{ route('vehicle.index'
+                                            <a href="{{ route($publicPath == 1 ? 'public.vehicle.index' : 'vehicle.index'
                                                 , ['sort' => 'nm_motor', 'order' => $order == 'asc' ? 'desc'
                                                     : ($order == '' ? 'asc' : '')]) }}">
                                                 Nama Motor
@@ -87,7 +91,7 @@
                                         </th>
                                         <th>Tahun</th>
                                         <th>
-                                            <a href="{{ route('vehicle.index'
+                                            <a href="{{ route($publicPath == 1 ? 'public.vehicle.index' : 'vehicle.index'
                                                 , ['sort' => 'no_seri_mesin', 'order' => $order == 'asc' ? 'desc'
                                                     : ($order == '' ? 'asc' : '')]) }}">
                                                 No Seri Mesin
@@ -105,7 +109,7 @@
                                             </a>
                                         </th>
                                         <th>
-                                            <a href="{{ route('vehicle.index'
+                                            <a href="{{ route($publicPath == 1 ? 'public.vehicle.index' : 'vehicle.index'
                                                 , ['sort' => 'no_seri_rangka', 'order' => $order == 'asc' ? 'desc'
                                                     : ($order == '' ? 'asc' : '')]) }}">
                                                 No Seri Rangka
@@ -186,17 +190,19 @@
                                                 </button>
                                                 <div class="dropdown-menu" role="menu">
                                                     <a class="dropdown-item"
-                                                        href="{{ route('vehicle.show', $vehicle->id) }}">Lihat</a>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('vehicle.edit', $vehicle->id) }}">Edit</a>
-                                            
-                                                    <form onsubmit="return confirm('Apakah Anda Yakin ?');"
-                                                        action="{{ route('vehicle.destroy', $vehicle->id) }}"
-                                                            method="POST">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="dropdown-item">Hapus</button>
-                                                    </form>
+                                                        href="{{ route($publicPath == 1 ? 'public.vehicle.show' : 'vehicle.show', $vehicle->id) }}">Lihat</a>
+                                                    @if($publicPath != 1)
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('vehicle.edit', $vehicle->id) }}">Edit</a>
+
+                                                        <form onsubmit="return confirm('Apakah Anda Yakin ?');"
+                                                            action="{{ route('vehicle.destroy', $vehicle->id) }}"
+                                                                method="POST">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="dropdown-item">Hapus</button>
+                                                        </form>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </td>
@@ -220,7 +226,7 @@
                                 {{ $vehicles->appends(['perPage' => Request::get('perPage')])->links() }}
                             </div>
                             <div class="float-right">
-                                <form class="form-inline" method="GET" action="{{ route('vehicle.index') }}">
+                                <form class="form-inline" method="GET" action="{{ route($publicPath == 1 ? 'public.vehicle.index' : 'vehicle.index') }}">
                                     <label for="perPage" class="mr-2">Items per page:</label>
                                     <select class="form-control form-control-sm"
                                         name="perPage" onchange="this.form.submit()">

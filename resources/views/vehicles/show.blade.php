@@ -29,12 +29,12 @@
                             @csrf
                             {{-- @method('PUT') --}}
                             <div class="card-body">
-                                
+
                                 <div class="form-group">
                                     <label for="KodeMotor">Kode Motor</label>
                                     <input type="text" class="form-control" value="{{ $vehicles->kd_motor }}" disabled>
                                 </div>
-                                
+
                                 <div class="form-group">
                                     <label for="NamaMotor">Nama Motor</label>
                                     <input type="text" class="form-control" value="{{ $vehicles->nm_motor }}" disabled>
@@ -54,7 +54,7 @@
                                     <label for="NoSeriMesin">No Seri Mesin</label>
                                     <input type="text" class="form-control" value="{{ $vehicles->no_seri_mesin }}" disabled>
                                 </div>
-                                
+
                                 <div class="form-group">
                                     <label for="NoSeriRangka">No Seri Rangka</label>
                                     <input type="text" class="form-control" value="{{ $vehicles->no_seri_rangka }}" disabled>
@@ -76,10 +76,15 @@
                                 </div>
                             </div>
                           <!-- /.card-body -->
-          
+
                           <div class="card-footer">
                             {{-- <button type="submit" class="btn btn-warning">{{ __('Ubah') }}</button> --}}
-                            <a href="{{ route('vehicle.edit', $vehicles->id) }}" class="btn btn-warning">Ubah</a>
+                            @php
+                                $publicPath = session('public_path'); // Ambil nilai dari session
+                            @endphp
+                            @if ($publicPath != 1)
+                                <a href="{{ route('vehicle.edit', $vehicles->id) }}" class="btn btn-warning">Ubah</a>
+                            @endif
                             <a href="{{ route('vehicle.index') }}" class="btn btn-info float-right">Kembali</a>
                           </div>
                         </form>
