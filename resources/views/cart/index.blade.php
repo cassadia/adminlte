@@ -95,8 +95,6 @@
                         for (const [toko, transactions] of Object.entries(data)) {
                             let totalToko = 0;
 
-                            console.log('transactions >>> ', transactions);
-
                             // if (transactions.length > 0) {
                                 content += `<div class="card card-primary">
                                     <div class="card-header">
@@ -115,8 +113,11 @@
                                             </thead>
                                         <tbody>`;
                                 transactions.forEach(transaction => {
-                                    const harga = parseInt(transaction.harga);
-                                    const qty = parseInt(transaction.qty);
+                                    const hargaString = transaction.harga;
+                                    const qtyString = transaction.qty;
+
+                                    const harga = hargaString && !isNaN(hargaString) ? parseFloat(hargaString) : 0;
+                                    const qty = qtyString && !isNaN(qtyString) ? parseInt(qtyString) : 0;
 
                                     totalToko += qty * harga;
 
