@@ -180,6 +180,8 @@ class HomeController extends Controller
     {
         $updQty = $request->stock - $request->qty;
 
+        DB::beginTransaction();
+
         try {
             Product::where('kd_produk', $request->kdBarang)
             ->where('database', $request->lokasi)
@@ -195,11 +197,14 @@ class HomeController extends Controller
                 'qty' => $request->qty,
             ]);
 
+            DB::commit();
+
             return response()->json([
                 'code' => 200,
                 'message' => 'Data berhasil disimpan!'
             ], 200);
         } catch (\Throwable $th) {
+            DB::rollback();
             throw $th;
         }
     }

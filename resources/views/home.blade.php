@@ -209,7 +209,7 @@
                 var kdBarang = $('#kdBarang').val();
                 var nmBarang = $('#nmBarang').val();
                 var mdlMotor = $('#mdlMotor').val();
-                var hrgBarang = $('#hrgBarang').val();
+                var hrgBarang = $('#hrgBarangPerLokVal').val();
                 var lokasi = $row.find('.lokasi').val();
                 var qty = parseInt($row.find('.qty').val());
                 var stock = parseInt($row.find('#stkPerBarangVal').val());
