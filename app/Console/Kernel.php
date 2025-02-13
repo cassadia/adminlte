@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('scheduler:command postTransaction')->everyMinute();
+        // $schedule->command('scheduler:command postTransaction')->everyMinute();
         $schedule->command('scheduler:command getListItemNew')->everyThreeMinutes();
         $schedule->command('scheduler:command updatePriceAndStockNew')->everyFiveMinutes();
         $schedule->command('scheduler:command getSession')->weekly()->mondays()->at('23:00');

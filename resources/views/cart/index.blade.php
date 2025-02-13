@@ -2,6 +2,7 @@
 
 @section('content')
     <!-- Content Header (Page header) -->
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -24,7 +25,8 @@
                         <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="konfirmasiModalLabel">Konfirmasi Penghapusan Data Keranjang</h5>
+                                {{-- <h5 class="modal-title" id="konfirmasiModalLabel">Konfirmasi Penghapusan Data Keranjang</h5> --}}
+                                <h5 class="modal-title" id="konfirmasiModalLabel"></h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -35,6 +37,7 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                                 <button type="button" class="btn btn-primary" id="btnHapus">Kirim</button>
+                                <button type="button" class="btn btn-primary" id="btnCheckout">Kirim</button>
                             </div>
                         </div>
                         </div>
@@ -157,6 +160,11 @@
                                         <h5><strong>Total Keseluruhan:</strong> Rp. ${totalKeseluruhan.toLocaleString()}</h5>
                                     </div>
                                 </div>
+                                <div class="card">
+                                    <div class="card-footer text-right bg-light">
+                                        <button type="button" class="btn btn-primary btn-lg btn-block checkout-button">Checkout</button>
+                                    </div>
+                                </div>
                             `;
                         // }
                     } else {
@@ -183,10 +191,18 @@
 
             // Variabel untuk menyimpan data item yang akan dihapus
             let selectedCartItem = {};
+            let modalTitle = 'Konfirmasi'; // Judul modal default
+            let modalBody = ''; // Isi modal default
+
+            const btnHapus = document.getElementById('btnHapus');
+            const btnCheckout = document.getElementById('btnCheckout');
 
             // Event delegation untuk menangkap klik pada ikon trash
             container.addEventListener('click', async function (event) {
-                if (event.target.classList.contains('delete-cart')) {
+                if (event.target.classList.contains('delete-cart') || event.target.classList.contains('checkout-button')) {
+
+                    const isDelete = event.target.classList.contains('delete-cart');
+
                     // const cartId = event.target.dataset.id;
                     // const cartId = event.target.getAttribute('data-id');
                     // const kdDB = event.target.getAttribute('data-db');
@@ -199,18 +215,69 @@
                         qty: event.target.getAttribute('data-qty'),
                     };
 
+                    modalTitle = isDelete ? 'Konfirmasi Penghapusan Data Keranjang' : 'Konfirmasi Checkout';
+                    modalBody = isDelete ? 'Apakah Anda yakin ingin menghapus produk dari keranjang ?' : 'Apakah Anda yakin ingin checkout item ini?';
+
+                    btnHapus.style.display = isDelete ? 'inline-block' : 'none';
+                    btnCheckout.style.display = isDelete ? 'none' : 'inline-block';
+
+
+                    $('#konfirmasiModalLabel').text(modalTitle);
+                    $('.modal-body').text(modalBody);
                     $('#konfirmasiModal').modal('show');
+
+                    // Hapus event listener sebelumnya untuk menghindari duplikasi
+                    $('#btnHapus').off('click');
+                    $('#btnCheckout').off('click');
+                }
+            });
+
+            document.getElementById('btnCheckout').addEventListener('click', async() => {
+                const loading = document.getElementById('loadingOverlay');
+                loading.style.display = 'block';
+                $('#konfirmasiModal').modal('hide');
+
+                try {
+                    const response = await fetch('{{ url('api/cart/postTransaction') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + apiToken,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        toastr.success(data.message || 'Transaction berhasil checkout.');
+
+                        loadTransactions();
+                    } else {
+                        const error = await response.json();
+                        toastr.error(error.message || 'Gagal checkout.');
+                    }
+                } catch (err) {
+                    console.log('err >>> ', err);
+                    toastr.error('Terjadi kesalahan saat checkout item.');
+                } finally {
+                    loading.style.display = 'none';
                 }
             });
 
             document.getElementById('btnHapus').addEventListener('click', async() => {
+                const loading = document.getElementById('loadingOverlay');
+                loading.style.display = 'block';
+                $('#konfirmasiModal').modal('hide');
+
                 try {
                     const response = await fetch('{{ url('api/cart/deleteCart') }}', {
                         method: 'PUT',
                         headers: {
                             'Accept': 'application/json',
                             'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + apiToken
+                            'Authorization': 'Bearer ' + apiToken,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         },
                         body: JSON.stringify(selectedCartItem),
                     });
@@ -232,7 +299,7 @@
                     // alert('Terjadi kesalahan saat mencoba menghapus item.');
                     toastr.error('Terjadi kesalahan saat mencoba menghapus item.');
                 } finally {
-                    $('#konfirmasiModal').modal('hide');
+                    loading.style.display = 'none';
                 }
             });
         });
