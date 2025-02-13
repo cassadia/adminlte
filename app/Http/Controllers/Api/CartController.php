@@ -31,11 +31,13 @@ class CartController extends Controller
         foreach ($toko as $value) {
             // Ambil transaksi berdasarkan 'kd_database' dari toko
             $transactions = Transaction::Join('products as p', function ($join) {
-                $join->on('transaction.kd_produk', '=', 'p.kd_produk');
+                $join->on('transaction.kd_produk', '=', 'p.kd_produk')
+                    ->on('transaction.kd_database', '=', 'p.database');
             })
             ->select('transaction.*', 'p.nm_produk')
             ->where('transaction.kd_database', $value->kd_database)
             ->whereNull('transaction.deleted_at')
+            ->where('is_send_to_accu', '!=', 1)
             ->get();
 
             // Hanya tambahkan ke hasil jika transaksi tidak kosong
@@ -60,7 +62,7 @@ class CartController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $result,
-        ], 200);
+        ], 200)->header('Cache-Control', 'no-store');
     }
 
     public function deleteCartByID(Request $request)
@@ -97,6 +99,6 @@ class CartController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Item berhasil dihapus!'
-        ], 200);
+        ], 200)->header('Cache-Control', 'no-store');
     }
 }

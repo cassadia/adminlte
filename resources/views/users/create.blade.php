@@ -2,6 +2,7 @@
 
 @section('content')
     <!-- Content Header (Page header) -->
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -159,7 +160,8 @@
                         headers: {
                             'Accept': 'application/json',
                             'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + apiToken
+                            'Authorization': 'Bearer ' + apiToken,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         },
                         body: JSON.stringify(formData)
                     });

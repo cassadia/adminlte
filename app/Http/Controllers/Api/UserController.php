@@ -75,7 +75,7 @@ class UserController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => [
-                    'user' => $users,
+                    'data' => $users,
                     'menus' => $menus
                 ]
             ], 200);
