@@ -34,30 +34,30 @@ class AccurateController extends Controller
             $headers = [
                 'Authorization' => 'Basic ' . $enkrip
             ];
-    
+
             $getRefreshToken = AccurateToken::whereNull('deleted_at')
                 ->where('kd_database', '=', $data->kd_database)->first();
-    
+
             $url = 'https://account.accurate.id/oauth/token?grant_type=refresh_token&refresh_token=' . rtrim($getRefreshToken->refresh_token);
-            
+
             try {
                 $response = $client->post($url, [
                     'headers' => $headers
                 ]);
-    
+
                 // Ambil isi dari respons
                 $body = $response->getBody();
                 $contents = $body->getContents();
-    
+
                 $responseArray = json_decode($contents, true);
-    
+
                 $accessToken = $responseArray['access_token'];
                 $tokenType = $responseArray['token_type'];
                 $refreshToken = $responseArray['refresh_token'];
                 $expiresIn = $responseArray['expires_in'];
-    
+
                 $getRefreshToken->update(['deleted_at' => now()]);
-    
+
                 AccurateToken::create([
                     'access_token' => $accessToken,
                     'token_type' => $tokenType,
@@ -76,7 +76,7 @@ class AccurateController extends Controller
                         'expires_in' => $expiresIn
                     ]
                 ];
-    
+
                 // return response()->json([
                 //     'access_token' => $accessToken,
                 //     'token_type' => $tokenType,
@@ -107,26 +107,26 @@ class AccurateController extends Controller
             $getRefreshToken = AccurateToken::whereNull('deleted_at')
                 ->where('kd_database', $data->kd_database)
                 ->first();
-    
+
             $headers = [
                 'Authorization' => 'Bearer ' . $getRefreshToken->access_token
             ];
-    
+
             $request = new Request('GET'
                 , 'https://account.accurate.id/api/open-db.do?id=' . $data->kd_database, $headers
             );
-    
+
             try {
                 $res = $client->sendAsync($request)->wait();
                 $result = json_decode((string)$res->getBody(), true);
-    
+
                 $host = $result['host'];
                 $session = $result['session'];
                 $admin = $result['admin'];
                 $dataVersion = $result['dataVersion'];
                 $accessibleUntil = $result['accessibleUntil'];
                 $licenseEnd = $result['licenseEnd'];
-    
+
                 $getSession = AccurateSession::whereNull('deleted_at')
                     ->where('kd_database', $data->kd_database)
                     ->first();
@@ -134,7 +134,7 @@ class AccurateController extends Controller
                 if ($getSession) {
                     $getSession->delete();
                 }
-    
+
                 AccurateSession::create([
                     'host' => $host,
                     'session' => $session,
@@ -148,7 +148,7 @@ class AccurateController extends Controller
                 $message[] = [
                     "message" => $res->getBody()
                 ];
-    
+
             } catch (\Exception $e) {
                 return response()->json(['error' => $e->getMessage()], 500);
             }
@@ -168,9 +168,9 @@ class AccurateController extends Controller
         if (count($getDB)>0) {
             foreach ($getDB as $database) {
                 $getAccess = $this->getDatabaseAccess($database->kd_database);
-                if ($getAccess) {
-
-                    $headers = $this->buildHeaders($getAccess->first());
+                $firstAccess = $getAccess->first();
+                if ($firstAccess) {
+                    $headers = $this->buildHeaders($firstAccess);
                     $host = $getAccess->first()->host;
                     $request = new Request('GET', $host . '/accurate/api/item/list.do', $headers);
                     $kdDb = $database->kd_database;
@@ -214,6 +214,8 @@ class AccurateController extends Controller
                     } catch (\Exception $e) {
                         return response()->json(['error' => $e->getMessage()], 500);
                     }
+                } else {
+                    $messages[] = ['message' => 'Tidak ada akses untuk database: '];
                 }
             }
         }
@@ -230,9 +232,8 @@ class AccurateController extends Controller
         if (count($getDB)>0) {
             foreach ($getDB as $database) {
                 $getAccess = $this->getDatabaseAccess($database->kd_database);
-                
-                if ($getAccess) {
-                    $firstAccess = $getAccess->first();
+                $firstAccess = $getAccess->first();
+                if ($firstAccess) {
                     $headers = $this->buildHeaders($firstAccess);
                     $host = $firstAccess->host;
                     $kdDb = $database->kd_database;
@@ -241,11 +242,11 @@ class AccurateController extends Controller
                         $request = $client->getAsync($host . '/accurate/api/item/list.do', ['headers' => $headers]);
                         $response = $request->wait();
                         $result = json_decode((string)$response->getBody(), true);
-    
+
                         $totalPages = $result['sp']['pageCount'];
                         $pageSize = $result['sp']['pageSize'];
                         $promises = [];
-    
+
                         $startTime = microtime(true);
                         for ($i = 1; $i <= $totalPages; $i++) {
                             $promises[] = $client->getAsync(
@@ -253,7 +254,7 @@ class AccurateController extends Controller
                                 ['headers' => $headers]
                             );
                         }
-    
+
                         $responses = Promise\Utils::settle($promises)->wait();
 
                         foreach ($responses as $response) {
@@ -267,12 +268,14 @@ class AccurateController extends Controller
                                 );
                             }
                         }
-    
+
                         $messages[] = ['message' => 'Proses berhasil untuk database: ' . $kdDb];
                         // $messages[] = ['message' => $insert];
                     } catch (\Throwable $e) {
                         $messages[] = ['error' => $e->getMessage()];
                     }
+                } else {
+                    $messages[] = ['message' => 'Tidak ada akses untuk database: '];
                 }
             }
         }
@@ -293,13 +296,13 @@ class AccurateController extends Controller
         if (count($cekTrans)>0) {
             foreach ($cekTrans as $dbTrans) {
                 $getAccess = $this->getDatabaseAccess($dbTrans->kd_database);
-                    
+
                 try {
                     $client = new Client();
 
                     foreach ($getAccess as $access) {
                         $headers = $this->buildHeaders($access);
-    
+
                         $dataTrans = DB::table('transaction')
                                         ->where('is_send_to_accu', 0)
                                         ->where('kd_database', $dbTrans->kd_database)
@@ -310,18 +313,18 @@ class AccurateController extends Controller
                             $data["detailItem[".$item."].itemNo"] = $value->kd_produk;
                             $data["data[".$item."].transDate"] = date("d/m/Y", strtotime($value->created_at));
                         }
-    
+
                         $getListCust = $this->getListCustomer($access->host, $headers);
                         foreach ($getListCust['d'] as $cust) {
                             $data["customerNo"] = $cust['customerNo'];
                         }
-    
+
                         $getAutoNumber = $this->getAutoNumber($access->host, $headers);
                         foreach ($getAutoNumber['d'] as $number) {
                             $data["typeAutoNumber"] = urlencode($number['id']);
                             $data["branchId"] = urlencode("50");
                         }
-    
+
                         $data_query = http_build_query($data);
                         $url = $access->host . '/accurate/api/sales-invoice/save.do?' . $data_query;
                         $request = new Request('POST', urldecode($url), $headers);
@@ -344,12 +347,12 @@ class AccurateController extends Controller
                         $message[] = [
                             'message' => $res_body['d'][0]
                         ];
-    
+
                         // if ($res_body['s']) {
                         //     $pesan = $res_body['d'][0];
                         //     preg_match('/"([^"]+)"/', $pesan, $matches);
                         //     $nomorFaktur = $matches[1];
-        
+
                         //     foreach ($dataTrans as $item) {
                         //         $data = Transaction::find($item->id)->where('kd_database', $dbTrans->kd_database);
                         //         $data->update([
@@ -396,7 +399,7 @@ class AccurateController extends Controller
                         $jmlDataUpdate = 1;
                         $res = $client->sendAsync($request)->wait();
                         $result = json_decode((string)$res->getBody(), true);
-            
+
                         for ($i=1; $i<=$result['sp']['pageCount']; $i++) {
                         // for ($i=1; $i<=3; $i++) {
                             $request_new = new Request('GET'
@@ -405,7 +408,7 @@ class AccurateController extends Controller
                             );
                             $res_new = $client->sendAsync($request_new)->wait();
                             $result_new = json_decode((string)$res_new->getBody(), true);
-            
+
                             foreach ($result_new['d'] as $data) {
                                 $kdProduct = $data['no'];
                                 $kdProductAccu = $data['id'];
@@ -416,7 +419,7 @@ class AccurateController extends Controller
                                 $database = $kdDb;
 
                                 $productExist = Product::where('kd_produk', $kdProduct)->where('database', $database)->count();
-            
+
                                 if ($productExist > 0) {
                                     Product::where('kd_produk', $kdProduct)
                                         ->where('database', $database)
@@ -433,7 +436,7 @@ class AccurateController extends Controller
                             'message' => response()->json([
                                 'message' => 'Data berhasil diperbaharui sebanyak: ' . $jmlDataUpdate . ', Pada database: ' . $kdDb
                             ], 200)
-                        ];                        
+                        ];
                         // return response()->json([
                         //     'message' => 'Data berhasil diperbaharui sebanyak: ' . $jmlDataUpdate . ', Pada database: ' . $kdDb
                         // ], 200);
@@ -507,7 +510,7 @@ class AccurateController extends Controller
                         $endTime = microtime(true);
 
                         $duration = $endTime - $startTime;
-                
+
                         AccurateLogNew::create([
                             'kd_database' => $kdDb,
                             'scheduler' => 'updatePriceAndStockNew',
@@ -516,7 +519,7 @@ class AccurateController extends Controller
                             'startTime' => date('Y-m-d H:i:s', $startTime),
                             'endTime' => date('Y-m-d H:i:s', $endTime),
                             'duration' => number_format($duration, 2) . ' seconds'
-                        ]);                        
+                        ]);
 
                         $message[] = [
                             'message' => response()->json([
@@ -552,7 +555,7 @@ class AccurateController extends Controller
             ->whereNull('b.deleted_at')
             ->get();
     }
-    
+
     private function buildHeaders($getAccess)
     {
         return [
@@ -624,6 +627,7 @@ class AccurateController extends Controller
                 }
             }
         }
+
         AccuratePage::where('id', '=', $id)
         ->update([
             'deleted_at' => now(),
@@ -640,9 +644,6 @@ class AccurateController extends Controller
         $client = new Client();
         $newProducts = [];
         $updateProducts = [];
-        $existingProducts = Product::where('database', $kdDb)
-            ->pluck('kd_produk', 'kd_produk_accu')
-            ->toArray();
 
         foreach($result as $data) {
             $kdProduct = $data['no'];
@@ -653,7 +654,12 @@ class AccurateController extends Controller
             $status = $data['charField5'] === 'N' ? "Tidak Aktif" : "Aktif";
             $barcode = $data['upcNo'];
 
-            if (!isset($existingProducts[$kdProductAccu])) {
+            $productExist = Product::where('kd_produk', $kdProduct)
+                ->where('kd_produk_accu', $kdProductAccu)
+                ->where('database', $kdDb)
+                ->first();
+
+            if (!$productExist) {
                 $newProducts[] = [
                     'kd_produk' => $kdProduct,
                     'kd_produk_accu' => $kdProductAccu,
@@ -722,7 +728,7 @@ class AccurateController extends Controller
         for ($batch = 1; $batch <= $totalBatches; $batch++) {
             $startPage = ($batch - 1) * 10 + 1;
             $endPage = min($startPage + 10 - 1, $totalPages);
-    
+
             AccuratePage::create([
                 'batch' => $batch,
                 'startPage' => $startPage,
