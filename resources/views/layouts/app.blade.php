@@ -40,7 +40,8 @@
                     {{ Auth::user()->name }}
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" style="left: inherit; right: 0px;">
-                    <a href="{{ route('profile.show') }}" class="dropdown-item">
+                    {{-- <a href="{{ route('profile.show') }}" class="dropdown-item"> --}}
+                    <a href="{{ route($publicPath === 0 ? 'profile.show' : 'public.profile.show') }}" class="dropdown-item">
                         <i class="mr-2 fas fa-file"></i>
                         {{ __('My profile') }}
                     </a>
@@ -53,18 +54,18 @@
                             {{ __('Log Out') }}
                         </a>
                     </form> --}}
-                    {{-- <form id="logout-form" method="POST" action="{{ route($publicPath == 1 ? 'public.logout' : 'logout') }}"> --}}
-                    {{-- <form id="logout-form">
+                    <form id="logout-form" method="POST" action="{{ route($publicPath == 1 ? 'public.logout' : 'logout') }}">
+                    {{-- <form id="logout-form"> --}}
                         @csrf
                         <button type="submit" class="dropdown-item">
                             <i class="mr-2 fas fa-sign-out-alt"></i>
                             {{ __('Log Out') }}
                         </button>
-                    </form> --}}
-                    <a href="#" class="dropdown-item" id="logout-btn">
+                    </form>
+                    {{-- <a href="#" class="dropdown-item" id="logout-btn">
                         <i class="mr-2 fas fa-sign-out-alt"></i>
                         {{ __('Log Out') }}
-                    </a>
+                    </a> --}}
                 </div>
             </li>
         </ul>

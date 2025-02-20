@@ -34,9 +34,9 @@ class TestScheduler extends Command
             case 'getListItemNew':
                 $result = $accurateController->getListItemNew();
                 break;
-            case 'postTransaction':
-                $result = $accurateController->postTransaction();
-                break;
+            // case 'postTransaction':
+            //     $result = $accurateController->postTransaction();
+            //     break;
             case 'refreshToken':
                 $result = $accurateController->refreshToken();
                 break;
@@ -54,11 +54,12 @@ class TestScheduler extends Command
 
         \Log::channel('scheduler')->info('Debug Result:', ['result' => $result]); // Log hasil
         $this->line('Result: ' . json_encode($result)); // Tampilkan ke terminal
-    
+
         if ($result instanceof \Illuminate\Http\JsonResponse) {
+            dd($result);
             // Akses data dari JsonResponse
             $data = $result->getData(true);
-    
+
             if (isset($data['messages']) && is_array($data['messages']) && count($data['messages']) > 0) {
                 foreach ($data['messages'] as $message) {
                     \Log::channel('scheduler')->info("Fungsi controller '$task' berhasil dijalankan: " . $message['message']);
@@ -68,6 +69,6 @@ class TestScheduler extends Command
             }
         } else {
             \Log::channel('scheduler')->error("Terjadi kesalahan: Hasil bukan instance JsonResponse.");
-        }        
+        }
     }
 }

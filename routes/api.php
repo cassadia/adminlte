@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\VehicleController;
+use App\Http\Controllers\Api\AccurateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +24,8 @@ use App\Http\Controllers\Api\UserController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+// routes/api.php
+// Route::post('/refresh-token', [LoginController::class, 'refreshToken']);
 
 Route::post('/login', [LoginController::class, 'apiLogin']);
 // Route::post('/logout', [LoginController::class, 'apiLogout'])->middleware('auth:sanctum');
@@ -43,8 +47,10 @@ Route::middleware('auth:sanctum')->post('/product/createProduct', [UserControlle
 Route::middleware('auth:sanctum')->put('/product/updateProduct', [UserController::class, 'updateProduct']);
 Route::middleware('auth:sanctum')->put('/product/deleteProduct', [UserController::class, 'deleteProduct']);
 
-Route::middleware('auth:sanctum')->get('/vehicle', [UserController::class, 'index']);
-Route::middleware('auth:sanctum')->post('/vehicle/getVehicle', [UserController::class, 'getVehicleById']);
-Route::middleware('auth:sanctum')->post('/vehicle/createVehicle', [UserController::class, 'createVehicle']);
-Route::middleware('auth:sanctum')->put('/vehicle/updateVehicle', [UserController::class, 'updateVehicle']);
-Route::middleware('auth:sanctum')->put('/vehicle/deleteVehicle', [UserController::class, 'deleteVehicle']);
+Route::middleware('auth:sanctum')->get('/vehicle', [VehicleController::class, 'index']);
+Route::middleware('auth:sanctum')->post('/vehicle/getVehicle', [VehicleController::class, 'getVehicleById']);
+Route::middleware('auth:sanctum')->post('/vehicle/createVehicle', [VehicleController::class, 'createVehicle']);
+Route::middleware('auth:sanctum')->put('/vehicle/updateVehicle', [VehicleController::class, 'updateVehicle']);
+Route::middleware('auth:sanctum')->put('/vehicle/deleteVehicle', [VehicleController::class, 'deleteVehicle']);
+
+Route::middleware('auth:sanctum')->post('/cart/postTransaction', [AccurateController::class, 'postTransaction']);

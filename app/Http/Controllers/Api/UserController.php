@@ -148,15 +148,32 @@ class UserController extends Controller
                 // }
             }
 
-            Permission::create([
-                'name' => 'profile.show',
-                'user_id' => $getId->id
-            ]);
+            if ($dataPublic == 1) {
+                $permissions = [
+                    'public.logout',
+                    'public.profile.show',
+                    'public.profile.update'
+                ];
 
-            Permission::create([
-                'name' => 'profile.update',
-                'user_id' => $getId->id
-            ]);
+                foreach ($permissions as $permissionsName) {
+                    Permission::create([
+                        'name' => $permissionsName,
+                        'user_id' => $getId->id
+                    ]);
+                }
+            } else {
+                $permissions = [
+                    'profile.show',
+                    'profile.update'
+                ];
+
+                foreach ($permissions as $permissionsName) {
+                    Permission::create([
+                        'name' => $permissionsName,
+                        'user_id' => $getId->id
+                    ]);
+                }
+            }
 
             $menus = $detailRoutes->pluck('idAssign')->toArray();
             $assign = array_unique($menus);
