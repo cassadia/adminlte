@@ -460,9 +460,10 @@ class AccurateController extends Controller
         if (count($getDB) > 0) {
             foreach ($getDB as $database) {
                 $getAccess = $this->getDatabaseAccess($database->kd_database);
-                if ($getAccess) {
-                    $headers = $this->buildHeaders($getAccess->first());
-                    $host = $getAccess->first()->host;
+                $firstAccess = $getAccess->first();
+                if ($firstAccess) {
+                    $headers = $this->buildHeaders($firstAccess);
+                    $host = $firstAccess->host;
                     $kdDb = $database->kd_database;
 
                     try {
@@ -530,7 +531,7 @@ class AccurateController extends Controller
                         return response()->json(['error' => $e->getMessage()], 500);
                     }
                 } else {
-                    echo 'else out';
+                    $messages[] = ['message' => 'Tidak ada akses untuk database: '];
                 }
             }
         }
@@ -677,6 +678,8 @@ class AccurateController extends Controller
                     'kd_produk' => $kdProduct,
                     'kd_produk_accu' => $kdProductAccu,
                     'nm_produk' => $nmProduct,
+                    'harga_jual' => $hargaJual,
+                    'qty_available' => $stockAvail,
                     'barcode' => $barcode,
                     'status' => $status,
                     'updated_at' => now()
@@ -698,6 +701,8 @@ class AccurateController extends Controller
                     'nm_produk' => $product['nm_produk'],
                     'barcode' => $product['barcode'],
                     'status' => $product['status'],
+                    'qty_available' => $product['qty_available'],
+                    'harga_jual' => $product['harga_jual'],
                     'updated_at' => $product['updated_at']
                 ]);
         }

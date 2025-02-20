@@ -209,7 +209,7 @@
                 var kdBarang = $('#kdBarang').val();
                 var nmBarang = $('#nmBarang').val();
                 var mdlMotor = $('#mdlMotor').val();
-                var hrgBarang = $('#hrgBarangPerLokVal').val();
+                var hrgBarang = $row.find('#hrgBarangPerLokVal').val();
                 var lokasi = $row.find('.lokasi').val();
                 var qty = parseInt($row.find('.qty').val());
                 var stock = parseInt($row.find('#stkPerBarangVal').val());
@@ -223,6 +223,24 @@
                 } else if (isChecked && qty > stock) {
                     toastr.error('Quantity yang dimasukkan tidak boleh melebihi stock!');
                     $(this).prop('checked', false);
+
+                    // Reset variabel dan input fields
+                    $('#kdBarang').val('');
+                    $('#nmBarang').val('');
+                    $('#mdlMotor').val('');
+                    $row.find('#hrgBarangPerLokVal').val('');
+                    $row.find('.lokasi').val('none'); // Reset dropdown ke nilai default
+                    $row.find('.qty').val(''); // Reset quantity input
+                    $row.find('#stkPerBarangVal').val(''); // Reset stock value
+
+                    // Reset variabel JavaScript
+                    kdBarang = '';
+                    nmBarang = '';
+                    mdlMotor = '';
+                    hrgBarang = '';
+                    lokasi = 'none';
+                    qty = 0;
+                    stock = 0;
                 } else if (isChecked && qty == 0) {
                     toastr.error('Quantity yang dimasukkan masih 0!');
                     $(this).prop('checked', false);
@@ -236,31 +254,31 @@
                     $('.cek_input').prop('checked', false);
                 });
 
-                // Handle klik tombol "Kirim" pada modal konfirmasi
-                $('#btnKirim').click(function() {
-                    // Di sini Anda dapat menambahkan logika untuk mengirim data, misalnya melalui AJAX
+                // // Handle klik tombol "Kirim" pada modal konfirmasi
+                // $('#btnKirim').click(function() {
+                //     // Di sini Anda dapat menambahkan logika untuk mengirim data, misalnya melalui AJAX
 
-                    // Kirim data yang dipilih ke server untuk disimpan atau diupdate
-                    $.ajax({
-                        url: "insertTransaction",
-                        type: "POST",
-                        data: { kdBarang: kdBarang, nmBarang: nmBarang, mdlMotor: mdlMotor, hrgBarang: hrgBarang, stock: stock, lokasi: lokasi, qty: qty },
-                        success: function(response) {
-                            if (response.code == 200) {
-                                toastr.success(response.message);
-                            }
-                            // Saat checkbox berubah, perbarui data tanpa harus menekan tombol "Cari Motor" lagi
-                            $('.btnCari').trigger('click');
-                        },
-                        error: function(xhr, status, error) {
-                            // Tangani kesalahan jika ada
-                            console.error(error);
-                        }
-                    });
+                //     // Kirim data yang dipilih ke server untuk disimpan atau diupdate
+                //     $.ajax({
+                //         url: "insertTransaction",
+                //         type: "POST",
+                //         data: { kdBarang: kdBarang, nmBarang: nmBarang, mdlMotor: mdlMotor, hrgBarang: hrgBarang, stock: stock, lokasi: lokasi, qty: qty },
+                //         success: function(response) {
+                //             if (response.code == 200) {
+                //                 toastr.success(response.message);
+                //             }
+                //             // Saat checkbox berubah, perbarui data tanpa harus menekan tombol "Cari Motor" lagi
+                //             $('.btnCari').trigger('click');
+                //         },
+                //         error: function(xhr, status, error) {
+                //             // Tangani kesalahan jika ada
+                //             console.error(error);
+                //         }
+                //     });
 
-                    // Setelah data dikirim, Anda dapat menutup modal konfirmasi
-                    $('#konfirmasiModal').modal('hide');
-                });
+                //     // Setelah data dikirim, Anda dapat menutup modal konfirmasi
+                //     $('#konfirmasiModal').modal('hide');
+                // });
 
                 // $('#loadingOverlay').show();
 
@@ -278,6 +296,39 @@
                 // // var kdMotor = $(this).data('KodeProduk');
                 // // var kd_produk = $('#KodeProduk').val();
                 // var kdProduk = $('#KodeProduk').val();
+            });
+
+            // Handle klik tombol "Kirim" pada modal konfirmasi
+            $('#btnKirim').off('click').on('click', function() {
+
+                var $row = $('.cek_input:checked').closest('tr');
+                var kdBarang = $row.find('#kdBarang').val();
+                var nmBarang = $row.find('#nmBarang').val();
+                var mdlMotor = $row.find('#mdlMotor').val();
+                var hrgBarang = $row.find('#hrgBarangPerLokVal').val();
+                var lokasi = $row.find('.lokasi').val();
+                var qty = parseInt($row.find('.qty').val());
+                var stock = parseInt($row.find('#stkPerBarangVal').val());
+
+                $.ajax({
+                    url: "insertTransaction",
+                    type: "POST",
+                    data: { kdBarang: kdBarang, nmBarang: nmBarang, mdlMotor: mdlMotor, hrgBarang: hrgBarang, stock: stock, lokasi: lokasi, qty: qty },
+                    success: function(response) {
+                        if (response.code == 200) {
+                            toastr.success(response.message);
+                        }
+                        // Saat checkbox berubah, perbarui data tanpa harus menekan tombol "Cari Motor" lagi
+                        $('.btnCari').trigger('click');
+                    },
+                    error: function(xhr, status, error) {
+                        // Tangani kesalahan jika ada
+                        console.error(error);
+                    }
+                });
+
+                // Setelah data dikirim, Anda dapat menutup modal konfirmasi
+                $('#konfirmasiModal').modal('hide');
             });
 
             $('.lokasi').on('change', function() {

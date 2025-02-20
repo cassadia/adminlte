@@ -42,13 +42,14 @@ Route::middleware(['auth' , 'check.menu.access', 'check.public.path'])->group(fu
 
     Route::resource('/users', \App\Http\Controllers\UserController::class);
 
-    Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
-    Route::put('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 
     // Route::get('product', [\App\Http\Controllers\ProductController::class, 'show'])->name('product.show');
     Route::resource('/product', \App\Http\Controllers\ProductController::class);
     Route::get('/product/search', [\App\Http\Controllers\UserController::class, 'search'])->name('product.search');
     Route::get('/search', [\App\Http\Controllers\UserController::class, 'search']);
+
     Route::resource('/vehicle', \App\Http\Controllers\VehicleController::class);
 
     Route::get('/mapping', [App\Http\Controllers\ProductController::class, 'indexMapping'])->name('product.mapping');
@@ -115,8 +116,10 @@ Route::prefix('public')->group(function () {
         // Route::resource('/users', \App\Http\Controllers\UserController::class);
 
         // Route::resource('/cart', \App\Http\Controllers\CartController::class);
-        Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
-        Route::put('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+        Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('public.profile.show');
+        Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('public.profile.update');
         Route::get('/users/detail/{id}', [App\Http\Controllers\UserController::class, 'getUserId'])->name('show.user');
+
+        Route::post('/logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('public.logout');
     });
 });

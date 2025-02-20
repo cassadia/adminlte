@@ -97,6 +97,7 @@
                     if (Object.keys(data).length > 0) {
                         for (const [toko, transactions] of Object.entries(data)) {
                             let totalToko = 0;
+                            let kdDB = '';
 
                             // if (transactions.length > 0) {
                                 content += `<div class="card card-primary">
@@ -118,6 +119,7 @@
                                 transactions.forEach(transaction => {
                                     const hargaString = transaction.harga;
                                     const qtyString = transaction.qty;
+                                    kdDB = transaction.kdDB;
 
                                     const harga = hargaString && !isNaN(hargaString) ? parseFloat(hargaString) : 0;
                                     const qty = qtyString && !isNaN(qtyString) ? parseInt(qtyString) : 0;
@@ -149,6 +151,11 @@
                                     <div class="card-footer text-right">
                                         <strong>Total (${toko}):</strong> Rp. ${totalToko.toLocaleString()}
                                     </div>
+                                    <div class="card">
+                                        <div class="card-footer bg-light">
+                                            <button type="button" class="btn btn-primary btn-lg btn-block checkout-button" data-db="${kdDB}">Checkout</button>
+                                        </div>
+                                    </div>
                                 </div>
                                 `;
                             // }
@@ -158,11 +165,6 @@
                                 <div class="card">
                                     <div class="card-footer text-right bg-light">
                                         <h5><strong>Total Keseluruhan:</strong> Rp. ${totalKeseluruhan.toLocaleString()}</h5>
-                                    </div>
-                                </div>
-                                <div class="card">
-                                    <div class="card-footer text-right bg-light">
-                                        <button type="button" class="btn btn-primary btn-lg btn-block checkout-button">Checkout</button>
                                     </div>
                                 </div>
                             `;
@@ -191,6 +193,7 @@
 
             // Variabel untuk menyimpan data item yang akan dihapus
             let selectedCartItem = {};
+            let checkoutDB = '';
             let modalTitle = 'Konfirmasi'; // Judul modal default
             let modalBody = ''; // Isi modal default
 
@@ -214,6 +217,8 @@
                         produk: event.target.getAttribute('data-product'),
                         qty: event.target.getAttribute('data-qty'),
                     };
+
+                    checkoutDB = event.target.getAttribute('data-db');
 
                     modalTitle = isDelete ? 'Konfirmasi Penghapusan Data Keranjang' : 'Konfirmasi Checkout';
                     modalBody = isDelete ? 'Apakah Anda yakin ingin menghapus produk dari keranjang ?' : 'Apakah Anda yakin ingin checkout item ini?';
