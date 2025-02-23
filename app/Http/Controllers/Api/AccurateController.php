@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Request as GuzzleRequest;
+use Illuminate\Http\Request;
 use GuzzleHttp\Promise;
 use GuzzleHttp\Pool;
 use App\Http\Controllers\Controller;
@@ -19,97 +20,102 @@ class AccurateController extends Controller
         $this->userRoleService = $userRoleService;
     }
 
-    public function postTransaction()
+    public function postTransaction(Request $request)
     {
-        $cekTrans = DB::table('transaction')
-                        ->select('kd_database')
-                        ->where('is_send_to_accu', 0)
-                        ->groupBy('kd_database')
-                        ->get();
+        DB::beginTransaction();
 
-        $message = [];
+        try {
+            $cekTrans = DB::table('transaction')
+                ->select('kd_database')
+                ->where('is_send_to_accu', 0)
+                ->where('kd_database', $request->kdDB)
+                ->groupBy('kd_database')
+                ->get();
 
-        if (count($cekTrans)>0) {
-            foreach ($cekTrans as $dbTrans) {
-                $getAccess = $this->getDatabaseAccess($dbTrans->kd_database);
+            $message = [];
 
-                try {
-                    $client = new Client();
+            if (count($cekTrans)>0) {
+                $getAccess = $this->getDatabaseAccess($cekTrans[0]->kd_database);
 
-                    foreach ($getAccess as $access) {
+                $client = new Client();
+                foreach ($getAccess as $access) {
+                    $headers = $this->buildHeaders($access);
+                    $dataTrans = DB::table('transaction')
+                                    ->where('is_send_to_accu', 0)
+                                    ->where('kd_database', $access->kd_database)
+                                    ->whereNull('deleted_at')
+                                    ->get();
 
-                        $headers = $this->buildHeaders($access);
-
-                        $dataTrans = DB::table('transaction')
-                                        ->where('is_send_to_accu', 0)
-                                        ->where('kd_database', $dbTrans->kd_database)
-                                        ->whereNull('deleted_at')
-                                        ->get();
-
-                        $data = [];
-                        foreach ($dataTrans as $item => $value) {
-                            $data["detailItem[".$item."].unitPrice"] = $value->harga_jual;
-                            $data["detailItem[".$item."].quantity"] = $value->qty;
-                            $data["detailItem[".$item."].itemNo"] = $value->kd_produk;
-                            $data["data[".$item."].transDate"] = date("d/m/Y", strtotime($value->created_at));
-                        }
-
-                        $getListCust = $this->getListCustomer($access->host, $headers);
-                        foreach ($getListCust['d'] as $cust) {
-                            $data["customerNo"] = $cust['customerNo'];
-                        }
-
-                        $getAutoNumber = $this->getAutoNumber($access->host, $headers);
-                        foreach ($getAutoNumber['d'] as $number) {
-                            $data["typeAutoNumber"] = urlencode($number['id']);
-                            $data["branchId"] = urlencode("50");
-                        }
-
-                        $data_query = http_build_query($data);
-
-                        $url = $access->host . '/accurate/api/sales-invoice/save.do?' . $data_query;
-                        $request = new Request('POST', urldecode($url), $headers);
-                        $res = $client->sendAsync($request)->wait();
-
-                        $res_body = json_decode($res->getBody(), true);
-
-                        if ($res_body['d'][0]) {
-                            $pesan = $res_body['d'][0];
-                            preg_match('/"([^"]+)"/', $pesan, $matches);
-                            $nomorFaktur = $matches[1];
-                            DB::table('transaction')
-                                ->where('is_send_to_accu', 0)
-                                ->where('kd_database', $dbTrans->kd_database)
-                                ->whereNull('deleted_at')
-                                ->update([
-                                    'is_send_to_accu' => 1,
-                                    'no_accu_trans' => $nomorFaktur
-                                ]);
-                        }
-
-                        $message[] = [
-                            'message' => $res_body['d'][0]
-                        ];
+                    $data = [];
+                    foreach ($dataTrans as $item => $value) {
+                        $data["detailItem[".$item."].unitPrice"] = $value->harga_jual;
+                        $data["detailItem[".$item."].quantity"] = $value->qty;
+                        $data["detailItem[".$item."].itemNo"] = $value->kd_produk;
+                        $data["data[".$item."].transDate"] = date("d/m/Y", strtotime($value->created_at));
                     }
 
-                } catch (\Throwable $th) {
-                    // var_dump('test >>> ', $th->getS);
-                    // throw $th;
-                    return response()->json([
-                        'status' => 'failed',
-                        'data' => $th->getMessage()
-                    ], 500)->header('Cache-Control', 'no-store');
+                    $getListCust = $this->getListCustomer($access->host, $headers);
+                    foreach ($getListCust['d'] as $cust) {
+                        $data["customerNo"] = $cust['customerNo'];
+                    }
+
+                    $getAutoNumber = $this->getAutoNumber($access->host, $headers);
+                    foreach ($getAutoNumber['d'] as $number) {
+                        $data["typeAutoNumber"] = urlencode($number['id']);
+                        $data["branchId"] = urlencode("50");
+                    }
+
+                    $data_query = http_build_query($data);
+
+                    $url = $access->host . '/accurate/api/sales-invoice/save.do?' . $data_query;
+                    $request = new GuzzleRequest(
+                        'POST',
+                        urldecode($url),
+                        $headers,
+                    );
+                    $res = $client->sendAsync($request)->wait();
+                    $res_body = json_decode($res->getBody(), true);
+
+                    if ($res_body['d'][0]) {
+                        $pesan = $res_body['d'][0];
+                        preg_match('/"([^"]+)"/', $pesan, $matches);
+                        $nomorFaktur = $matches[1];
+                        DB::table('transaction')
+                            ->where('is_send_to_accu', 0)
+                            ->where('kd_database', $access->kd_database)
+                            ->whereNull('deleted_at')
+                            ->update([
+                                'is_send_to_accu' => 1,
+                                'no_accu_trans' => $nomorFaktur
+                            ]);
+                    }
+
+                    $message[] = [
+                        'message' => $res_body['d'][0]
+                    ];
                 }
+
+                DB::commit();
+
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $message[0],
+                ], 200)->header('Cache-Control', 'no-store');
+
+            } else {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => 'Data kosong',
+                ], 200)->header('Cache-Control', 'no-store');
             }
+
+        } catch (\Throwable $th) {
+            DB::rollback();
+
             return response()->json([
-                'status' => 'success',
-                'data' => $message[0],
-            ], 200)->header('Cache-Control', 'no-store');
-        } else {
-            return response()->json([
-                'status' => 'success',
-                'data' => 'Data kosong',
-            ], 200)->header('Cache-Control', 'no-store');
+                'status' => 'failed',
+                'data' => $th->getMessage()
+            ], 500)->header('Cache-Control', 'no-store');
         }
     }
 
@@ -136,17 +142,16 @@ class AccurateController extends Controller
     {
         try {
             $client = new Client();
-            $request = new Request('GET', $host . '/accurate/api/customer/list.do?fields=id,name,no,category,email,customerNo&filter.keywords.val=WEB.&filter.keywords.op=CONTAIN', $headers);
+            $request = new GuzzleRequest( // Use GuzzleRequest here
+                'GET',
+                $host . '/accurate/api/customer/list.do?fields=id,name,no,category,email,customerNo&filter.keywords.val=WEB.&filter.keywords.op=CONTAIN',
+                $headers
+            );
+
             $res = $client->sendAsync($request)->wait();
             $data = json_decode($res->getBody(), true);
 
-            $test = isset($data['sp']) && is_array($data['sp']) ? ($data['sp']['rowCount'] ?? 0) : 0;
-
-            if ($test == 0) {
-                throw new \Exception("Kode Customer tidak ditemukan.");  // Recommended
-            }
-
-            return json_decode($res->getBody(), true);
+            return $data; // No need to decode twice
         } catch (\Throwable $th) {
             // Check if a response object exists before trying to access it
             if ($th instanceof \GuzzleHttp\Exception\RequestException && $th->hasResponse()) {
@@ -160,7 +165,7 @@ class AccurateController extends Controller
             }
 
             // Re-throw the original exception after handling potential 401 errors
-            throw $th;  // Now $th is defined
+            throw $th;
         }
     }
 
@@ -168,7 +173,12 @@ class AccurateController extends Controller
     {
         try {
             $client = new Client();
-            $request = new Request('GET', $host . '/accurate/api/auto-number/list.do?filter.keywords.val=penjualan website&filter.keywords.op=CONTAIN', $headers);
+            // $request = new Request('GET', $host . '/accurate/api/auto-number/list.do?filter.keywords.val=penjualan website&filter.keywords.op=CONTAIN', $headers);
+            $request = new GuzzleRequest(
+                'GET',
+                $host . '/accurate/api/auto-number/list.do?filter.keywords.val=penjualan website&filter.keywords.op=CONTAIN',
+                $headers
+            );
             $res = $client->sendAsync($request)->wait();
             return json_decode($res->getBody(), true);
         } catch (\Throwable $th) {
