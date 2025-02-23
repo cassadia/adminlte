@@ -250,7 +250,10 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + apiToken,
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        }
+                        },
+                        body: JSON.stringify({
+                            kdDB: checkoutDB
+                        })
                     });
 
                     if (response.ok) {
