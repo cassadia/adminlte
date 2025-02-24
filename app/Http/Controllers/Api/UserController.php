@@ -89,13 +89,113 @@ class UserController extends Controller
 
     public function createUser(Request $request)
     {
-        $validatedData = $request->validate([
-            'nmUser' => 'required|string|max:255',
-            'emailUser' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
-            'menu' => 'array',
-            'status' => 'boolean'
-        ]);
+        DB::beginTransaction();
+        try {
+            $validatedData = $request->validate([
+                'nmUser' => 'required|string|max:255',
+                'emailUser' => 'required|email|unique:users,email',
+                'password' => 'required|min:6|confirmed',
+                'menu' => 'array',
+                'status' => 'boolean'
+            ]);
+
+            $existingUser = User::withoutGlobalScopes()
+                ->where('email', $request->emailUser)->first();
+
+            if ($existingUser) {
+                return redirect()->back()->withInput()->withErrors(['emailUser' => 'Email sudah ada di database!'])->with(['error' => 'Email sudah ada di database!']);
+            }
+
+            // Tentukan nilai status berdasarkan kondisi checkbox
+            $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
+            $menus = $request->menu;
+            $dataPublic = $request->has('dataPublic') ? 1 : 0;
+
+            $detailRoutes = DB::table('user_menu as a')
+                ->join('user_menu_detail as b', 'b.master_route', '=', 'a.id')
+                ->select('b.detail_route', 'b.id')
+                ->where('a.status', 'Aktif')
+                ->whereNull('a.deleted_at')
+                ->whereIn('a.route', $menus)
+                ->get();
+
+            $detailAssign = DB::table('user_menu')
+                ->whereIn('route', $menus)
+                ->where('status', 'Aktif')
+                ->get();
+
+            //create post
+            User::create([
+                'name' => $request->nmUser,
+                'email' => $request->emailUser,
+                'password' => Hash::make($request->password),
+                'status' => $status,
+                'has_public_path' => $dataPublic
+            ]);
+
+            $getId = User::withoutGlobalScopes()
+                ->where('email', $request->emailUser)
+                ->first();
+
+            foreach ($detailRoutes as $route) {
+                Permission::create([
+                    'name' => $route->detail_route,
+                    'user_id' => $getId->id
+                ]);
+            }
+
+            foreach ($detailAssign as $assign) {
+                DB::table('user_assign')->insert([
+                    'kd_user' => $getId->id,
+                    'id_user_permission' => $assign->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            if ($dataPublic == 1) {
+                $permissions = [
+                    'public.logout',
+                    'public.profile.show',
+                    'public.profile.update'
+                ];
+
+                foreach ($permissions as $permissionsName) {
+                    Permission::create([
+                        'name' => $permissionsName,
+                        'user_id' => $getId->id
+                    ]);
+                }
+            } else {
+                $permissions = [
+                    'profile.show',
+                    'profile.update'
+                ];
+
+                foreach ($permissions as $permissionsName) {
+                    Permission::create([
+                        'name' => $permissionsName,
+                        'user_id' => $getId->id
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User inserted successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+
+            DB::rollback();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User inserted failed'
+            ], 404);
+        }
     }
 
     public function updateUser(Request $request)

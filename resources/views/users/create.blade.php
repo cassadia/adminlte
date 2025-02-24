@@ -106,6 +106,15 @@
                                         <label class="form-check-label" for="exampleCheck1">Aktif</label>
                                     </div>
                                 </div>
+
+                                <div class="form-group">
+                                    <label for="Status">Public</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input"
+                                            id="checkPublic" name="dataPublic">
+                                        <label class="form-check-label" for="checkPublic">Ya</label>
+                                    </div>
+                                </div>
                             </div>
                           <!-- /.card-body -->
 
@@ -137,7 +146,8 @@
                 emailUser: document.getElementById("emailUser").value,
                 password: document.getElementById("password").value,
                 password_confirmation: document.getElementById("password_confirmation").value,
-                status: document.getElementById("status")?.checked ? 1 : 0,
+                status: document.getElementById("exampleCheck1")?.checked ? 1 : 0,
+                dataPublic: document.getElementById("checkPublic")?.checked ? 1 : 0,
                 menu: [...document.querySelectorAll('input[name="menu[]"]:checked')].map(el => el.value)
             };
 
@@ -169,7 +179,7 @@
                     let result = await response.json();
 
                     if (response.ok) {
-                        toastr.success("User berhasil ditambahkan!");
+                        toastr.success(result.message);
                         window.location.href = "{{ route('users.index') }}"; // Redirect ke daftar user
                     } else {
                         console.log('result >>> ', result);

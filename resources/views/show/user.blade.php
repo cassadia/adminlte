@@ -48,7 +48,8 @@
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + apiToken
+                        'Authorization': 'Bearer ' + apiToken,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
                     body: JSON.stringify(payload),
                 });
@@ -57,13 +58,13 @@
                     const result = await response.json();
                     let content = '';
 
-                    let name = result.data.user.name;
-                    let email = result.data.user.email;
-                    let tglbuat = result.data.user.format_createdAt;
-                    let tglubah = result.data.user.format_updatedAt;
-                    let status = result.data.user.status;
+                    let name = result.data.data.name;
+                    let email = result.data.data.email;
+                    let tglbuat = result.data.data.format_createdAt;
+                    let tglubah = result.data.data.format_updatedAt;
+                    let status = result.data.data.status;
                     let menus = result.data.menus;
-                    let dataPublicPath = result.data.user.has_public_path;
+                    let dataPublicPath = result.data.data.has_public_path;
 
                     content += `
                     <div class="card card-primary">
@@ -144,7 +145,9 @@
                     container.innerHTML = content;
                 }
             } catch (error) {
+                console.log('error >>> ', error);
 
+                toastr.failed(result.message || 'Data gagal dimuat.');
             }
         }
 
@@ -170,7 +173,9 @@
                     // toastr.success(result.message || 'Item berhasil dihapus.');
                 }
             } catch (error) {
+                console.log('error >>> ', error);
 
+                toastr.failed(result.message || 'Data gagal diperbaharui.');
             }
         }
 
