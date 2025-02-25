@@ -136,6 +136,38 @@
                         </div>
                     </div> --}}
 
+                    <!-- Modal Konfirmasi -->
+                    <div class="modal fade" id="konfirmasiModal" tabindex="-1" role="dialog" aria-labelledby="konfirmasiModalLabel" aria-hidden="true" data-backdrop="static">
+                        <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="konfirmasiModalLabel">Konfirmasi Penghapusan Data User</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Apakah Anda yakin ingin menghapus data user ini ?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                <button type="button" class="btn btn-primary" id="btnHapus">Ya</button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div id="loadingOverlay" style="display: none; position: fixed;
+                        top: 0; left: 0; width: 100%; height: 100%;
+                            background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+                        <div style="position: absolute; top: 50%; left: 50%;
+                            transform: translate(-50%, -50%); color: white; font-size: 20px;">
+                            <div class="spinner-grow" role="status" id="loading">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="loadUsers"></div>
                 </div>
             </div>
@@ -261,8 +293,7 @@
                                                 <a class="dropdown-item" href="/users/detail/${data.id}" value="${data.id}">Lihat</a>
                             `;
                             publicPath == 1 ? '' : content += `
-                                                <a class="dropdown-item" href="">Ubah</a>
-                                                <a class="dropdown-item" href="">Hapus</a>
+                                                <a class="dropdown-item delete-user" href="" data-id="${data.id}" data-email="${data.email}">Hapus</a>
                             `;
                             content += `
                                             </div>
@@ -367,6 +398,61 @@
             loadUsers(1, perPage, keyword);
         }
 
-        document.addEventListener('DOMContentLoaded', loadUsers(1, 5));
+        document.addEventListener('DOMContentLoaded', function () {
+            loadUsers(1, 5);
+
+            const container = document.getElementById('loadUsers');
+            const btnHapus = document.getElementById('btnHapus');
+            const apiToken = '{{ session('api_token') }}';
+            let dataPayload = {};
+
+            // Gunakan event delegation untuk menangani klik pada tombol "Hapus"
+            container.addEventListener('click', async function (event) {
+                // Periksa apakah elemen yang diklik memiliki kelas 'delete-user'
+                if (event.target.classList.contains('delete-user')) {
+                    event.preventDefault(); // Mencegah perilaku default dari <a>
+
+                    dataPayload = {
+                        userId: event.target.getAttribute('data-id'),
+                        userEmail: event.target.getAttribute('data-email')
+                    };
+
+                    $('#konfirmasiModal').modal('show');
+                }
+            });
+
+            document.getElementById('btnHapus').addEventListener('click', async() => {
+                const loading = document.getElementById('loadingOverlay');
+                loading.style.display = 'block';
+                $('#konfirmasiModal').modal('hide');
+
+                try {
+                    const response = await fetch(`/api/user/deleteUser`, {
+                        method: 'PUT',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + apiToken,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        },
+                        body: JSON.stringify(dataPayload),
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        toastr.success(result.message || 'Data user berhasil dihapus.');
+                        loadUsers(1, 5);
+                    } else {
+                        const errorData = await response.json();
+                        toastr.error(error.message || 'Data user gagal dihapus.');
+                    }
+                } catch (error) {
+                    console.error('Terjadi kesalahan:', error);
+                    toastr.error('Terjadi kesalahan saat menghapus pengguna.');
+                } finally {
+                    loading.style.display = 'none';
+                }
+            })
+        });
     </script>
 @endsection

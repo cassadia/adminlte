@@ -299,33 +299,114 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function updatePass(Request $request)
+    public function updatePassOld(Request $request)
     {
         $getId = User::where('email', $request->emailUser)
             ->first();
 
         if ($getId) {
-            if (Hash::check($request->oldPass, $getId->password)) {
+            if ($request->oldPass !== null) {
+                if (Hash::check($request->oldPass, $getId->password)) {
+                    $getId->update([
+                        'name' => $request->nmUser,
+                        'email' => $request->emailUser,
+                        'password' => Hash::make($request->newPass),
+                    ]);
+                }
+            } else {
                 $getId->update([
                     'name' => $request->nmUser,
                     'email' => $request->emailUser,
-                    'password' => Hash::make($request->newPass),
                 ]);
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Password updated successfully'
-                ], 200);
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Old password is incorrect'
-                ], 400);
             }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Profile berhasil diperbaharui!.'
+            ], 200);
         } else {
             return response()->json([
                 'status' => 'error',
                 'message' => 'User not found'
             ], 404);
+        }
+    }
+
+    public function updatePass(Request $request)
+    {
+        try {
+            $user = User::where('email', $request->emailUser)->firstOrFail();
+
+            if ($request->oldPass !== null && !Hash::check($request->oldPass, $user->password)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Old password is incorrect'
+                ], 400);
+            }
+
+            $updateData = [
+                'name' => $request->nmUser,
+                'email' => $request->emailUser,
+            ];
+
+            if ($request->newPass) {
+                $updateData['password'] = Hash::make($request->newPass);
+            }
+
+            $user->update($updateData);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Profile berhasil diperbaharui!.'
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found'
+            ], 404);
+        }
+    }
+
+    public function deleteUser(Request $request)
+    {
+        try {
+            $user = User::where('email', $request->userEmail)->first();
+            if (!$user) {
+                return response()->json(['message' => 'Pengguna tidak diketemukan'], 404);
+            }
+
+            $permission = Permission::where('user_id', $request->userId)->first();
+            if (!$permission) {
+                return response()->json(['message' => 'Ijin tidak diketemukan'], 404);
+            }
+
+            $userAssign = DB::table('user_assign')
+                ->where('kd_user', $request->userId)
+                ->get();
+
+            // Debugging: Tampilkan data yang ditemukan
+            \Log::info([
+                'user' => $user,
+                'permission' => $permission,
+                'userAssign' => $userAssign,
+            ]);
+
+            $user->delete();
+            $permission->delete();
+            DB::table('user_assign')->where('kd_user', $request->userId)->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data user berhasil dihapus!'
+            ], 200)->header('Cache-Control', 'no-store');
+        } catch (\Throwable $th) {
+            throw $th;
+
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Data user gagal dihapus!'
+            ], 500)->header('Cache-Control', 'no-store');
         }
     }
 }
