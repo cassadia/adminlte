@@ -2,6 +2,7 @@
 
 @section('content')
     <!-- Content Header (Page header) -->
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -18,81 +19,6 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-6">
-                    {{-- <div class="card">
-                        <div id="profileContainer"></div>
-                        <form action="{{ route('profile.update') }}" method="POST">
-                            @csrf
-                            @method('PUT')
-
-                            <div class="card-body">
-                                <div class="input-group mb-3">
-                                    <input type="text" id="name" name="name"
-                                        class="form-control @error('name') is-invalid @enderror"
-                                            placeholder="{{ __('Name') }}"
-                                                value="{{ old('name', auth()->user()->name) }}" required>
-                                    <div class="input-group-append">
-                                        <div class="input-group-text">
-                                            <span class="fas fa-user"></span>
-                                        </div>
-                                    </div>
-                                    @error('name')
-                                    <span class="error invalid-feedback">
-                                        {{ $message }}
-                                    </span>
-                                    @enderror
-                                </div>
-
-                                <div class="input-group mb-3">
-                                    <input type="email" id="email" name="email"
-                                        class="form-control @error('email') is-invalid @enderror"
-                                            placeholder="{{ __('Email') }}"
-                                                value="{{ old('email', auth()->user()->email) }}" required>
-                                    <div class="input-group-append">
-                                        <div class="input-group-text">
-                                            <span class="fas fa-envelope"></span>
-                                        </div>
-                                    </div>
-                                    @error('email')
-                                    <span class="error invalid-feedback">
-                                        {{ $message }}
-                                    </span>
-                                    @enderror
-                                </div>
-
-                                <div class="input-group mb-3">
-                                    <input type="password" id="password" name="password"
-                                           class="form-control @error('password') is-invalid @enderror"
-                                           placeholder="{{ __('New password') }}">
-                                    <div class="input-group-append">
-                                        <div class="input-group-text">
-                                            <span class="fas fa-lock"></span>
-                                        </div>
-                                    </div>
-                                    @error('password')
-                                    <span class="error invalid-feedback">
-                                        {{ $message }}
-                                    </span>
-                                    @enderror
-                                </div>
-
-                                <div class="input-group mb-3">
-                                    <input type="password" id="password_confirmation" name="password_confirmation"
-                                           class="form-control @error('password_confirmation') is-invalid @enderror"
-                                           placeholder="{{ __('New password confirmation') }}"
-                                           autocomplete="new-password">
-                                    <div class="input-group-append">
-                                        <div class="input-group-text">
-                                            <span class="fas fa-lock"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
-                            </div>
-                        </form>
-                    </div> --}}
                     <div class="card card-primary">
                         <div class="card-header">
                             <h3 class="card-title">Profile</h3>
@@ -102,7 +28,7 @@
                             <!-- Placeholder untuk pesan error jika data gagal dimuat -->
                             {{-- <div id="profileContainer"></div> --}}
 
-                            <form action="{{ route('profile.update') }}" method="POST" id="profileForm">
+                            <form id="profileForm">
                                 @csrf
                                 @method('PUT')
 
@@ -195,6 +121,17 @@
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-primary float-right">{{ __('Submit') }}</button>
                                 </div>
+
+                                <div id="loadingOverlay" style="display: none; position: fixed;
+                                    top: 0; left: 0; width: 100%; height: 100%;
+                                        background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+                                    <div style="position: absolute; top: 50%; left: 50%;
+                                        transform: translate(-50%, -50%); color: white; font-size: 20px;">
+                                        <div class="spinner-grow" role="status" id="loading">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </form>
                         {{-- </div> --}}
                     </div>
@@ -219,7 +156,8 @@
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + apiToken
+                        'Authorization': 'Bearer ' + apiToken,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
                 });
 
@@ -227,31 +165,27 @@
                 if (response.ok) {
                     const result = await response.json();
                     console.log('API Response:', result);
-
-                    // Isi nilai input form dengan data dari API
-                    // document.getElementById('name').value = result.data.user.name || '';
-                    // document.getElementById('email').value = result.data.user.email || '';
-                    // document.getElementById('password').value = ''; // Kosongkan password field
-                    // document.getElementById('password_confirmation').value = ''; // Kosongkan password confirmation field
-
-                    // Bersihkan pesan error jika ada
-                    container.innerHTML = '';
-                } else {
-                    // Jika ada error dari API
-                    const errorData = await response.json();
-                    console.error('Failed to load profile:', errorData);
-                    container.innerHTML = `<p class="text-danger">Error: ${errorData.message || 'Gagal memuat data profil.'}</p>`;
                 }
             } catch (error) {
+                console.log('Error:', container);
                 // Tangani error lain (misalnya network error)
-                console.error('Error loading profile:', error);
-                container.innerHTML = `<p class="text-danger">Terjadi kesalahan saat memuat data profil. Silakan coba lagi.</p>`;
+                // console.error('Error loading profile:', error);
+                // container.innerHTML = `<p class="text-danger">Terjadi kesalahan saat memuat data profil. Silakan coba lagi.</p>`;
+
+                // const errorData = await response.json();
+                console.error('Failed to load profile:', error);
+                // container.innerHTML = `<p class="text-danger">Error: ${error.message || 'Gagal memuat data profil.'}</p>`;
             }
         }
-        document.addEventListener('DOMContentLoaded', loadProfile);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProfile();
+        });
 
         document.getElementById("profileForm").addEventListener("submit", async function (event) {
             event.preventDefault();
+            const loading = document.getElementById('loadingOverlay');
+            loading.style.display = 'block';
 
             const apiToken = '{{ session('api_token') }}';
 
@@ -263,36 +197,44 @@
                 newPass_confirmation: document.getElementById("password_confirmation").value
             };
 
-            if (formData.password == "") {
-                toastr.error("Password tidak boleh kosong!");
-            } else if (formData.newPass != formData.newPass_confirmation) {
-                toastr.error("Konfirmasi Password tidak sesuai!");
+            if (formData.oldPass != "") {
+                // toastr.error("Password Lama tidak boleh kosong!");
+                if (formData.newPass == "") {
+                    toastr.error("Password Baru tidak boleh kosong!");
+                    loading.style.display = 'none';
+                    return;
+                } else if (formData.newPass != formData.newPass_confirmation) {
+                    toastr.error("Konfirmasi Password tidak sesuai!");
+                    loading.style.display = 'none';
+                    return;
+                }
             }
 
-            if (formData.newPass != "" && formData.newPass_confirmation != "") {
-                try {
-                    let response = await fetch("/api/user/updatePass", {
-                        method: "PUT",
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + apiToken
-                        },
-                        body: JSON.stringify(formData)
-                    });
+            try {
+                let response = await fetch("/api/user/updatePass", {
+                    method: "PUT",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + apiToken,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify(formData)
+                });
 
-                    let result = await response.json();
+                let result = await response.json();
 
-                    if (response.ok) {
-                        toastr.success("Password berhasil diubah!");
-                        window.location.reload();
-                    } else {
-                        toastr.error("Gagal mengubah password!");
-                    }
-                } catch (error) {
-                    console.error("Error: ", error);
-                    toastr.error("Terjadi kesalahan, coba lagi.");
+                if (response.ok) {
+                    toastr.success(result.message || "Profile berhasil diperbaharui!");
+                    window.location.reload();
+                } else {
+                    toastr.error(result.message || "Profile gagal diperbaharui!");
                 }
+            } catch (error) {
+                console.error("Error: ", error);
+                toastr.error("Terjadi kesalahan, coba lagi!");
+            } finally {
+                loading.style.display = 'none';
             }
         });
     </script>

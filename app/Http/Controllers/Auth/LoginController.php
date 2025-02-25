@@ -48,7 +48,7 @@ class LoginController extends Controller
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        $expiresTime = now()->addMinutes(5);
+        $expiresTime = now()->addMinutes(60);
 
         User::where("email", $emailUser)->update([
             'bearer_token' => $token,

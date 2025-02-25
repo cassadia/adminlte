@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->post('/user/getUser', [UserController::class,
 Route::middleware('auth:sanctum')->post('/user/createUser', [UserController::class, 'createUser']);
 Route::middleware('auth:sanctum')->put('/user/updateUser', [UserController::class, 'updateUser']);
 Route::middleware('auth:sanctum')->put('/user/updatePass', [UserController::class, 'updatePass']);
+Route::middleware('auth:sanctum')->put('/user/deleteUser', [UserController::class, 'deleteUser']);
 
 Route::middleware('auth:sanctum')->get('/product', [UserController::class, 'index']);
 Route::middleware('auth:sanctum')->post('/product/getProduct', [UserController::class, 'getProductById']);
