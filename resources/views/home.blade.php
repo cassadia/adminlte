@@ -21,6 +21,7 @@
                 <div class="col-lg-12">
                     @php
                         $publicPath = session('public_path');
+                        $userId = session('id');
                     @endphp
                     <div class="card card-primary">
                         <div class="card-header d-flex align-items-center">
@@ -128,15 +129,13 @@
                                             <p id="stkPerBarang">0</p>
                                         </td>
                                         <td>
-                                            <div>
-                                                <div class="form-group">
-                                                    <select class="form-control-sm lokasi" style="padding: 0.25rem 0.5rem; height: auto;">
-                                                        <option value="none">Pilih Lokasi</option>
-                                                        @foreach($item['productData'] as $lokasi)
-                                                            <option value="{{ $lokasi->database }}">{{ $lokasi->nm_database }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+                                            <div class="form-group">
+                                                <select class="form-control-sm lokasi" style="padding: 0.25rem 0.5rem; height: auto; width: 175px;">
+                                                    <option value="none">Pilih Lokasi</option>
+                                                    @foreach($item['productData'] as $lokasi)
+                                                        <option value="{{ $lokasi->database }}">{{ $lokasi->nm_database }}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </td>
                                         <td>
@@ -301,6 +300,7 @@
             // Handle klik tombol "Kirim" pada modal konfirmasi
             $('#btnKirim').off('click').on('click', function() {
 
+                const userId = '{{ session('id') }}';
                 var $row = $('.cek_input:checked').closest('tr');
                 var kdBarang = $row.find('#kdBarang').val();
                 var nmBarang = $row.find('#nmBarang').val();
@@ -313,7 +313,10 @@
                 $.ajax({
                     url: "insertTransaction",
                     type: "POST",
-                    data: { kdBarang: kdBarang, nmBarang: nmBarang, mdlMotor: mdlMotor, hrgBarang: hrgBarang, stock: stock, lokasi: lokasi, qty: qty },
+                    data: { kdBarang: kdBarang, nmBarang: nmBarang
+                        , mdlMotor: mdlMotor, hrgBarang: hrgBarang
+                        , stock: stock, lokasi: lokasi
+                        , qty: qty, userId: userId },
                     success: function(response) {
                         if (response.code == 200) {
                             toastr.success(response.message);

@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'Laravel') }}</title>
-    <link rel="icon" href="{!! asset($content->title_icon ?? 'default_icon.png') !!}"/>
+    <title>{{ config('app.name', 'Hondashop') }}</title>
+    {{-- <link rel="icon" href="{!! asset($content->title_icon ?? 'default_icon.png') !!}"/> --}}
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"

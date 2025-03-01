@@ -18,7 +18,9 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-6">
-
+                    @php
+                        $publicPath = session('public_path'); // Ambil nilai dari session
+                    @endphp
                     <div class="card card-primary">
                         <div class="card-header">
                           <h3 class="card-title">Ubah Produk</h3>

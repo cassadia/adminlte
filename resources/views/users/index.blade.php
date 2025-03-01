@@ -351,7 +351,6 @@
                                 <form class="form-inline">
                                     <label for="perPage" class="mr-2">Items per page:</label>
                                     <select class="form-control form-control-sm" id="perPage" onchange="updatePerPage()">
-                                        <option value="5" ${perPage === 5 ? 'selected' : ''}>5</option>
                                         <option value="10" ${perPage === 10 ? 'selected' : ''}>10</option>
                                         <option value="25" ${perPage === 25 ? 'selected' : ''}>25</option>
                                         <option value="50" ${perPage === 50 ? 'selected' : ''}>50</option>
@@ -394,12 +393,16 @@
 
         function searchUsers() {
             const keyword = document.querySelector('#searchKeyword').value;
-            const perPage = document.querySelector('#perPage').value;
+            const perPageElement = document.querySelector('#perPage');
+            const perPage = perPageElement ? perPageElement.value : 10;
+
             loadUsers(1, perPage, keyword);
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            loadUsers(1, 5);
+            const perPageElement = document.querySelector('#perPage');
+            const perPage = perPageElement ? perPageElement.value : 10;
+            loadUsers(1, perPage);
 
             const container = document.getElementById('loadUsers');
             const btnHapus = document.getElementById('btnHapus');

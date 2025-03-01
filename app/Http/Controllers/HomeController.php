@@ -195,6 +195,7 @@ class HomeController extends Controller
                 'harga_jual' => $request->hrgBarang,
                 'kd_database' => $request->lokasi,
                 'qty' => $request->qty,
+                'kd_user' => $request->userId,
             ]);
 
             DB::commit();

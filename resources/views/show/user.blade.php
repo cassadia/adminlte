@@ -65,6 +65,7 @@
                     let status = result.data.data.status;
                     let menus = result.data.menus;
                     let dataPublicPath = result.data.data.has_public_path;
+                    let expiredAt = result.data.data.format_expiredAt;
 
                     content += `
                     <div class="card card-primary">
@@ -84,12 +85,12 @@
 
                             <div class="form-group">
                                 <label for="NamaProduk">Tgl Buat</label>
-                                <input type="text" class="form-control" name="tglbuat" value="${tglbuat}" disabled>
+                                <input type="text" class="form-control" name="tglbuat" value="${tglbuat}" readonly>
                             </div>
 
                             <div class="form-group">
                                 <label for="NamaProduk">Tgl Ubah</label>
-                                <input type="text" class="form-control" name="tglubah" value="${tglubah}" disabled>
+                                <input type="text" class="form-control" name="tglubah" value="${tglubah}" readonly>
                             </div>
 
                             <div class="form-group">
@@ -147,9 +148,13 @@
                                 <div class="row">
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input"
-                                            id="dataPublic" name="public" ${dataPublicPath == 1 ? 'checked' : '' } disabled>
+                                            id="dataPublic" name="dataPublic" ${dataPublicPath == 1 ? 'checked' : '' } disabled>
                                         <label class="form-check-label" for="dataPublic">Ya</label>
                                     </div>
+                                </div>
+                                <div class="form-group" style="${expiredAt != null ? 'display: block;' : 'display: none;'}">
+                                    <label for="expiredTime">Pilih Waktu Expired</label>
+                                    <input type="datetime-local" class="form-control" id="expiredTime" name="expiredTime" value="${expiredAt}" disabled>
                                 </div>
                             </div>
                         </div>
@@ -181,7 +186,7 @@
             } catch (error) {
                 console.log('error >>> ', error);
 
-                toastr.failed(result.message || 'Data gagal dimuat.');
+                toastr.error(result.message || 'Data gagal dimuat.');
             }
         }
 
@@ -209,7 +214,7 @@
             } catch (error) {
                 console.log('error >>> ', error);
 
-                toastr.failed(result.message || 'Data gagal diperbaharui.');
+                toastr.error(result.message || 'Data gagal diperbaharui.');
             }
         }
 
@@ -218,11 +223,34 @@
         document.addEventListener('DOMContentLoaded', function() {
             detailUser();
 
+            $('#dataPublic').on('click', function () {
+                // Periksa apakah checkbox dicentang
+                const isChecked = $(this).is(':checked');
+
+                // Tampilkan atau sembunyikan elemen expiredTime berdasarkan status checkbox
+                $('#expiredTime').parent().toggle(isChecked);
+            });
+
             document.addEventListener('click', function(event) {
                 let button = event.target;
                 let cancelButton = document.querySelector('.btn-cancel');
                 let backButton = document.querySelector('.btn-back');
+                // let publicCheck = document.querySelector('.check-public');
+                let publicCheck = document.querySelector('#dataPublic');
                 let dataUser = {};
+
+
+                if (event.target.matches('#dataPublic')) {
+                    // Periksa apakah checkbox dicentang
+                    const isChecked = publicCheck.checked;
+
+                    // Tampilkan atau sembunyikan elemen expiredTime berdasarkan status checkbox
+                    $('#expiredTime').parent().toggle(isChecked);
+
+                    if (!isChecked) {
+                        $('#expiredTime').val(''); // Mengosongkan nilai input expiredTime
+                    }
+                }
 
                 if (event.target.matches('.btn-edit')) {
                     event.preventDefault();
@@ -244,6 +272,15 @@
 
                 } else if (button.classList.contains('btn-save')) {
                     event.preventDefault();
+                    const isChecked = publicCheck.checked;
+
+                    if (isChecked) {
+                        const expiredTimeInput = document.querySelector('#expiredTime');
+                        if (!expiredTimeInput.value) {
+                            toastr.error('Waktu Expired masih kosong!');
+                            return
+                        }
+                    }
 
                     // TODO: Tambahkan logika untuk menyimpan data ke server
                     // cartId: event.target.getAttribute('data-id'),
@@ -259,6 +296,9 @@
                                 dataUser[input.name].push(input.value); // Simpan nilai dalam array
                             }
                         } else {
+                            if (input.name == 'expiredTime' && !isChecked) {
+                                return;
+                            }
                             dataUser[input.name] = input.value; // Ambil nilai dari input berdasarkan atribut 'name'
                         }
                         input.setAttribute('disabled', 'disabled');
@@ -299,7 +339,7 @@
                     cancelButton.style.display = 'none';
                     backButton.style.display = 'inline-block';
                 }
-            })
+            });
         });
     </script>
 @endsection

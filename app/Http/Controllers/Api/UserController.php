@@ -60,7 +60,8 @@ class UserController extends Controller
                 ->select(
                     'users.*',
                     DB::raw('DATE_FORMAT(users.created_at, "%Y-%m-%d %H:%i:%s") as format_createdAt'),
-                    DB::raw('DATE_FORMAT(users.updated_at, "%Y-%m-%d %H:%i:%s") as format_updatedAt')
+                    DB::raw('DATE_FORMAT(users.updated_at, "%Y-%m-%d %H:%i:%s") as format_updatedAt'),
+                    DB::raw('DATE_FORMAT(users.expires_at, "%Y-%m-%d %H:%i:%s") as format_expiredAt')
                 )
                 ->first();
 
@@ -140,7 +141,8 @@ class UserController extends Controller
                 'email' => $request->emailUser,
                 'password' => Hash::make($request->password),
                 'status' => $status,
-                'has_public_path' => $dataPublic
+                'has_public_path' => $dataPublic,
+                'expires_at' => $request->expiredTime,
             ]);
 
             $getId = User::withoutGlobalScopes()
@@ -197,7 +199,7 @@ class UserController extends Controller
             }
 
             $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
-            $dataPublic = $request->input('dataPublic', 0);
+            $dataPublic = $request->has('dataPublic') ? 1 : 0;
 
             foreach ($request->menu as $menu) {
                 $detailRoutes = DB::table('user_menu as a')
@@ -237,6 +239,7 @@ class UserController extends Controller
                 'email' => $request->emailUser,
                 'status' => $status,
                 'has_public_path' => $dataPublic,
+                'expires_at' => $request->expiredTime,
             ]);
 
             DB::commit();

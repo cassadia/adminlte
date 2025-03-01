@@ -114,14 +114,18 @@
                                             id="checkPublic" name="dataPublic">
                                         <label class="form-check-label" for="checkPublic">Ya</label>
                                     </div>
+                                    <div class="form-group" style="display: none">
+                                        <label for="expiredTime">Pilih Waktu Expired</label>
+                                        <input type="datetime-local" class="form-control" id="expiredTime" name="expiredTime">
+                                    </div>
                                 </div>
                             </div>
                           <!-- /.card-body -->
 
                           <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
+                            <button type="submit" class="btn btn-primary">{{ __('Simpan') }}</button>
                             <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>
-                            <a href="{{ route('users.index') }}" class="btn btn-info float-right">Back</a>
+                            <a href="{{ route('users.index') }}" class="btn btn-info float-right">Kembali</a>
                           </div>
                         </form>
                       </div>
@@ -189,6 +193,16 @@
                     console.error("Error:", error);
                     toastr.error("Terjadi kesalahan, coba lagi.");
                 }
+            }
+        });
+
+        document.addEventListener('click', function(event) {
+            if (event.target.matches('#checkPublic')) {
+                // Periksa apakah checkbox dicentang
+                const isChecked = checkPublic.checked;
+
+                // Tampilkan atau sembunyikan elemen expiredTime berdasarkan status checkbox
+                $('#expiredTime').parent().toggle(isChecked);
             }
         });
     </script>
