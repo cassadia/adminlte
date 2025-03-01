@@ -226,12 +226,16 @@ class UserController extends Controller
                 $menus = $detailRoutes->pluck('idAssign')->toArray();
                 $assign = array_unique($menus);
 
-                DB::table('user_assign')->insert([
-                    'kd_user' => $getId->id,
-                    'id_user_permission' => $assign[0],
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
+                if (!empty($assign)) {
+                    DB::table('user_assign')->insert([
+                        'kd_user' => $getId->id,
+                        'id_user_permission' => $assign[0],
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                } else {
+                    \Log::warning("No valid assignments found for menu: {$menu}");
+                }
             }
 
             User::where("email", $request->emailUser)->update([
