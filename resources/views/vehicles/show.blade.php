@@ -85,7 +85,7 @@
                             @if ($publicPath != 1)
                                 <a href="{{ route('vehicle.edit', $vehicles->id) }}" class="btn btn-warning">Ubah</a>
                             @endif
-                            <a href="{{ route('vehicle.index') }}" class="btn btn-info float-right">Kembali</a>
+                            <a href="{{ $publicPath != 1 ? route('vehicle.index') : route('public.vehicle.index') }}" class="btn btn-info float-right">Kembali</a>
                           </div>
                         </form>
                       </div>
