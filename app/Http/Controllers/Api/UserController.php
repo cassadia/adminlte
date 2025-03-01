@@ -113,7 +113,7 @@ class UserController extends Controller
             // Tentukan nilai status berdasarkan kondisi checkbox
             $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
             $menus = $request->menu;
-            $dataPublic = $request->has('dataPublic') ? 1 : 0;
+            $dataPublic = $request->input('dataPublic', 0);
 
             $detailRoutes = DB::table('user_menu as a')
                 ->join('user_menu_detail as b', 'b.master_route', '=', 'a.id')
@@ -197,7 +197,7 @@ class UserController extends Controller
             }
 
             $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
-            $dataPublic = $request->has('public') ? 1 : 0;
+            $dataPublic = $request->input('dataPublic', 0);
 
             foreach ($request->menu as $menu) {
                 $detailRoutes = DB::table('user_menu as a')

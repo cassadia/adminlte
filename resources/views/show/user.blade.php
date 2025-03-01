@@ -131,16 +131,26 @@
                                 </div>
                             </div>
 
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input"
-                                    id="exampleCheck1" name="status" ${status == 'Aktif' ? 'checked' : '' } disabled>
-                                <label class="form-check-label" for="exampleCheck1">Status</label>
+                            <div class="form-group">
+                                <label for="">Status</label>
+                                <div class="row">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input"
+                                            id="statusAktif" name="status" ${status == 'Aktif' ? 'checked' : '' } disabled>
+                                        <label class="form-check-label" for="statusAktif">Aktif</label>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input"
-                                    id="exampleCheck1" name="public" ${dataPublicPath == 1 ? 'checked' : '' } disabled>
-                                <label class="form-check-label" for="exampleCheck1">Public</label>
+                            <div class="form-group">
+                                <label for="">Public</label>
+                                <div class="row">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input"
+                                            id="dataPublic" name="public" ${dataPublicPath == 1 ? 'checked' : '' } disabled>
+                                        <label class="form-check-label" for="dataPublic">Ya</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     `;
