@@ -98,19 +98,22 @@ Route::prefix('public')->group(function () {
 
         Route::resource('/product', \App\Http\Controllers\ProductController::class)->names([
             'index' => 'public.product.index',
-            'show' => 'public.product.show'
+            'show' => 'public.product.show',
+            'edit' => 'public.product.edit'
         ]);
 
         Route::resource('/vehicle', \App\Http\Controllers\VehicleController::class)->names([
             'index' => 'public.vehicle.index',
-            'show' => 'public.vehicle.show'
+            'show' => 'public.vehicle.show',
+            'edit' => 'public.vehicle.edit'
         ]);
 
-        Route::get('/searchAuto', [\App\Http\Controllers\ProductController::class, 'searchAuto'])->name('product.searchAuto');
-        Route::get('/searchMotor', [\App\Http\Controllers\ProductController::class, 'searchMotor'])->name('product.searchMotor');
+        Route::get('/searchAuto', [\App\Http\Controllers\ProductController::class, 'searchAuto'])->name('public.product.searchAuto');
+        Route::get('/searchMotor', [\App\Http\Controllers\ProductController::class, 'searchMotor'])->name('public.product.searchMotor');
 
         Route::get('/mapping', [App\Http\Controllers\ProductController::class, 'indexMapping'])->name('public.product.mapping');
-        // Route::get('users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
+        Route::post('/updateMapping', [\App\Http\Controllers\MappingController::class, 'updateMapping'])->name('public.mapping.updateMapp');
+        Route::post('/updateMappingAll', [\App\Http\Controllers\MappingController::class, 'updateMappingAll'])->name('public.mapping.updateMappAll');
         Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('public.users.index');
         Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('public.cart.index');
         // Route::resource('/users', \App\Http\Controllers\UserController::class);

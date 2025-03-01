@@ -21,7 +21,7 @@ class CheckExpiresTime
 
         if ($user && $user->expires_at && Carbon::now()->greaterThan($user->expires_at)) {
             Auth::logout();
-            return redirect()->route('login')->with(['error' => 'Sesi Anda telah kedaluwarsa. Silakan login kembali.']);
+            return redirect()->route('login')->with(['error' => 'Sesi Anda telah kedaluwarsa!']);
         }
         return $next($request);
     }

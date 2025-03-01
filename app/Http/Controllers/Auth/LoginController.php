@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -48,11 +49,11 @@ class LoginController extends Controller
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        $expiresTime = now()->addMinutes(60);
+        // $expiresTime = now()->addMinutes(60);
 
         User::where("email", $emailUser)->update([
             'bearer_token' => $token,
-            'expires_at' => $expiresTime,
+            // 'expires_at' => $expiresTime,
         ]);
 
         // Simpan token ke session
@@ -64,6 +65,20 @@ class LoginController extends Controller
         ]);
 
         return route($cekRoute->menu_link);
+    }
+
+
+    public function logout(Request $request)
+    {
+        // Logout pengguna
+        Auth::logout();
+
+        // Hapus sesi
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Redirect ke halaman login atau halaman publik lainnya
+        return redirect()->route('login');
     }
 
     /**

@@ -19,7 +19,9 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
-
+                    @php
+                        $publicPath = session('public_path'); // Ambil nilai dari session
+                    @endphp
                     <div class="card card-primary">
                         <div class="card-header d-flex align-items-center">
                             <h3 class="card-title">Mapping Produk dan Motor</h3>
@@ -71,7 +73,10 @@
                                             <button id="searchMotor" type="button" class="btn btn-primary btn-sm">
                                                 <i class="fas fa-search"></i> Cari
                                             </button>
-                                            &nbsp;<a href="{{ route('product.mapping', ['reset' => true]) }}" class="btn btn-sm btn-warning"><i class="fas fa-eraser"></i> Clear</a>
+                                            &nbsp;
+                                            <a href="{{  route($publicPath == 1 ? 'public.product.mapping' : 'product.mapping', ['reset' => true]) }}" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-eraser"></i> Clear
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -88,8 +93,7 @@
                             </div>
                         </div>
                     </div>
-                    
-                    
+
                     <div class="card">
                         <div class="card-body p-0">
                             <table class="table table-striped">
@@ -152,6 +156,17 @@
     <!-- /.content -->
 @endsection
 
+@section('styles')
+    <style>
+        #search_list {
+            max-height: 300px; /* Sesuaikan tinggi maksimal sesuai kebutuhan */
+            overflow-y: auto;  /* Menambahkan scrollbar vertikal */
+            /* border: 1px solid #ccc; Opsional: tambahkan border untuk estetika */
+            width: 100%; /* Sesuaikan lebar sesuai kebutuhan */
+        }
+    </style>
+@endsection
+
 @section('scripts')
     @if ($message = Session::get('success'))
         <script>
@@ -185,16 +200,16 @@
                 var kodeProduk = $(this).find('td:eq(0)').text();
                 var namaProduk = $(this).find('td:eq(1)').text();
                 // var lokasi = $(this).find('td:eq(2)').text();
-                
+
                 // Tempatkan nilai kode produk ke dalam input kode produk
                 $('#KodeProduk').val(kodeProduk);
                 $('#NamaProduk').val(namaProduk);
                 // $('#Lokasi').val(lokasi);
-    
+
                 // Bersihkan daftar saran setelah nilai dimasukkan
                 $('#search_list').empty();
             });
-    
+
             // Event keyup pada input search
             $('#search').on('keyup', function() {
                 var query = $(this).val();
@@ -215,6 +230,7 @@
 
             $('#searchMotor').on('click', function() {
                 var kd_produk = $('#KodeProduk').val();
+                const publicPath = '{{ session('public_path') }}';
 
                 if (kd_produk == '') {
                     return toastr.warning("Kata pencarian masih kosong!");
@@ -230,11 +246,13 @@
                     type: "GET",
                     data: { kd_produk: kd_produk },
                     success: function(data) {
-                        $('#selectAll').prop('disabled', false);
-                        $('#selectAll').prop('checked', false);
+                        if (publicPath != 1) {
+                            $('#selectAll').prop('disabled', false);
+                            $('#selectAll').prop('checked', false);
+                        }
                         // Tempatkan data hasil pencarian ke dalam tabel di dalam tbody
                         $('#search_motor').html(data);
-                        
+
                         // Perbarui status tombol "Mapping" setelah data dimuat
                         updateMappingButtonStatus();
                         $('#export-link').removeAttr('disabled');
@@ -285,7 +303,7 @@
 
             $('#selectAll').on('click', function() {
                 $('#loadingOverlay').show();
-                
+
                 // Perbarui status checkbox sebelumnya untuk semua checkbox yang dipilih sebelumnya
                 $('.motor_cek').each(function() {
                     $(this).data('checked-before', $(this).is(':checked'));
@@ -295,7 +313,7 @@
                 setTimeout(function() {
                     $('#loadingOverlay').hide();
                 }, 2000); // 3000 milidetik = 3 detik
-                
+
                 var isChecked = $(this).is(':checked');
                 if (isChecked) {
                     if ($('#search_motor').children(':visible').length > 0) {
@@ -434,6 +452,7 @@
 
             // Fungsi untuk mengupdate status tombol "Mapping"
             function updateMappingButtonStatus() {
+                const publicPath = '{{ session('public_path') }}';
                 var checkboxes = $('input[name="motor_cek"]');
                 var checkall = $('#selectAll');
                 var isAnyChecked = checkboxes.is(':checked');

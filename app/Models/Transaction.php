@@ -15,6 +15,7 @@ class Transaction extends Model
 
     protected $fillable = [
         'no_accu_trans',
+        'kd_user',
         'kd_produk',
         'kd_produk_accu',
         'kd_motor',

@@ -38,6 +38,7 @@ class CartController extends Controller
             ->where('transaction.kd_database', $value->kd_database)
             ->whereNull('transaction.deleted_at')
             ->where('is_send_to_accu', '!=', 1)
+            ->where('kd_user', $request->kdUser)
             ->get();
 
             // Hanya tambahkan ke hasil jika transaksi tidak kosong
@@ -71,6 +72,7 @@ class CartController extends Controller
         $kdDB = $request->input('kdDB');
         $produk = $request->input('produk');
         $qty = $request->input('qty');
+        $kdUser = $request->input('kdUser');
 
         $stock = Product::where('database', $kdDB)
             ->where('kd_produk', $produk)
@@ -91,6 +93,7 @@ class CartController extends Controller
         $transaction = Transaction::where('id', $cart)
             ->where('kd_database', $kdDB)
             ->where('kd_produk', $produk)
+            ->where('kd_user', $kdUser)
             ->whereNull('deleted_at')
             ->update([
                 'deleted_at' => now()

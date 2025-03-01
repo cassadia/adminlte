@@ -73,17 +73,21 @@
             const loading = document.getElementById('loadingOverlay');
             const container = document.getElementById('transactionsContainer');
             const apiToken = '{{ session('api_token') }}';
+            let payload = {
+               kdUser: '{{ session('id') }}'
+            };
 
             loading.style.display = 'block';
 
             try {
                 const response = await fetch('{{ url('api/cart') }}', {
-                    method: 'GET',
+                    method: 'POST',
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + apiToken
                     },
+                    body: JSON.stringify(payload),
                 });
                 const result = await response.json();
 
@@ -216,6 +220,7 @@
                         kdDB: event.target.getAttribute('data-db'),
                         produk: event.target.getAttribute('data-product'),
                         qty: event.target.getAttribute('data-qty'),
+                        kdUser: '{{ session('id') }}',
                     };
 
                     checkoutDB = event.target.getAttribute('data-db');

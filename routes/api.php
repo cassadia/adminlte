@@ -31,7 +31,7 @@ Route::post('/login', [LoginController::class, 'apiLogin']);
 // Route::post('/logout', [LoginController::class, 'apiLogout'])->middleware('auth:sanctum');
 Route::middleware('auth:sanctum')->post('/logout', [LoginController::class, 'apiLogout']);
 
-Route::middleware('auth:sanctum')->get('/cart', [CartController::class, 'index']);
+Route::middleware('auth:sanctum')->post('/cart', [CartController::class, 'index']);
 Route::middleware('auth:sanctum')->put('/cart/deleteCart', [CartController::class, 'deleteCartByID']);
 Route::middleware('auth:sanctum')->get('/profile/getUserByEmail', [ProfileController::class, 'getUserByEmail']);
 
