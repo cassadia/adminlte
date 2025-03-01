@@ -312,40 +312,40 @@
     // });
 
 
-    document.getElementById("logout-btn").addEventListener("click", async function(event) {
-        event.preventDefault();
+    // document.getElementById("logout-btn").addEventListener("click", async function(event) {
+    //     event.preventDefault();
 
-        try {
-            const response = await fetch(`{{ url('api/logout') }}`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + '{{ session('api_token') }}' // Ambil token dari localStorage
-                }
-            });
+    //     try {
+    //         const response = await fetch(`{{ url('api/logout') }}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer ' + '{{ session('api_token') }}' // Ambil token dari localStorage
+    //             }
+    //         });
 
-            const data = await response.json();
-            console.log('Logout Response:', data);
+    //         const data = await response.json();
+    //         console.log('Logout Response:', data);
 
-            if (response.ok) {
-                toastr.success("Logout berhasil!");
+    //         if (response.ok) {
+    //             toastr.success("Logout berhasil!");
 
-                // 🔥 Hapus token dari localStorage/sessionStorage
-                localStorage.removeItem('token');
-                sessionStorage.removeItem('token');
+    //             // 🔥 Hapus token dari localStorage/sessionStorage
+    //             localStorage.removeItem('token');
+    //             sessionStorage.removeItem('token');
 
-                // 🔄 Redirect ke halaman login setelah logout sukses
-                setTimeout(() => {
-                    // window.location.href = data.redirect;
-                    window.location.href = "{{ route('login') }}";
-                }, 1500);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            toastr.error("Gagal logout!");
-        }
-    });
+    //             // 🔄 Redirect ke halaman login setelah logout sukses
+    //             setTimeout(() => {
+    //                 // window.location.href = data.redirect;
+    //                 window.location.href = "{{ route('login') }}";
+    //             }, 1500);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error:', error);
+    //         toastr.error("Gagal logout!");
+    //     }
+    // });
 
 </script>
 

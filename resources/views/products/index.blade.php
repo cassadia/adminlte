@@ -85,7 +85,7 @@
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-right" role="menu">
                                                     <a class="dropdown-item"
-                                                        href="{{ route('product.show', $product->id) }}">Lihat</a>
+                                                        href="{{ $publicPath != 1 ? route('product.show', $product->id) : route('public.product.show', $product->id) }}">Lihat</a>
                                                     @if ($publicPath != 1)
                                                         <a class="dropdown-item"
                                                             href="{{ route('product.edit', $product->id) }}">Ubah</a>

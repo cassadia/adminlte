@@ -29,7 +29,7 @@
                             @csrf
                             @method('PUT')
                             <div class="card-body">
-                                
+
                                 <div class="form-group">
                                     <label for="KodeMotor">Kode Motor</label>
                                     <input type="text" class="form-control  @error('KodeMotor') is-invalid @enderror" placeholder="Kode Motor" name="KodeMotor" value="{{ old('kd_motor', $vehicles->kd_motor) }}">
@@ -41,7 +41,7 @@
                                         </div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="form-group">
                                     <label for="NamaMotor">Nama Motor</label>
                                     <input type="text" class="form-control @error('NamaMotor') is-invalid @enderror" placeholder="Nama Motor" name="NamaMotor" value="{{ old('nm_motor', $vehicles->nm_motor) }}">
@@ -57,7 +57,7 @@
                                 <div class="form-group">
                                     <label>Tahun dari:</label>
                                     <input type="number" class="form-control @error('TahunMotorDari') is-invalid @enderror" placeholder="Tahun Dari" name="TahunMotorDari" id="TahunMotorDari" value="{{ old('TahunMotor', $vehicles->tahun_dari) }}" min="0" max="9999">
-                                
+
                                     <!-- Pesan kesalahan untuk input tahun -->
                                     @error('TahunMotorDari')
                                         <div class="alert alert-danger mt-2 small">
@@ -69,7 +69,7 @@
                                 <div class="form-group">
                                     <label>Tahun sampai:</label>
                                     <input type="number" class="form-control @error('TahunMotorSampai') is-invalid @enderror" placeholder="Tahun Sampai" name="TahunMotorSampai" id="TahunMotorSampai" value="{{ old('TahunMotor', $vehicles->tahun_sampai) }}" min="0" max="9999">
-                                
+
                                     <!-- Pesan kesalahan untuk input tahun -->
                                     @error('TahunMotorSampai')
                                         <div class="alert alert-danger mt-2 small">
@@ -119,11 +119,11 @@
                                 </div>
                             </div>
                           <!-- /.card-body -->
-          
+
                           <div class="card-footer">
                             <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
                             <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>
-                            <a href="{{ route('vehicle.index') }}" class="btn btn-info float-right">Back</a>
+                            <a href="{{ $publicPath != 1 ? route('vehicle.index') : route('public.vehicle.index') }}" class="btn btn-info float-right">Kembali</a>
                           </div>
                         </form>
                       </div>
@@ -147,7 +147,7 @@
             // Mendapatkan elemen input tahun
             var tahunInputDari = document.getElementById('TahunMotorDari');
             var tahunInputSampai = document.getElementById('TahunMotorSampai');
-            
+
             // Menambahkan event listener untuk membatasi panjang input tahun
             tahunInputDari.addEventListener('input', function(event) {
                 // Ambil nilai input

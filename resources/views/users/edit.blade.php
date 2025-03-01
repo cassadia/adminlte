@@ -29,7 +29,7 @@
                             @csrf
                             @method('PUT')
                             <div class="card-body">
-                                
+
                                 <div class="form-group">
                                     <label for="nmUser">Nama</label>
                                     <input type="text" name="nmUser"
@@ -43,7 +43,7 @@
                                         </div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="form-group">
                                     <label for="email">Email</label>
                                     <input type="text" name="emailUser"
@@ -65,15 +65,21 @@
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <div class="form-check">
-                                                    <input type="checkbox" class="form-check-input"
+                                                    {{-- <input type="checkbox" class="form-check-input"
                                                         name="after[]" value="{{ $menu->menu }}"
                                                             id="{{ $menu->menu }}"
+                                                                {{ $menu->menuakses == 1 ? 'checked' : '' }}> --}}
+                                                    <input type="checkbox" class="form-check-input"
+                                                        name="after[]" value="{{ $menu->menu }}"
+                                                            id="menu_{{ $menu->id }}"
                                                                 {{ $menu->menuakses == 1 ? 'checked' : '' }}>
                                                     <input type="hidden" class="form-check-input"
                                                         name="before[]"
                                                             value="{{ $menu->menuakses == 1 ? $menu->menu : '' }}">
+                                                    {{-- <label class="form-check-label"
+                                                        for="{{ $menu->menu }}">{{ $menu->menu }}</label> --}}
                                                     <label class="form-check-label"
-                                                        for="{{ $menu->menu }}">{{ $menu->menu }}</label>
+                                                        for="menu_{{ $menu->id }}">{{ $menu->menu }}</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -89,7 +95,7 @@
                                 </div>
                             </div>
                           <!-- /.card-body -->
-          
+
                           <div class="card-footer">
                             <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
                             <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>

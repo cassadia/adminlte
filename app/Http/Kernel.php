@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'check.menu.access' => \App\Http\Middleware\CheckMenuAccess::class,
         'check.public.path' => \App\Http\Middleware\CheckPublicPath::class,
+        'allow.fallback.access' => \App\Http\Middleware\AllowFallbackAccess::class,
     ];
 }

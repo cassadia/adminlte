@@ -29,7 +29,7 @@
                             @csrf
                             @method('PUT')
                             <div class="card-body">
-                                
+
                                 <div class="form-group">
                                     <label for="KodeProduk">Kode Produk</label>
                                     <input type="text" class="form-control  @error('KodeProduk') is-invalid @enderror" placeholder="Kode Produk" name="KodeProduk" value="{{ old('kd_produk', $products->kd_produk) }}">
@@ -41,7 +41,7 @@
                                         </div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="form-group">
                                     <label for="NamaProduk">Nama Produk</label>
                                     <input type="text" class="form-control @error('NamaProduk') is-invalid @enderror"
@@ -81,7 +81,7 @@
                                         </div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="form-group">
                                     <label for="Lokasi">Lokasi</label>
                                     <select name="Lokasi" id="" class="form-control @error('Lokasi') is-invalid @enderror">
@@ -108,13 +108,14 @@
                                 </div>
                             </div>
                             <!-- /.card-body -->
-          
+
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
                                 <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>
-                                @if (session('previous_url'))
-                                    <a href="{{ session('previous_url') }}" class="btn btn-info float-right">Back</a>
-                                @endif
+                                {{-- @if (session('previous_url'))
+                                    <a href="{{ session('previous_url') }}" class="btn btn-info float-right">Kembali</a>
+                                @endif --}}
+                                <a href="{{ $publicPath != 1 ? route('product.index') : route('public.product.index') }}" class="btn btn-info float-right">Kembali</a>
                             </div>
                         </form>
                       </div>

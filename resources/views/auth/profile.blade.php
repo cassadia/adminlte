@@ -56,7 +56,7 @@
                                         <input type="email" id="emailUser" name="email"
                                             class="form-control @error('email') is-invalid @enderror"
                                             placeholder="{{ __('Email') }}"
-                                            value="{{ old('email', auth()->user()->email) }}" required>
+                                            value="{{ old('email', auth()->user()->email) }}" autocomplete="username" required>
                                         <div class="input-group-append">
                                             <div class="input-group-text">
                                                 <span class="fas fa-envelope"></span>
@@ -73,7 +73,7 @@
                                     <div class="input-group mb-3">
                                         <input type="password" id="old_password" name=""
                                             class="form-control @error('old_password') is-invalid @enderror"
-                                            placeholder="{{ __('Old Password') }}">
+                                            placeholder="{{ __('Old Password') }}" autocomplete="current-password">
                                         <div class="input-group-append">
                                             <div class="input-group-text">
                                                 <span class="fas fa-lock"></span>
@@ -90,7 +90,7 @@
                                     <div class="input-group mb-3">
                                         <input type="password" id="password" name="password"
                                             class="form-control @error('password') is-invalid @enderror"
-                                            placeholder="{{ __('New password') }}">
+                                            placeholder="{{ __('New password') }}" autocomplete="new-password">
                                         <div class="input-group-append">
                                             <div class="input-group-text">
                                                 <span class="fas fa-lock"></span>
@@ -164,7 +164,6 @@
                 // Handle response
                 if (response.ok) {
                     const result = await response.json();
-                    console.log('API Response:', result);
                 }
             } catch (error) {
                 console.log('Error:', container);

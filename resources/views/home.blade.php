@@ -366,7 +366,7 @@
                         );
                         $row.find('#hrgBarangPerLokVal').val(response.harga_jual);
                     }
-                })
+                });
             });
         });
     </script>
