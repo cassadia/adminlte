@@ -52,39 +52,43 @@ class UserController extends Controller
 
     public function getUserById(Request $request)
     {
-        $id = $request->input('id');
+        try {
+            $id = $request->input('id');
 
-        $users = User::whereNull('deleted_at')
-            ->where('id', $id)
-            ->select(
-                'users.*',
-                DB::raw('DATE_FORMAT(users.created_at, "%Y-%m-%d %H:%i:%s") as format_createdAt'),
-                DB::raw('DATE_FORMAT(users.updated_at, "%Y-%m-%d %H:%i:%s") as format_updatedAt')
-            )
-            ->first();
+            $users = User::whereNull('deleted_at')
+                ->where('id', $id)
+                ->select(
+                    'users.*',
+                    DB::raw('DATE_FORMAT(users.created_at, "%Y-%m-%d %H:%i:%s") as format_createdAt'),
+                    DB::raw('DATE_FORMAT(users.updated_at, "%Y-%m-%d %H:%i:%s") as format_updatedAt')
+                )
+                ->first();
 
-        $menus = DB::table('user_menu as um')
-            ->select('um.menu')
-            ->selectRaw('CASE WHEN (
-                SELECT 1 FROM users u JOIN user_assign ua ON ua.kd_user = u.id AND ua.id_user_permission = um.id
-                WHERE u.email = ? limit 1
-            ) IS NULL THEN 0 ELSE 1 END AS menuakses', [$users->email])
-            ->get();
+            $menus = DB::table('user_menu as um')
+                ->select('um.menu')
+                ->selectRaw('CASE WHEN (
+                    SELECT 1 FROM users u JOIN user_assign ua ON ua.kd_user = u.id AND ua.id_user_permission = um.id
+                    WHERE u.email = ? limit 1
+                ) IS NULL THEN 0 ELSE 1 END AS menuakses', [$users->email])
+                ->get();
 
-        if ($users) {
+            if ($users) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => [
+                        'data' => $users,
+                        'menus' => $menus
+                    ]
+                ], 200)->header('Cache-Control', 'no-store');
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+
             return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'data' => $users,
-                    'menus' => $menus
-                ]
-            ], 200);
+                'status' => 'error',
+                'message' => 'User not found'
+            ], 404)->header('Cache-Control', 'no-store');
         }
-
-        return response()->json([
-            'status' => 'error',
-            'message' => 'User not found'
-        ], 404);
     }
 
     public function createUser(Request $request)
@@ -102,6 +106,8 @@ class UserController extends Controller
             $existingUser = User::withoutGlobalScopes()
                 ->where('email', $request->emailUser)->first();
 
+            dd($existingUser)->all();
+
             if ($existingUser) {
                 return redirect()->back()->withInput()->withErrors(['emailUser' => 'Email sudah ada di database!'])->with(['error' => 'Email sudah ada di database!']);
             }
@@ -117,6 +123,12 @@ class UserController extends Controller
                 ->where('a.status', 'Aktif')
                 ->whereNull('a.deleted_at')
                 ->whereIn('a.route', $menus)
+                ->when($dataPublic == 1, function ($query) {
+                    return $query->where('b.has_public_path', 1);
+                })
+                ->when($dataPublic != 1, function ($query) {
+                    return $query->whereNull('b.has_public_path');
+                })
                 ->get();
 
             $detailAssign = DB::table('user_menu')
@@ -153,150 +165,101 @@ class UserController extends Controller
                 ]);
             }
 
-            if ($dataPublic == 1) {
-                $permissions = [
-                    'public.logout',
-                    'public.profile.show',
-                    'public.profile.update'
-                ];
-
-                foreach ($permissions as $permissionsName) {
-                    Permission::create([
-                        'name' => $permissionsName,
-                        'user_id' => $getId->id
-                    ]);
-                }
-            } else {
-                $permissions = [
-                    'profile.show',
-                    'profile.update'
-                ];
-
-                foreach ($permissions as $permissionsName) {
-                    Permission::create([
-                        'name' => $permissionsName,
-                        'user_id' => $getId->id
-                    ]);
-                }
-            }
-
             DB::commit();
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'User inserted successfully'
-            ], 200);
+            ], 200)->header('Cache-Control', 'no-store');
         } catch (\Throwable $th) {
             //throw $th;
+
+            // \Log::info('Insert user:', $th);
 
             DB::rollback();
 
             return response()->json([
                 'status' => 'error',
                 'message' => 'User inserted failed'
-            ], 404);
+            ], 404)->header('Cache-Control', 'no-store');
         }
     }
 
     public function updateUser(Request $request)
     {
-        $getId = User::where('email', $request->emailUser)
+        DB::beginTransaction();
+        try {
+            $getId = User::where('email', $request->emailUser)
             ->first();
 
-        $cekPermission = DB::select('select * from permissions where user_id = ?', [$getId->id]);
-        if (count($cekPermission) > 0) {
-            DB::delete('delete from permissions where user_id = ?', [$getId->id]);
-            DB::delete('delete from user_assign where kd_user = ?', [$getId->id]);
-        }
+            $cekPermission = DB::select('select * from permissions where user_id = ?', [$getId->id]);
+            if (count($cekPermission) > 0) {
+                DB::delete('delete from permissions where user_id = ?', [$getId->id]);
+                DB::delete('delete from user_assign where kd_user = ?', [$getId->id]);
+            }
 
-        $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
-        $dataPublic = $request->has('public') ? 1 : 0;
+            $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
+            $dataPublic = $request->has('public') ? 1 : 0;
 
-        foreach ($request->menu as $menu) {
-            $detailRoutes = DB::table('user_menu as a')
-                ->join('user_menu_detail as b', 'b.master_route', '=', 'a.id')
-                ->select('b.detail_route', 'b.id', 'a.id as idAssign')
-                ->where('a.status', 'Aktif')
-                ->whereNull('a.deleted_at')
-                ->where('a.menu', $menu)
-                ->get();
+            foreach ($request->menu as $menu) {
+                // dd($menu)->all();
+                $detailRoutes = DB::table('user_menu as a')
+                    ->join('user_menu_detail as b', 'b.master_route', '=', 'a.id')
+                    ->select('b.detail_route', 'b.id', 'a.id as idAssign')
+                    ->where('a.status', 'Aktif')
+                    ->whereNull('a.deleted_at')
+                    ->where('a.menu', $menu)
+                    ->when($dataPublic == 1, function ($query) {
+                        return $query->where('b.has_public_path', 1);
+                    })
+                    ->when($dataPublic != 1, function ($query) {
+                        return $query->whereNull('b.has_public_path');
+                    })
+                    ->get();
 
-            foreach ($detailRoutes as $route) {
+                foreach ($detailRoutes as $route) {
+                    Permission::create([
+                        'name' => $route->detail_route,
+                        'user_id' => $getId->id
+                    ]);
+                }
 
-                Permission::create([
-                    'name' => $route->detail_route,
-                    'user_id' => $getId->id
+                $menus = $detailRoutes->pluck('idAssign')->toArray();
+                $assign = array_unique($menus);
+
+                DB::table('user_assign')->insert([
+                    'kd_user' => $getId->id,
+                    'id_user_permission' => $assign[0],
+                    'created_at' => now(),
+                    'updated_at' => now()
                 ]);
-
-                // $publicHome = $dataPublic && $route->detail_route == 'home' ? 'public.home' : $route->detail_route;
-
-                // if ($dataPublic && $route->detail_route == 'home') {
-                //     Permission::create([
-                //         'name' => 'home',
-                //         'user_id' => $getId->id
-                //     ]);
-
-                //     Permission::create([
-                //         'name' => 'public.home',
-                //         'user_id' => $getId->id
-                //     ]);
-                // } else {
-                //     Permission::create([
-                //         'name' => $publicHome,
-                //         'user_id' => $getId->id
-                //     ]);
-                // }
             }
 
-            if ($dataPublic == 1) {
-                $permissions = [
-                    'public.logout',
-                    'public.profile.show',
-                    'public.profile.update'
-                ];
-
-                foreach ($permissions as $permissionsName) {
-                    Permission::create([
-                        'name' => $permissionsName,
-                        'user_id' => $getId->id
-                    ]);
-                }
-            } else {
-                $permissions = [
-                    'profile.show',
-                    'profile.update'
-                ];
-
-                foreach ($permissions as $permissionsName) {
-                    Permission::create([
-                        'name' => $permissionsName,
-                        'user_id' => $getId->id
-                    ]);
-                }
-            }
-
-            $menus = $detailRoutes->pluck('idAssign')->toArray();
-            $assign = array_unique($menus);
-
-            DB::table('user_assign')->insert([
-                'kd_user' => $getId->id,
-                'id_user_permission' => $assign[0],
-                'created_at' => now(),
-                'updated_at' => now()
+            User::where("email", $request->emailUser)->update([
+                'name' => $request->nmUser,
+                'email' => $request->emailUser,
+                'status' => $status,
+                'has_public_path' => $dataPublic,
             ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User updated successfully'
+            ], 200)->header('Cache-Control', 'no-store');
+        } catch (\Throwable $th) {
+            //throw $th;
+
+            \Log::info('Update user:', $th);
+
+            DB::rollback();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User updated failed'
+            ], 404)->header('Cache-Control', 'no-store');
         }
-
-        User::where("email", $request->emailUser)->update([
-            'name' => $request->nmUser,
-            'email' => $request->emailUser,
-            'status' => $status,
-            'has_public_path' => $dataPublic,
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User updated successfully'
-        ], 200);
     }
 
     public function updatePassOld(Request $request)

@@ -72,7 +72,7 @@
                             @if ($publicPath != 1)
                                 <a href="{{ route('product.edit', $products->id) }}" class="btn btn-warning">Ubah</a>
                             @endif
-                            <a href="{{ route('product.index') }}" class="btn btn-info float-right">Kembali</a>
+                            <a href="{{ $publicPath != 1 ? route('product.index') : route('public.product.index') }}" class="btn btn-info float-right">Kembali</a>
                             {{-- @if (session('previous_url'))
                                 <a href="{{ session('previous_url') }}" class="btn btn-info float-right">Kembali</a>
                             @endif --}}

@@ -96,14 +96,31 @@
                                 <label for="">Menu</label>
                                 <div class="row">
                     `;
+                        // menus.forEach(menu => {
+                        //     content += `
+                        //             <div class="col-sm-6">
+                        //                 <div class="form-group">
+                        //                     <div class="form-check">
+                        //                         <input type="checkbox" class="form-check-input" name="menu"
+                        //                             value="${menu.menu}" ${menu.menuakses == 1 ? 'checked' : ''} disabled>
+                        //                         <label class="form-check-label">${menu.menu}</label>
+                        //                     </div>
+                        //                 </div>
+                        //             </div>
+                        //     `;
+                        // });
+
                         menus.forEach(menu => {
                             content += `
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <div class="form-check">
                                                 <input type="checkbox" class="form-check-input" name="menu"
-                                                    value="${menu.menu}" ${menu.menuakses == 1 ? 'checked' : ''} disabled>
-                                                <label class="form-check-label">${menu.menu}</label>
+                                                    value="${menu.menu}"
+                                                    id="menu_${menu.menu.replace(/\s+/g, '_')}"
+                                                    ${menu.menuakses == 1 ? 'checked' : ''} disabled>
+                                                <label class="form-check-label"
+                                                    for="menu_${menu.menu.replace(/\s+/g, '_')}">${menu.menu}</label>
                                             </div>
                                         </div>
                                     </div>
@@ -137,10 +154,17 @@
                             <a href="" class="btn btn-danger btn-cancel" style="display: none">Batal</a>
                     `;
 
-                    content += `
+                    if (publicPath == 1) {
+                        content += `
+                            <a href="{{ route('public.users.index') }}" class="btn btn-info btn-back float-right">Kembali</a>
+                        </div>
+                        `;
+                    } else {
+                        content += `
                             <a href="{{ route('users.index') }}" class="btn btn-info btn-back float-right">Kembali</a>
                         </div>
-                    `;
+                        `;
+                    }
 
                     container.innerHTML = content;
                 }

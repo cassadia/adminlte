@@ -27,4 +27,18 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    public function render($request, \Throwable $exception)
+    {
+        // if ($exception instanceof AccessDeniedHttpException) {
+        //     // Redirect ke halaman fallback jika terjadi error 403
+        //     // return redirect()->route('fallback.dashboard');
+        //     return redirect()->route('public.profile.show');
+        // }
+        if ($exception instanceof AccessDeniedHttpException && $request->route()->getName() !== 'public.profile.show') {
+            return redirect()->route('public.profile.show');
+        }
+
+        return parent::render($request, $exception);
+    }
 }

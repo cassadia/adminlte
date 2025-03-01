@@ -85,7 +85,7 @@ Route::middleware(['auth' , 'check.menu.access', 'check.public.path'])->group(fu
     // Route::resource('/about', \App\Http\Controllers\AboutController::class);
     // Route::get('about', [App\Http\Controllers\AboutController::class, 'index'])->name('about.index');
     // Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-    Route::get('/about', [App\Http\Controllers\AboutController::class, 'index'])->name('about');
+    // Route::get('/about', [App\Http\Controllers\AboutController::class, 'index'])->name('about');
     Route::get('/users/detail/{id}', [App\Http\Controllers\UserController::class, 'getUserId'])->name('show.user');
 });
 
@@ -116,7 +116,7 @@ Route::prefix('public')->group(function () {
         // Route::resource('/users', \App\Http\Controllers\UserController::class);
 
         // Route::resource('/cart', \App\Http\Controllers\CartController::class);
-        Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('public.profile.show');
+        Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('public.profile.show')->middleware('allow.fallback.access');
         Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('public.profile.update');
         Route::get('/users/detail/{id}', [App\Http\Controllers\UserController::class, 'getUserId'])->name('show.user');
 
