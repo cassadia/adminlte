@@ -106,8 +106,6 @@ class UserController extends Controller
             $existingUser = User::withoutGlobalScopes()
                 ->where('email', $request->emailUser)->first();
 
-            dd($existingUser)->all();
-
             if ($existingUser) {
                 return redirect()->back()->withInput()->withErrors(['emailUser' => 'Email sudah ada di database!'])->with(['error' => 'Email sudah ada di database!']);
             }
@@ -127,7 +125,7 @@ class UserController extends Controller
                     return $query->where('b.has_public_path', 1);
                 })
                 ->when($dataPublic != 1, function ($query) {
-                    return $query->whereNull('b.has_public_path');
+                    return $query->where('b.has_public_path', 0);
                 })
                 ->get();
 
@@ -202,7 +200,6 @@ class UserController extends Controller
             $dataPublic = $request->has('public') ? 1 : 0;
 
             foreach ($request->menu as $menu) {
-                // dd($menu)->all();
                 $detailRoutes = DB::table('user_menu as a')
                     ->join('user_menu_detail as b', 'b.master_route', '=', 'a.id')
                     ->select('b.detail_route', 'b.id', 'a.id as idAssign')
@@ -213,7 +210,7 @@ class UserController extends Controller
                         return $query->where('b.has_public_path', 1);
                     })
                     ->when($dataPublic != 1, function ($query) {
-                        return $query->whereNull('b.has_public_path');
+                        return $query->where('b.has_public_path', 0);
                     })
                     ->get();
 
