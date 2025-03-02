@@ -114,6 +114,7 @@ Route::prefix('public')->group(function () {
         Route::get('/mapping', [App\Http\Controllers\ProductController::class, 'indexMapping'])->name('public.product.mapping');
         Route::post('/updateMapping', [\App\Http\Controllers\MappingController::class, 'updateMapping'])->name('public.mapping.updateMapp');
         Route::post('/updateMappingAll', [\App\Http\Controllers\MappingController::class, 'updateMappingAll'])->name('public.mapping.updateMappAll');
+        Route::get('/mappingExport', [\App\Http\Controllers\MappingController::class, 'mappingExport'])->name('public.mapping.export');
         Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('public.users.index');
         Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('public.cart.index');
         // Route::resource('/users', \App\Http\Controllers\UserController::class);
