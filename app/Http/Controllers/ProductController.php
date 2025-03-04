@@ -42,12 +42,13 @@ class ProductController extends Controller
             })
             ->select('products.id', 'products.kd_produk', 'products.nm_produk', 'products.qty_available', 'products.harga_jual', 'products.status', 'b.nm_database', 'products.barcode')
             ->paginate($perPage);
-        
+
         $products->appends(['keyword' => $keyword]);
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
-        return view('products.index', compact('products', 'menusdua', 'content'));
+        return view('products.index', compact('products', 'menusdua', 'content', 'publicPathDB'));
     }
 
     public function create(): View
@@ -56,8 +57,9 @@ class ProductController extends Controller
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
         $menuLokasi = DB::table('accurate_db')->whereNull('deleted_at')->get();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
-        return view('products.create', compact('menusdua', 'content', 'menuLokasi'));
+        return view('products.create', compact('menusdua', 'content', 'menuLokasi', 'publicPathDB'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -105,9 +107,10 @@ class ProductController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
         //render view with post
-        return view('products.show', compact('products', 'menusdua', 'content'));
+        return view('products.show', compact('products', 'menusdua', 'content', 'publicPathDB'));
     }
 
     public function edit(string $id): View
@@ -126,9 +129,10 @@ class ProductController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
         //render view with post
-        return view('products.edit', compact('products', 'menusdua', 'content', 'getLokasi'));
+        return view('products.edit', compact('products', 'menusdua', 'content', 'getLokasi', 'publicPathDB'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -144,7 +148,7 @@ class ProductController extends Controller
 
         // Tentukan nilai status berdasarkan kondisi checkbox
         $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
-                    
+
         //update product without image
         $product->update([
             'kd_produk' => $request->KodeProduk,
@@ -174,21 +178,21 @@ class ProductController extends Controller
     public function search(Request $request)
     {
         $keyword = $request->input('keyword');
-    
+
         // Lakukan pencarian berdasarkan keyword dan kirimkan saran kembali dalam bentuk JSON
         $suggestions = Product::where('kd_produk', 'like', '%' . $keyword . '%')
             ->orWhere('nm_produk', 'like', '%' . $keyword . '%')
             ->limit(10) // Batasi jumlah saran yang dikembalikan
             ->get();
-    
+
         return response()->json($suggestions);
     }
 
     public function searchAuto(Request $request)
     {
- 
+
         if ($request->ajax()) {
- 
+
             // $data = Product::whereNull('deleted_at') // Menambahkan kondisi untuk memeriksa apakah deleted_at null
             // ->where(function ($query) use ($request) {
             //     $query->where('id', 'like', '%' . $request->search . '%')
@@ -208,7 +212,7 @@ class ProductController extends Controller
                 ->get();
 
             $jml = 1;
- 
+
             $output='';
             if (count($data)>0) {
                 $output ='
@@ -245,8 +249,9 @@ class ProductController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
-        
-        return view('mapping.index', compact('menusdua', 'content'));
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
+
+        return view('mapping.index', compact('menusdua', 'content', 'publicPathDB'));
     }
 
     public function myNewFunction()
@@ -304,16 +309,16 @@ class ProductController extends Controller
         if (!$request->ajax()) {
             return '';
         }
-    
+
         $data = $this->fetchVehicleData($request);
-    
+
         if (count($data) > 0) {
             return $this->generateOutput($data);
         } else {
             return 'No results';
         }
     }
-    
+
     private function fetchVehicleData(Request $request)
     {
         return Vehicle::leftJoin('mappings as b', function ($join) use ($request) {
@@ -329,12 +334,12 @@ class ProductController extends Controller
             ->orderBy('nm_motor', 'ASC')
             ->get();
     }
-    
+
     private function generateOutput($data)
     {
         $output = '';
         $tdSeparator = "</td><td>";
-    
+
         foreach ($data as $row) {
             $isChecked = !empty($row->kdproduk) ? 'checked' : '';
             $isCheckedBefore = !empty($row->kdproduk) ? 'true' : 'false';
@@ -363,14 +368,14 @@ class ProductController extends Controller
             </tr>
             ';
         }
-    
+
         return $output;
     }
 
     public function productExport(Request $request)
     {
         $keyword = $request->input('keyword');
-        
+
         if ($keyword) {
             $products = Product::where('nm_produk', 'like', '%' . $keyword . '%')->get();
         } else {

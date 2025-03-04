@@ -26,7 +26,7 @@ class MappingController extends Controller
             ->where('kd_produk', $request->kdProduk)
             ->where('id_motor', $request->idMotor)
             ->first();
-    
+
         if ($existingMapping !== null) {
             // dd([
             //     'print' => $existingMapping
@@ -63,23 +63,23 @@ class MappingController extends Controller
         if (!$request->ajax()) {
             return response()->json(['message' => 'Akses ditolak'], 403);
         }
-    
+
         $dataArray = $request->input('data');
         $response = ['message' => 'Tidak ada tindakan yang diambil']; // Pesan respons default
-    
+
         foreach ($dataArray as $data) {
             $kdProduk = $data['kdProduk'];
             $kdProdukSelected = $data['kdProdukSelected'];
             $kdMotor = $data['kdMotor'];
             $idMotor = $data['idMotor'];
-    
+
             if ($kdProdukSelected == null) {
                 $existingMapping = Mapping::withoutGlobalScopes()
                     ->where('kd_motor', $kdMotor)
                     ->where('kd_produk', $kdProduk)
                     ->where('id_motor', $idMotor)
                     ->first();
-    
+
                 if ($existingMapping !== null) {
                     if ($existingMapping->deleted_at) {
                         $existingMapping->update(['deleted_at' => null]);
@@ -105,7 +105,7 @@ class MappingController extends Controller
                     ->where('kd_produk', $kdProduk)
                     ->where('id_motor', $idMotor)
                     ->first();
-    
+
                 if ($existingMapping !== null) {
                     if (!$existingMapping->deleted_at) {
                         $existingMapping->update(['deleted_at' => now()]);
@@ -127,7 +127,7 @@ class MappingController extends Controller
                 }
             }
         }
-    
+
         return response()->json($response, 200);
     }
 

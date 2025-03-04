@@ -198,6 +198,7 @@
             // Variabel untuk menyimpan data item yang akan dihapus
             let selectedCartItem = {};
             let checkoutDB = '';
+            let userId = '{{ session('id') }}';
             let modalTitle = 'Konfirmasi'; // Judul modal default
             let modalBody = ''; // Isi modal default
 
@@ -257,7 +258,8 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         },
                         body: JSON.stringify({
-                            kdDB: checkoutDB
+                            kdDB: checkoutDB,
+                            userId: userId
                         })
                     });
 

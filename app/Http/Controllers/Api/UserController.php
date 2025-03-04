@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
 use App\Models\Permission;
@@ -189,18 +190,27 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
-            $getId = User::where('email', $request->emailUser)
-            ->first();
-
-            $cekPermission = DB::select('select * from permissions where user_id = ?', [$getId->id]);
-            if (count($cekPermission) > 0) {
-                DB::delete('delete from permissions where user_id = ?', [$getId->id]);
-                DB::delete('delete from user_assign where kd_user = ?', [$getId->id]);
+            // Ambil pengguna berdasarkan email
+            $user = User::where('email', $request->emailUser)->first();
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found'
+                ], 404);
             }
 
+            // Hapus permission dan assignment lama
+            $cekPermission = DB::select('select * from permissions where user_id = ?', [$user->id]);
+            if (count($cekPermission) > 0) {
+                DB::delete('delete from permissions where user_id = ?', [$user->id]);
+                DB::delete('delete from user_assign where kd_user = ?', [$user->id]);
+            }
+
+            // Set status dan public path
             $status = $request->has('status') ? 'Aktif' : 'Tidak Aktif';
             $dataPublic = $request->has('dataPublic') ? 1 : 0;
 
+            // Update permission baru berdasarkan menu yang dipilih
             foreach ($request->menu as $menu) {
                 $detailRoutes = DB::table('user_menu as a')
                     ->join('user_menu_detail as b', 'b.master_route', '=', 'a.id')
@@ -219,7 +229,7 @@ class UserController extends Controller
                 foreach ($detailRoutes as $route) {
                     Permission::create([
                         'name' => $route->detail_route,
-                        'user_id' => $getId->id
+                        'user_id' => $user->id
                     ]);
                 }
 
@@ -228,7 +238,7 @@ class UserController extends Controller
 
                 if (!empty($assign)) {
                     DB::table('user_assign')->insert([
-                        'kd_user' => $getId->id,
+                        'kd_user' => $user->id,
                         'id_user_permission' => $assign[0],
                         'created_at' => now(),
                         'updated_at' => now()
@@ -238,12 +248,21 @@ class UserController extends Controller
                 }
             }
 
+            // Update atribut pengguna di database
             User::where("email", $request->emailUser)->update([
                 'name' => $request->nmUser,
                 'email' => $request->emailUser,
                 'status' => $status,
                 'has_public_path' => $dataPublic,
                 'expires_at' => $request->expiredTime,
+            ]);
+
+            // Logging untuk admin
+            \Log::info('Admin updated user:', [
+                'admin_id' => auth()->id(),
+                'admin_email' => auth()->user()?->email,
+                'updated_user_id' => $user->id,
+                'updated_user_email' => $user->email,
             ]);
 
             DB::commit();
@@ -253,11 +272,13 @@ class UserController extends Controller
                 'message' => 'User updated successfully'
             ], 200)->header('Cache-Control', 'no-store');
         } catch (\Throwable $th) {
-            //throw $th;
-
-            \Log::info('Update user:', $th);
-
             DB::rollback();
+
+            // Logging error
+            \Log::error('Error updating user:', [
+                'error' => $th->getMessage(),
+                'trace' => $th->getTraceAsString(),
+            ]);
 
             return response()->json([
                 'status' => 'error',

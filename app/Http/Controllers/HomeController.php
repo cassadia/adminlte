@@ -64,8 +64,10 @@ class HomeController extends Controller
         $mergedData = [];
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
-        return view('home', compact('mergedData', 'menusdua', 'content'));
+        // return view('home', compact('mergedData', 'menusdua', 'content'));
+        return view('home', compact('mergedData', 'menusdua', 'content', 'publicPathDB'));
 
         // return view('home');
     }
@@ -126,9 +128,10 @@ class HomeController extends Controller
 
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
         // Kirim data ke view
-        return view('home', compact('mergedData', 'menusdua', 'content'));
+        return view('home', compact('mergedData', 'menusdua', 'content', 'publicPathDB'));
     }
 
     // Metode untuk mendapatkan data produk berdasarkan kd_produk
