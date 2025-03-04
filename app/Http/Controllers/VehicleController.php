@@ -21,7 +21,7 @@ class VehicleController extends Controller
     {
         $this->userRoleService = $userRoleService;
     }
-    
+
     public function index(Request $request)
     {
         $emailUser = auth()->user()->email;
@@ -56,8 +56,9 @@ class VehicleController extends Controller
 
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
-        return view('vehicles.index', compact('vehicles', 'menusdua', 'content', 'order', 'sort'));
+        return view('vehicles.index', compact('vehicles', 'menusdua', 'content', 'order', 'sort', 'publicPathDB'));
     }
 
     public function create(): View
@@ -65,8 +66,9 @@ class VehicleController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
-        return view('vehicles.create', compact('menusdua', 'content'));
+        return view('vehicles.create', compact('menusdua', 'content', 'publicPathDB'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -88,10 +90,10 @@ class VehicleController extends Controller
         if ($request->hasFile('gambar')) {
             // Dapatkan file yang diunggah
             $file = $request->file('gambar');
-            
+
             // Buat nama unik untuk file
             $fileName = time() . '_' . $file->getClientOriginalName();
-            
+
             // Simpan file ke dalam direktori penyimpanan (misalnya: public/images)
             $file->move(public_path('images'), $fileName);
 
@@ -131,9 +133,10 @@ class VehicleController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
         //render view with post
-        return view('vehicles.show', compact('vehicles', 'menusdua', 'content'));
+        return view('vehicles.show', compact('vehicles', 'menusdua', 'content', 'publicPathDB'));
     }
 
     public function edit(string $id): View
@@ -145,9 +148,10 @@ class VehicleController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
         //render view with post
-        return view('vehicles.edit', compact('vehicles', 'menusdua', 'content'));
+        return view('vehicles.edit', compact('vehicles', 'menusdua', 'content', 'publicPathDB'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -187,10 +191,10 @@ class VehicleController extends Controller
         if ($request->hasFile('gambar')) {
             // Dapatkan file yang diunggah
             $file = $request->file('gambar');
-            
+
             // Buat nama unik untuk file
             $fileName = time() . '_' . $file->getClientOriginalName();
-            
+
             // Simpan file ke dalam direktori penyimpanan (misalnya: public/images)
             $file->move(public_path('images'), $fileName);
             // Simpan data ke dalam database termasuk nama file gambar
@@ -218,7 +222,7 @@ class VehicleController extends Controller
                 'deleted_at' => null,
             ]);
         }
-                    
+
         //update vehi$vehicles without image
         // $vehicles->update([
         //     'kd_motor' => $request->KodeMotor,
@@ -260,7 +264,7 @@ class VehicleController extends Controller
     public function search(Request $request)
     {
         $keyword = $request->input('keyword');
-    
+
         $vehicles = Vehicle::whereNull('deleted_at')
             ->when($keyword, function ($query) use ($keyword) {
                 return $query->where('no_seri_rangka', 'like', '%' . $keyword . '%')
@@ -269,16 +273,16 @@ class VehicleController extends Controller
                     ->orWhere('status', 'like', '%' . $keyword . '%');
             })
             ->paginate(10); // Jumlah data per halaman
-    
+
         return view('mapping.index', compact('vehicles'));
     }
 
     public function vehicleExport(Request $request)
     {
         $keyword = $request->input('keyword');
-        
+
         if ($keyword) {
-            $vehicles = Vehicle::where('nm_produk', 'like', '%' . $keyword . '%')->get();
+            $vehicles = Vehicle::where('nm_motor', 'like', '%' . $keyword . '%')->get();
         } else {
             $vehicles = Vehicle::all();
         }

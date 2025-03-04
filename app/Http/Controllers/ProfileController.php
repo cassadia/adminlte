@@ -23,8 +23,9 @@ class ProfileController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
-        return view('auth.profile', compact('menusdua', 'content'));
+        return view('auth.profile', compact('menusdua', 'content', 'publicPathDB'));
     }
 
     public function update(ProfileUpdateRequest $request)

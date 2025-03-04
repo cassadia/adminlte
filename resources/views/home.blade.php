@@ -67,25 +67,30 @@
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th></th>
+                                        @if ($publicPath != 1)
+                                            <th></th>
+                                        @endif
                                         <th>Kode Produk</th>
                                         <th>Nama Produk</th>
                                         <th style="background-color: red">Nama Motor</th>
                                         <th>Tahun</th>
-                                        {{-- <th>Harga</th> --}}
-                                        <th>Harga Per Lokasi</th>
-                                        <th>Total Stock</th>
-                                        <th>Stock Per Lokasi</th>
-                                        <th>Lokasi</th>
-                                        <th>Qty Jual</th>
+                                        @if ($publicPath != 1)
+                                            <th>Harga Per Lokasi</th>
+                                            <th>Total Stock</th>
+                                            <th>Stock Per Lokasi</th>
+                                            <th>Lokasi</th>
+                                            <th>Qty Jual</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
                                 @forelse($mergedData as $item)
                                     <tr>
-                                        <td>
-                                            <input type="checkbox" id="kdCek" name="cek_input" class="cek_input" value="">
-                                        </td>
+                                        @if ($publicPath != 1)
+                                            <td>
+                                                <input type="checkbox" id="kdCek" name="cek_input" class="cek_input" value="">
+                                            </td>
+                                        @endif
                                         <td>
                                             <input type="text" id="kdBarang" value="{{ $item['mapping']->{'Kode Barang'} }}" hidden>
                                             {{ $item['mapping']->{'Kode Barang'} }}
@@ -106,45 +111,47 @@
                                             <input type="text" id="hrgBarang" value="{{ $item['mapping']->{'Harga'} }}" hidden>
                                             {{ number_format($item['mapping']->{'Harga'}, 0) }}
                                         </td> --}}
-                                        <td>
-                                            <input type="text" id="hrgBarangPerLokVal" value="" hidden>
-                                            <p id="hrgBarangPerLok">0</p>
-                                        </td>
-                                        <td>
-                                            <input type="text" id="stkBarang" value="{{ $item['mapping']->{'Stock'} }}" hidden>
-                                            {{ $item['mapping']->{'Stock'} }}
-                                        </td>
-                                        <td>
-                                            <div id="loadingOverlay" style="display: none; position: fixed;
-                                                top: 0; left: 0; width: 100%; height: 100%;
-                                                    background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
-                                                <div style="position: absolute; top: 50%; left: 50%;
-                                                    transform: translate(-50%, -50%); color: white; font-size: 20px;">
-                                                    <div class="spinner-grow" role="status" id="loading">
-                                                        <span class="sr-only">Loading...</span>
+                                        @if ($publicPath != 1)
+                                            <td>
+                                                <input type="text" id="hrgBarangPerLokVal" value="" hidden>
+                                                <p id="hrgBarangPerLok">0</p>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="stkBarang" value="{{ $item['mapping']->{'Stock'} }}" hidden>
+                                                {{ $item['mapping']->{'Stock'} }}
+                                            </td>
+                                            <td>
+                                                <div id="loadingOverlay" style="display: none; position: fixed;
+                                                    top: 0; left: 0; width: 100%; height: 100%;
+                                                        background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+                                                    <div style="position: absolute; top: 50%; left: 50%;
+                                                        transform: translate(-50%, -50%); color: white; font-size: 20px;">
+                                                        <div class="spinner-grow" role="status" id="loading">
+                                                            <span class="sr-only">Loading...</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <input type="text" id="stkPerBarangVal" value="" hidden>
-                                            <p id="stkPerBarang">0</p>
-                                        </td>
-                                        <td>
-                                            <div class="form-group">
-                                                <select class="form-control-sm lokasi" style="padding: 0.25rem 0.5rem; height: auto; width: 175px;">
-                                                    <option value="none">Pilih Lokasi</option>
-                                                    @foreach($item['productData'] as $lokasi)
-                                                        <option value="{{ $lokasi->database }}">{{ $lokasi->nm_database }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
+                                                <input type="text" id="stkPerBarangVal" value="" hidden>
+                                                <p id="stkPerBarang">0</p>
+                                            </td>
+                                            <td>
                                                 <div class="form-group">
-                                                    <input class="form-control-sm qty" type="number" name="qty" min=1 placeholder="0" oninput="validity.valid||(value='');">
+                                                    <select class="form-control-sm lokasi" style="padding: 0.25rem 0.5rem; height: auto; width: 175px;">
+                                                        <option value="none">Pilih Lokasi</option>
+                                                        @foreach($item['productData'] as $lokasi)
+                                                            <option value="{{ $lokasi->database }}">{{ $lokasi->nm_database }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
-                                            </div>
-                                        </td>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <div class="form-group">
+                                                        <input class="form-control-sm qty" type="number" name="qty" min=1 placeholder="0" oninput="validity.valid||(value='');">
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        @endif
                                     </tr>
                                 @empty
                                     <tr>

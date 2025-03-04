@@ -24,8 +24,9 @@ class CartController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
-        return view('cart.index', compact('content', 'menusdua'));
+        return view('cart.index', compact('content', 'menusdua', 'publicPathDB'));
     }
 
     // public function index(Request $request)
@@ -51,5 +52,5 @@ class CartController extends Controller
     //             'content' => $content,
     //         ],
     //     ], 200);
-    // }    
+    // }
 }

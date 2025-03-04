@@ -23,7 +23,8 @@ class AboutController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
-        return view('about', compact('content', 'menusdua'));
+        return view('about', compact('content', 'menusdua', 'publicPathDB'));
     }
 }

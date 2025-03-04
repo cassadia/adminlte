@@ -29,6 +29,7 @@ class AccurateController extends Controller
                 ->select('kd_database')
                 ->where('is_send_to_accu', 0)
                 ->where('kd_database', $request->kdDB)
+                ->where('kd_user', $request->userId)
                 ->groupBy('kd_database')
                 ->get();
 
@@ -43,6 +44,7 @@ class AccurateController extends Controller
                     $dataTrans = DB::table('transaction')
                                     ->where('is_send_to_accu', 0)
                                     ->where('kd_database', $access->kd_database)
+                                    ->where('kd_user', $request->userId)
                                     ->whereNull('deleted_at')
                                     ->get();
 

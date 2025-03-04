@@ -37,10 +37,10 @@ class UserController extends Controller
             ->paginate($perPage);
 
         $menusdua = $this->userRoleService->getUserRole($emailUser);
-
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
-        return view('users.index', compact('users', 'menusdua', 'content'));
+        return view('users.index', compact('users', 'menusdua', 'content', 'publicPathDB'));
     }
 
     public function create(): View
@@ -49,8 +49,9 @@ class UserController extends Controller
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $menus = $this->getMenu();
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
-        return view('users.create', compact('menusdua','menus','content'));
+        return view('users.create', compact('menusdua','menus','content', 'publicPathDB'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -152,9 +153,10 @@ class UserController extends Controller
             ->get();
 
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
         //render view with post
-        return view('users.show', compact('users', 'getMenu', 'menusdua', 'content'));
+        return view('users.show', compact('users', 'getMenu', 'menusdua', 'content', 'publicPathDB'));
     }
 
     public function edit(string $id): View
@@ -171,9 +173,10 @@ class UserController extends Controller
             ->get();
 
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
         //render view with post
-        return view('users.edit', compact('users', 'menusdua', 'getMenu', 'content'));
+        return view('users.edit', compact('users', 'menusdua', 'getMenu', 'content', 'publicPathDB'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -352,8 +355,9 @@ class UserController extends Controller
         $emailUser = auth()->user()->email;
         $menusdua = $this->userRoleService->getUserRole($emailUser);
         $content = ContentService::getContent();
+        $publicPathDB = $menusdua->pluck('has_public_path')->unique();
 
-        return view('show.user', compact('menusdua','content'));
+        return view('show.user', compact('menusdua','content', 'publicPathDB'));
         // $users = User::findOrFail($id);
 
         // if ($users) {
