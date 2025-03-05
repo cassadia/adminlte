@@ -15,9 +15,6 @@
                     $publicPath = session('public_path'); // Ambil nilai dari session
                     $routeName = $menu->menu_link;
 
-                    // var_dump('publicPath', $publicPath);
-                    // dd('publicPath new', $publicPathDB->get(0))->all();
-
                     // Jika pengguna memiliki public path, tambahkan prefix 'public.'
                     // if ($publicPath) {
                     //     $routeName = 'public.' . $menu->menu_link;

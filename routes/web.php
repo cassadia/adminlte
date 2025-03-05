@@ -46,7 +46,14 @@ Route::middleware(['auth' , 'check.menu.access', 'check.public.path'])->group(fu
     Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 
     // Route::get('product', [\App\Http\Controllers\ProductController::class, 'show'])->name('product.show');
-    Route::resource('/product', \App\Http\Controllers\ProductController::class);
+    // Route::resource('/product', \App\Http\Controllers\ProductController::class);
+    Route::resource('/product', \App\Http\Controllers\ProductController::class)->names([
+        'index' => 'product.index',
+        'show' => 'product.show',
+        'edit' => 'product.edit',
+        'create' => 'product.create',
+        'destroy' => 'product.destroy'
+    ]);
     Route::get('/product/search', [\App\Http\Controllers\UserController::class, 'search'])->name('product.search');
     Route::get('/search', [\App\Http\Controllers\UserController::class, 'search']);
 
@@ -99,7 +106,9 @@ Route::prefix('public')->group(function () {
         Route::resource('/product', \App\Http\Controllers\ProductController::class)->names([
             'index' => 'public.product.index',
             'show' => 'public.product.show',
-            'edit' => 'public.product.edit'
+            'edit' => 'public.product.edit',
+            'create' => 'public.product.create',
+            'destroy' => 'public.product.destroy'
         ]);
 
         Route::resource('/vehicle', \App\Http\Controllers\VehicleController::class)->names([

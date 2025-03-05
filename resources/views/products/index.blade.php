@@ -2,6 +2,7 @@
 
 @section('content')
     <!-- Content Header (Page header) -->
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -90,13 +91,18 @@
                                                         <a class="dropdown-item"
                                                             href="{{ route('product.edit', $product->id) }}">Ubah</a>
 
-                                                        <form onsubmit="return confirm('Apakah Anda Yakin ?');"
+                                                        {{-- <form onsubmit="return confirm('Apakah Anda Yakin ?');"
                                                             action="{{ route('product.destroy', $product->id) }}"
                                                                 method="POST">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="dropdown-item">Hapus</button>
-                                                        </form>
+                                                        </form> --}}
+
+                                                        <a class="dropdown-item delete-product" href="#"
+                                                            data-id="{{ $product->id }}" data-lokasi="{{ $product->nm_database }}">
+                                                            Hapus
+                                                        </a>
                                                     @endif
                                                 </div>
                                             </div>
@@ -115,6 +121,37 @@
                             </table>
                         </div>
                         <!-- /.card-body -->
+
+                        <div class="modal fade" id="konfirmasiModal" tabindex="-1" role="dialog" aria-labelledby="konfirmasiModalLabel" aria-hidden="true" data-backdrop="static">
+                            <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="konfirmasiModalLabel">Konfirmasi Penghapusan Data Produk</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Apakah Anda yakin ingin menghapus data produk ini ?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                    <button type="button" class="btn btn-primary" id="btnHapus">Ya</button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div id="loadingOverlay" style="display: none; position: fixed;
+                            top: 0; left: 0; width: 100%; height: 100%;
+                                background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+                            <div style="position: absolute; top: 50%; left: 50%;
+                                transform: translate(-50%, -50%); color: white; font-size: 20px;">
+                                <div class="spinner-grow" role="status" id="loading">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="card-footer clearfix">
                             <div class="float-left">
@@ -186,6 +223,73 @@
                             console.error(error);
                         }
                     });
+                }
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Variabel untuk menyimpan data payload
+            let dataPayload = {};
+            const apiToken = '{{ session('api_token') }}';
+
+            // Tangkap semua tombol "Hapus" dengan class 'delete-product'
+            const deleteButtons = document.querySelectorAll('.delete-product');
+
+            // Tangkap tombol "Ya" di modal
+            const btnHapus = document.getElementById('btnHapus');
+
+            // Hapus event listener yang sudah ada (jika ada)
+            btnHapus.replaceWith(btnHapus.cloneNode(true));
+
+            // Loop melalui setiap tombol "Hapus"
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault(); // Mencegah perilaku default dari <a>
+
+                    // Simpan data payload
+                    dataPayload = {
+                        productId: event.target.getAttribute('data-id'),
+                        lokasi: event.target.getAttribute('data-lokasi')
+                    };
+
+                    // Tampilkan modal
+                    $('#konfirmasiModal').modal('show');
+                });
+            });
+
+            document.getElementById('btnHapus').addEventListener('click', async () => {
+                const loading = document.getElementById('loadingOverlay');
+                loading.style.display = 'block';
+                $('#konfirmasiModal').modal('hide');
+
+                console.log('Data Payload:', dataPayload);
+
+                try {
+                    const response = await fetch(`/api/product/deleteProduct`, {
+                        method: 'PUT',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + apiToken,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        },
+                        body: JSON.stringify(dataPayload),
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        toastr.success(result.message || 'Data produk berhasil dihapus.');
+                        window.location.reload();
+                    } else {
+                        const errorData = await response.json();
+                        toastr.error(errorData.message || 'Data produk gagal dihapus.');
+                        window.location.reload();
+                    }
+                } catch (error) {
+                    toastr.error('Terjadi kesalahan saat menghapus produk.');
+                } finally {
+                    loading.style.display = 'none';
                 }
             });
         });

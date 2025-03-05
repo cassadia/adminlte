@@ -33,7 +33,7 @@
                                 <input type="text" name="keyNmPro" class="form-control form-control-sm mr-2" placeholder="Nama Produk" value="{{ Request::get('keyNmPro') }}">
                                 <input type="text" name="keyNmMtr" class="form-control form-control-sm mr-2" placeholder="Nama Motor" value="{{ Request::get('keyNmMtr') }}">
                                 <input type="text" name="keyThn" class="form-control form-control-sm mr-2" placeholder="Tahun" value="{{ Request::get('keyThn') }}">
-                                <div class="col-md-6">
+                                <div class="col-md-3">
                                     <button type="submit" class="btn btn-sm btn-info btnCari"><i class="fas fa-search"></i> Cari</button>
                                     <a href="{{ route('home', ['reset' => true]) }}" class="btn btn-sm btn-warning"><i class="fas fa-eraser"></i> Clear</a>
                                 </div>
