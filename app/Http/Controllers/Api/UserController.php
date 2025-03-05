@@ -166,6 +166,33 @@ class UserController extends Controller
                 ]);
             }
 
+            if ($dataPublic == 1) {
+                $menus = [
+                    'public.logout',
+                    'public.profile.show',
+                    'public.profile.update',
+                ];
+
+                foreach ($menus as $menuSingle) {
+                    Permission::create([
+                        'name' => $menuSingle,
+                        'user_id' => $user->id
+                    ]);
+                }
+            } else {
+                $menus = [
+                    'profile.show',
+                    'profile.update',
+                ];
+
+                foreach ($menus as $menuSingle) {
+                    Permission::create([
+                        'name' => $menuSingle,
+                        'user_id' => $user->id
+                    ]);
+                }
+            }
+
             DB::commit();
 
             return response()->json([
@@ -245,6 +272,33 @@ class UserController extends Controller
                     ]);
                 } else {
                     \Log::warning("No valid assignments found for menu: {$menu}");
+                }
+            }
+
+            if ($dataPublic == 1) {
+                $menus = [
+                    'public.logout',
+                    'public.profile.show',
+                    'public.profile.update',
+                ];
+
+                foreach ($menus as $menuSingle) {
+                    Permission::create([
+                        'name' => $menuSingle,
+                        'user_id' => $user->id
+                    ]);
+                }
+            } else {
+                $menus = [
+                    'profile.show',
+                    'profile.update',
+                ];
+
+                foreach ($menus as $menuSingle) {
+                    Permission::create([
+                        'name' => $menuSingle,
+                        'user_id' => $user->id
+                    ]);
                 }
             }
 
