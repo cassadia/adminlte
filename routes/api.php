@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\AccurateController;
+use App\Http\Controllers\Api\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,14 +45,14 @@ Route::middleware('auth:sanctum')->put('/user/deleteUser', [UserController::clas
 
 Route::middleware('auth:sanctum')->get('/product', [UserController::class, 'index']);
 Route::middleware('auth:sanctum')->post('/product/getProduct', [UserController::class, 'getProductById']);
-Route::middleware('auth:sanctum')->post('/product/createProduct', [UserController::class, 'createProduct']);
-Route::middleware('auth:sanctum')->put('/product/updateProduct', [UserController::class, 'updateProduct']);
-Route::middleware('auth:sanctum')->put('/product/deleteProduct', [UserController::class, 'deleteProduct']);
+Route::middleware('auth:sanctum')->post('/product/createProduct', [ProductController::class, 'createProduct']);
+Route::middleware('auth:sanctum')->put('/product/updateProduct', [ProductController::class, 'updateProduct']);
+Route::middleware('auth:sanctum')->put('/product/deleteProduct', [ProductController::class, 'deleteProduct']);
 
 Route::middleware('auth:sanctum')->get('/vehicle', [VehicleController::class, 'index']);
 Route::middleware('auth:sanctum')->post('/vehicle/getVehicle', [VehicleController::class, 'getVehicleById']);
 Route::middleware('auth:sanctum')->post('/vehicle/createVehicle', [VehicleController::class, 'createVehicle']);
-Route::middleware('auth:sanctum')->put('/vehicle/updateVehicle', [VehicleController::class, 'updateVehicle']);
+Route::middleware('auth:sanctum')->post('/vehicle/updateVehicle', [VehicleController::class, 'updateVehicle']);
 Route::middleware('auth:sanctum')->put('/vehicle/deleteVehicle', [VehicleController::class, 'deleteVehicle']);
 
 Route::middleware('auth:sanctum')->post('/cart/postTransaction', [AccurateController::class, 'postTransaction']);
