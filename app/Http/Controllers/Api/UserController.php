@@ -248,6 +248,33 @@ class UserController extends Controller
                 }
             }
 
+            if ($dataPublic == 1) {
+                $menus = [
+                    'public.logout',
+                    'public.profile.show',
+                    'public.profile.update',
+                ];
+
+                foreach ($menus as $menuSingle) {
+                    Permission::create([
+                        'name' => $menuSingle,
+                        'user_id' => $user->id
+                    ]);
+                }
+            } else {
+                $menus = [
+                    'profile.show',
+                    'profile.update',
+                ];
+
+                foreach ($menus as $menuSingle) {
+                    Permission::create([
+                        'name' => $menuSingle,
+                        'user_id' => $user->id
+                    ]);
+                }
+            }
+
             // Update atribut pengguna di database
             User::where("email", $request->emailUser)->update([
                 'name' => $request->nmUser,
