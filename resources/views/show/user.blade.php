@@ -76,11 +76,14 @@
                         <div class="card-body">
                             <div class="form-group">
                                 <label for="KodeProduk">Nama</label>
-                                <input type="text" class="form-control" name="nmUser" value="${name}" disabled>
+                                <input type="text" class="form-control" id="nmUser" name="nmUser" value="${name}" disabled>
                             </div>
                             <div class="form-group">
                                 <label for="Email">Email</label>
-                                <input type="text" class="form-control" name="emailUser" value="${email}" disabled>
+                                <input type="text" class="form-control" id="emailUser" name="emailUser" value="${email}" disabled>
+                            </div>
+                            <div id="emailError" class="alert alert-danger mt-2 small" style="display: none;">
+                                Format email tidak valid. Pastikan email mengandung "@" dan domain yang benar (contoh: @gmail.com).
                             </div>
 
                             <div class="form-group">
@@ -97,23 +100,10 @@
                                 <label for="">Menu</label>
                                 <div class="row">
                     `;
-                        // menus.forEach(menu => {
-                        //     content += `
-                        //             <div class="col-sm-6">
-                        //                 <div class="form-group">
-                        //                     <div class="form-check">
-                        //                         <input type="checkbox" class="form-check-input" name="menu"
-                        //                             value="${menu.menu}" ${menu.menuakses == 1 ? 'checked' : ''} disabled>
-                        //                         <label class="form-check-label">${menu.menu}</label>
-                        //                     </div>
-                        //                 </div>
-                        //             </div>
-                        //     `;
-                        // });
 
                         menus.forEach(menu => {
                             content += `
-                                    <div class="col-sm-6">
+                                    <div class="col-sm-6" id="menuContainer">
                                         <div class="form-group">
                                             <div class="form-check">
                                                 <input type="checkbox" class="form-check-input" name="menu"
@@ -130,6 +120,9 @@
 
                     content += `
                                 </div>
+                            </div>
+                            <div id="menuError" class="alert alert-danger mt-2 small" style="display: none;">
+                                Pilih setidaknya satu menu.
                             </div>
 
                             <div class="form-group">
@@ -154,7 +147,7 @@
                                 </div>
                                 <div class="form-group" style="${expiredAt != null ? 'display: block;' : 'display: none;'}">
                                     <label for="expiredTime">Pilih Waktu Expired</label>
-                                    <input type="datetime-local" class="form-control" id="expiredTime" name="expiredTime" value="${expiredAt}" disabled>
+                                    <input type="date" class="form-control" id="expiredTime" name="expiredTime" value="${expiredAt}" disabled>
                                 </div>
                             </div>
                         </div>
@@ -181,11 +174,23 @@
                         `;
                     }
 
+                    content += `
+                        <div id="loadingOverlay" style="display: none; position: fixed;
+                            top: 0; left: 0; width: 100%; height: 100%;
+                                background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+                            <div style="position: absolute; top: 50%; left: 50%;
+                                transform: translate(-50%, -50%); color: white; font-size: 20px;">
+                                <div class="spinner-grow" role="status" id="loading">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
                     container.innerHTML = content;
                 }
             } catch (error) {
                 console.log('error >>> ', error);
-
                 toastr.error(result.message || 'Data gagal dimuat.');
             }
         }
@@ -207,14 +212,14 @@
 
                 if (response.ok) {
                     const result = response.json();
-
                     toastr.success(result.message || 'Data berhasil diperbaharui.');
-                    // toastr.success(result.message || 'Item berhasil dihapus.');
+                    window.location.href = "{{ route('users.index') }}";
                 }
             } catch (error) {
                 console.log('error >>> ', error);
-
                 toastr.error(result.message || 'Data gagal diperbaharui.');
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
             }
         }
 
@@ -272,18 +277,30 @@
 
                 } else if (button.classList.contains('btn-save')) {
                     event.preventDefault();
+                    const loading = document.getElementById('loadingOverlay');
+                    loading.style.display = 'block';
                     const isChecked = publicCheck.checked;
+
+                    const emailInput = document.getElementById("emailUser");
+                    const emailError = document.getElementById("emailError");
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                    const formMenu = document.getElementById("menuContainer");
+                    const statusUser = document.getElementById("statusAktif");
+
+                    const checkPublic = document.getElementById("dataPublic");
+                    const expiredTime = document.getElementById("expiredTime");
+
+                    let hasError = false;
 
                     if (isChecked) {
                         const expiredTimeInput = document.querySelector('#expiredTime');
                         if (!expiredTimeInput.value) {
                             toastr.error('Waktu Expired masih kosong!');
-                            return
+                            expiredTimeInput.classList.add('is-invalid');
+                            hasError = true;
                         }
                     }
-
-                    // TODO: Tambahkan logika untuk menyimpan data ke server
-                    // cartId: event.target.getAttribute('data-id'),
 
                     // Menonaktifkan kembali semua input dan checkbox
                     document.querySelectorAll('#detailContainer input').forEach(input => {
@@ -303,6 +320,57 @@
                         }
                         input.setAttribute('disabled', 'disabled');
                     });
+
+                    if (dataUser.nmUser == "") {
+                        toastr.error("Nama User tidak boleh kosong");
+                        document.getElementById("nmUser").classList.add("is-invalid");
+                        emailError.style.display = "none";
+                        hasError = true;
+                    } else {
+                        document.getElementById("nmUser").classList.remove("is-invalid");
+                    }
+
+                    // Validasi Email
+                    if (dataUser.emailUser === "") {
+                        toastr.error("Email User tidak boleh kosong");
+                        emailInput.classList.add("is-invalid");
+                        emailError.style.display = "none";
+                        hasError = true;
+                    } else if (!emailRegex.test(dataUser.emailUser)) {
+                        toastr.error("Format email tidak valid.");
+                        emailInput.classList.add("is-invalid");
+                        emailError.style.display = "block"; // Tampilkan pesan error format
+                        hasError = true;
+                    } else {
+                        emailInput.classList.remove("is-invalid");
+                        emailError.style.display = "none"; // Sembunyikan pesan error
+                    }
+
+                    if (dataUser.menu == undefined) {
+                        toastr.error("Menu tidak boleh kosong");
+                        document.getElementById("menuContainer").classList.add("is-invalid");
+                        document.getElementById("menuError").style.display = "block";
+                        hasError = true;
+                    } else {
+                        document.getElementById("menuContainer").classList.remove("is-invalid");
+                        document.getElementById("menuError").style.display = "none";
+                    }
+
+                    if (hasError) {
+                        loading.style.display = 'none';
+                        document.getElementById("nmUser").removeAttribute("disabled");
+                        emailInput.removeAttribute("disabled");
+
+                        const menuCheckboxes = document.querySelectorAll('#menuContainer input[type="checkbox"]');
+                        menuCheckboxes.forEach(checkbox => {
+                            checkbox.removeAttribute("disabled");
+                        });
+
+                        statusUser.removeAttribute("disabled");
+                        checkPublic.removeAttribute("disabled");
+                        expiredTime.removeAttribute("disabled");
+                        return;
+                    }
 
                     updateUser(dataUser)
 
