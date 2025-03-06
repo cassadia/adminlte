@@ -176,7 +176,7 @@ class UserController extends Controller
                 foreach ($menus as $menuSingle) {
                     Permission::create([
                         'name' => $menuSingle,
-                        'user_id' => $user->id
+                        'user_id' => $getId->id
                     ]);
                 }
             } else {
@@ -188,7 +188,7 @@ class UserController extends Controller
                 foreach ($menus as $menuSingle) {
                     Permission::create([
                         'name' => $menuSingle,
-                        'user_id' => $user->id
+                        'user_id' => $getId->id
                     ]);
                 }
             }

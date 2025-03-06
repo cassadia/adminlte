@@ -202,4 +202,35 @@ class VehicleController extends Controller
         ], 200);
     }
 
+    public function deleteVehicle(Request $request)
+    {
+        try {
+            $vehicles = Vehicle::find($request->vehicleId);
+
+            if ($vehicles) {
+                $checkMapping = Mapping::whereNull('deleted_at')
+                    ->where([
+                        'kd_motor' => $vehicles->kd_motor,
+                        'id_motor' => $vehicles->id
+                    ])
+                    ->first();
+
+                if ($checkMapping) {
+                    $checkMapping->delete();
+                }
+
+                $vehicles->delete();
+            }
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data Vehicle Berhasil Dihapus!'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data Vehicle Gagal Dihapus!'
+            ], 400);
+        }
+    }
+
 }

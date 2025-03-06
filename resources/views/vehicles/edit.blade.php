@@ -288,8 +288,10 @@
                     let result = await response.json();
 
                     if (response.ok) {
+                        setTimeout(() => {
+                            window.location.href = "{{ route('vehicle.index') }}";
+                        }, 2000);
                         toastr.success(result.message || "Vehicle berhasil diperbaharui!");
-                        window.location.reload();
                     } else {
                         toastr.error(result.message || "Vehicle gagal diperbaharui!");
                     }
