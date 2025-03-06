@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'status',
         'has_public_path',
+        'expires_at'
     ];
 
     /**

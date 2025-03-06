@@ -21,7 +21,7 @@
                 <div class="col-lg-6">
                     <div class="card card-primary">
                         <div class="card-header">
-                          <h3 class="card-title">Tambah User</h3>
+                            <h3 class="card-title">Tambah User</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
@@ -50,7 +50,7 @@
                                     <label for="emailUser">Email</label>
                                     <input type="text" name="emailUser" id="emailUser"
                                         class="form-control @error('emailUser') is-invalid @enderror"
-                                            placeholder="Email">
+                                            placeholder="Email" autocomplete="emailUser">
 
                                     <!-- error message untuk title -->
                                     @error('emailUser')
@@ -58,6 +58,9 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
+                                </div>
+                                <div id="emailError" class="alert alert-danger mt-2 small" style="display: none;">
+                                    Format email tidak valid. Pastikan email mengandung "@" dan domain yang benar (contoh: @gmail.com).
                                 </div>
 
                                 <div class="form-group">
@@ -81,7 +84,7 @@
 
                                 <div class="form-group">
                                     <label for="">Menu</label>
-                                    <div class="row">
+                                    <div class="row" id="menuContainer">
                                         @foreach ($menus as $menu)
                                         <div class="col-sm-6">
                                             <div class="form-group">
@@ -96,6 +99,9 @@
                                         </div>
                                         @endforeach
                                     </div>
+                                </div>
+                                <div id="menuError" class="alert alert-danger mt-2 small" style="display: none;">
+                                    Pilih setidaknya satu menu.
                                 </div>
 
                                 <div class="form-group">
@@ -116,19 +122,30 @@
                                     </div>
                                     <div class="form-group" style="display: none">
                                         <label for="expiredTime">Pilih Waktu Expired</label>
-                                        <input type="datetime-local" class="form-control" id="expiredTime" name="expiredTime">
+                                        <input type="date" class="form-control" id="expiredTime" name="expiredTime">
                                     </div>
                                 </div>
                             </div>
                           <!-- /.card-body -->
 
-                          <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">{{ __('Simpan') }}</button>
-                            <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>
-                            <a href="{{ route('users.index') }}" class="btn btn-info float-right">Kembali</a>
-                          </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">{{ __('Simpan') }}</button>
+                                <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>
+                                <a href="{{ route('users.index') }}" class="btn btn-info float-right">Kembali</a>
+                            </div>
                         </form>
-                      </div>
+                    </div>
+
+                    <div id="loadingOverlay" style="display: none; position: fixed;
+                        top: 0; left: 0; width: 100%; height: 100%;
+                            background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+                        <div style="position: absolute; top: 50%; left: 50%;
+                            transform: translate(-50%, -50%); color: white; font-size: 20px;">
+                            <div class="spinner-grow" role="status" id="loading">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -142,8 +159,16 @@
     <script>
         document.getElementById("userForm").addEventListener("submit", async function(event) {
             event.preventDefault(); // Mencegah reload halaman
+            const loading = document.getElementById('loadingOverlay');
+            loading.style.display = 'block';
+
+            const emailInput = document.getElementById("emailUser");
+            const emailError = document.getElementById("emailError");
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
             const apiToken = '{{ session('api_token') }}';
+            const checkPublic = document.getElementById("checkPublic");
+            const expiredTime = document.getElementById("expiredTime");
 
             let formData = {
                 nmUser: document.getElementById("nmUser").value,
@@ -151,20 +176,63 @@
                 password: document.getElementById("password").value,
                 password_confirmation: document.getElementById("password_confirmation").value,
                 status: document.getElementById("exampleCheck1")?.checked ? 1 : 0,
-                dataPublic: document.getElementById("checkPublic")?.checked ? 1 : 0,
-                menu: [...document.querySelectorAll('input[name="menu[]"]:checked')].map(el => el.value)
+                dataPublic: checkPublic?.checked ? 1 : 0,
+                menu: [...document.querySelectorAll('input[name="menu[]"]:checked')].map(el => el.value),
+                ...(checkPublic?.checked && { expiredTime: expiredTime.value })
             };
+
+            let hasError = false;
 
             if (formData.nmUser == "") {
                 toastr.error("Nama User tidak boleh kosong");
+                document.getElementById("nmUser").classList.add("is-invalid");
+                hasError = true;
+            } else {
+                document.getElementById("nmUser").classList.remove("is-invalid");
             }
-            if (formData.emailUser == "") {
+
+            // Validasi Email
+            if (emailInput.value === "") {
                 toastr.error("Email User tidak boleh kosong");
+                emailInput.classList.add("is-invalid");
+                emailError.style.display = "none"; // Sembunyikan pesan error format
+                hasError = true;
+            } else if (!emailRegex.test(emailInput.value)) {
+                toastr.error("Format email tidak valid.");
+                emailInput.classList.add("is-invalid");
+                emailError.style.display = "block"; // Tampilkan pesan error format
+                hasError = true;
+            } else {
+                emailInput.classList.remove("is-invalid");
+                emailError.style.display = "none"; // Sembunyikan pesan error
             }
+
             if (formData.password == "") {
                 toastr.error("Password tidak boleh kosong");
+                document.getElementById("password").classList.add("is-invalid");
+                hasError = true;
             } else if (formData.password != formData.password_confirmation) {
                 toastr.error("Konfirmasi Password tidak sesuai!");
+                document.getElementById("password_confirmation").classList.add("is-invalid");
+                hasError = true;
+            } else {
+                document.getElementById("password").classList.remove("is-invalid");
+                document.getElementById("password_confirmation").classList.remove("is-invalid");
+            }
+
+            if (formData.menu.length == 0) {
+                toastr.error("Menu tidak boleh kosong");
+                document.getElementById("menuContainer").classList.add("is-invalid");
+                document.getElementById("menuError").style.display = "block";
+                hasError = true;
+            } else {
+                document.getElementById("menuContainer").classList.remove("is-invalid");
+                document.getElementById("menuError").style.display = "none";
+            }
+
+            if (hasError) {
+                loading.style.display = 'none';
+                return;
             }
 
             if (formData.nmUser != "" && formData.emailUser != "" && formData.password != "") {
@@ -186,12 +254,13 @@
                         toastr.success(result.message);
                         window.location.href = "{{ route('users.index') }}"; // Redirect ke daftar user
                     } else {
-                        console.log('result >>> ', result);
                         toastr.error("Error: " + result.message);
                     }
                 } catch (error) {
                     console.error("Error:", error);
                     toastr.error("Terjadi kesalahan, coba lagi.");
+                } finally {
+                    loading.style.display = 'none';
                 }
             }
         });

@@ -62,7 +62,7 @@ class UserController extends Controller
                     'users.*',
                     DB::raw('DATE_FORMAT(users.created_at, "%Y-%m-%d %H:%i:%s") as format_createdAt'),
                     DB::raw('DATE_FORMAT(users.updated_at, "%Y-%m-%d %H:%i:%s") as format_updatedAt'),
-                    DB::raw('DATE_FORMAT(users.expires_at, "%Y-%m-%d %H:%i:%s") as format_expiredAt')
+                    DB::raw('DATE_FORMAT(users.expires_at, "%Y-%m-%d") as format_expiredAt')
                 )
                 ->first();
 
@@ -97,14 +97,6 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
-            $validatedData = $request->validate([
-                'nmUser' => 'required|string|max:255',
-                'emailUser' => 'required|email|unique:users,email',
-                'password' => 'required|min:6|confirmed',
-                'menu' => 'array',
-                'status' => 'boolean'
-            ]);
-
             $existingUser = User::withoutGlobalScopes()
                 ->where('email', $request->emailUser)->first();
 
@@ -136,6 +128,8 @@ class UserController extends Controller
                 ->where('status', 'Aktif')
                 ->get();
 
+            $expiresAt = $request->expiredTime ? $request->expiredTime . ' 00:00:00' : null;
+
             //create post
             User::create([
                 'name' => $request->nmUser,
@@ -143,7 +137,7 @@ class UserController extends Controller
                 'password' => Hash::make($request->password),
                 'status' => $status,
                 'has_public_path' => $dataPublic,
-                'expires_at' => $request->expiredTime,
+                'expires_at' => $expiresAt,
             ]);
 
             $getId = User::withoutGlobalScopes()
@@ -302,13 +296,15 @@ class UserController extends Controller
                 }
             }
 
+            $expiresAt = $request->expiredTime ? $request->expiredTime . ' 00:00:00' : null;
+
             // Update atribut pengguna di database
             User::where("email", $request->emailUser)->update([
                 'name' => $request->nmUser,
                 'email' => $request->emailUser,
                 'status' => $status,
                 'has_public_path' => $dataPublic,
-                'expires_at' => $request->expiredTime,
+                'expires_at' => $expiresAt,
             ]);
 
             // Logging untuk admin

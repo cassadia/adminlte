@@ -21,7 +21,7 @@
 
                     <div class="card card-primary">
                         <div class="card-header">
-                          <h3 class="card-title">Ubah User</h3>
+                            <h3 class="card-title">Ubah User</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
@@ -96,13 +96,13 @@
                             </div>
                           <!-- /.card-body -->
 
-                          <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
-                            <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>
-                            <a href="{{ route('users.index') }}" class="btn btn-info float-right">Back</a>
-                          </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
+                                <button type="reset" class="btn btn-warning">{{ __('Reset') }}</button>
+                                <a href="{{ route('users.index') }}" class="btn btn-info float-right">Back</a>
+                            </div>
                         </form>
-                      </div>
+                    </div>
 
                 </div>
             </div>
