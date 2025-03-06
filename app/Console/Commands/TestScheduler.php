@@ -56,7 +56,6 @@ class TestScheduler extends Command
         $this->line('Result: ' . json_encode($result)); // Tampilkan ke terminal
 
         if ($result instanceof \Illuminate\Http\JsonResponse) {
-            dd($result);
             // Akses data dari JsonResponse
             $data = $result->getData(true);
 
