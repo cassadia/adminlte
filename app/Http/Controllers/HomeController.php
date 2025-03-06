@@ -118,7 +118,10 @@ class HomeController extends Controller
 
         if ($request->filled('keyThn')) {
             $query->where('c.tahun_dari', '<=', $request->keyThn)
-                  ->where('c.tahun_sampai', '>=', $request->keyThn);
+                ->where(function ($query) use ($request) {
+                    $query->where('c.tahun_sampai', '>=', $request->keyThn)
+                        ->orWhereNull('c.tahun_sampai');
+                });
         }
 
         $mappingData = $query->orderBy('c.nm_motor')->skip(0)->take(100)->get();

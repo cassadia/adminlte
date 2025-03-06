@@ -265,13 +265,9 @@
                 formData.append('NoSeriRangka', noSeriRangka);
                 formData.append('status', status);
 
-                console.log('formData', gambar);
-                console.log('formData', kodeMotor);
-
                 if (typeof gambar !== 'undefined') {
                     const gambarError = validateGambar(gambar);
                     if (gambarError) {
-                        console.log('gambarError', gambarError);
                         toastr.error(gambarError);
                         loading.style.display = 'none';
                         return;
@@ -295,8 +291,10 @@
                     let result = await response.json();
 
                     if (response.ok) {
+                        setTimeout(() => {
+                            window.location.href = "{{ route('vehicle.index') }}";
+                        }, 2000);
                         toastr.success(result.message || "Vehicle berhasil dibuat!");
-                        window.location.reload();
                     } else {
                         toastr.error(result.message || "Vehicle gagal dibuat!");
                     }
@@ -314,8 +312,8 @@
 
                 const kodeMotor = document.getElementById('kdMotor').value;
                 const namaMotor = document.getElementById('nmMotor').value;
-                const noSeriMesin = document.getElementById('noSeriMesin').value;
-                const noSeriRangka = document.getElementById('noSeriAngka').value;
+                // const noSeriMesin = document.getElementById('noSeriMesin').value;
+                // const noSeriRangka = document.getElementById('noSeriAngka').value;
 
                 const kodeMotorError = validateForm('kdMotor', kodeMotor);
                 if (kodeMotorError) {
@@ -327,15 +325,15 @@
                     errors.push(namaMotorError);
                 }
 
-                const noSeriMesinError = validateForm('noMesin', noSeriMesin);
-                if (noSeriMesinError) {
-                    errors.push(noSeriMesinError);
-                }
+                // const noSeriMesinError = validateForm('noMesin', noSeriMesin);
+                // if (noSeriMesinError) {
+                //     errors.push(noSeriMesinError);
+                // }
 
-                const noSeriRangkaError = validateForm('noRangka', noSeriRangka);
-                if (noSeriRangkaError) {
-                    errors.push(noSeriRangkaError);
-                }
+                // const noSeriRangkaError = validateForm('noRangka', noSeriRangka);
+                // if (noSeriRangkaError) {
+                //     errors.push(noSeriRangkaError);
+                // }
 
                 return errors;
             }
@@ -357,31 +355,32 @@
                         return "Nama Motor minimal 2 karakter!";
                     }
                     return null; // Tidak ada error
-                } else if (flag == 'noRangka') {
-                    if (!value) {
-                        return "No Rangka wajib diisi!";
-                    }
-                    if (value.length < 2) {
-                        return "No Rangka minimal 2 karakter!";
-                    }
-                    return null; // Tidak ada error
-                } else if (flag == 'noMesin') {
-                    if (!value) {
-                        return "No Mesin wajib diisi!";
-                    }
-                    if (value.length < 2) {
-                        return "No Mesin minimal 2 karakter!";
-                    }
-                    return null; // Tidak ada error
-                } else if (flag == 'tahun') {
-                    if (!value) {
-                        return "Tahun wajib diisi!";
-                    }
-                    if (value.length < 2) {
-                        return "Tahun minimal 2 karakter!";
-                    }
-                    return null; // Tidak ada error
                 }
+                // else if (flag == 'noRangka') {
+                //     if (!value) {
+                //         return "No Rangka wajib diisi!";
+                //     }
+                //     if (value.length < 2) {
+                //         return "No Rangka minimal 2 karakter!";
+                //     }
+                //     return null; // Tidak ada error
+                // } else if (flag == 'noMesin') {
+                //     if (!value) {
+                //         return "No Mesin wajib diisi!";
+                //     }
+                //     if (value.length < 2) {
+                //         return "No Mesin minimal 2 karakter!";
+                //     }
+                //     return null; // Tidak ada error
+                // } else if (flag == 'tahun') {
+                //     if (!value) {
+                //         return "Tahun wajib diisi!";
+                //     }
+                //     if (value.length < 2) {
+                //         return "Tahun minimal 2 karakter!";
+                //     }
+                //     return null; // Tidak ada error
+                // }
             }
 
             // Fungsi validasi Gambar
